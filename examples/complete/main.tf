@@ -2,6 +2,15 @@ provider "aws" {
   region = "eu-west-1"
 }
 
+// See Notes in README.md for explanation regarding using data-sources and computed values
+data "aws_vpc" "default" {
+  default = true
+}
+
+data "aws_subnet_ids" "this" {
+  vpc_id = data.aws_vpc.default.id
+}
+
 module "tgw" {
   source = "../../"
 
@@ -13,8 +22,8 @@ module "tgw" {
 
   vpc_attachments = {
     vpc1 = {
-      vpc_id                                          = module.vpc1.vpc_id
-      subnet_ids                                      = module.vpc1.private_subnets
+      vpc_id                                          = data.aws_vpc.default.id      # module.vpc1.vpc_id
+      subnet_ids                                      = data.aws_subnet_ids.this.ids # module.vpc1.private_subnets
       dns_support                                     = true
       ipv6_support                                    = true
       transit_gateway_default_route_table_association = false
@@ -32,8 +41,8 @@ module "tgw" {
       ]
     },
     vpc2 = {
-      vpc_id     = module.vpc2.vpc_id
-      subnet_ids = module.vpc2.private_subnets
+      vpc_id     = data.aws_vpc.default.id      # module.vpc2.vpc_id
+      subnet_ids = data.aws_subnet_ids.this.ids # module.vpc2.private_subnets
 
       tgw_routes = [
         {
