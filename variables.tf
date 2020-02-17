@@ -59,11 +59,25 @@ variable "vpc_attachments" {
   default     = {}
 }
 
+// VPN attachments
+variable "vpn_attachments" {
+  description = "Maps of maps of VPN details to attach to TGW. Type 'any' to disable type validation by Terraform."
+  type        = any
+  default     = {}
+}
+
 // TGW Route Table association and propagation
 variable "transit_gateway_route_table_id" {
   description = "Identifier of EC2 Transit Gateway Route Table to use with the Target Gateway when reusing it between multiple TGWs"
   type        = string
   default     = null
+}
+
+// TGW Route Tables mapping
+variable transit_route_tables_map {
+  description = "Map of TGW Route Tables using names of VPN and VPC attachments"
+  type = map(any)
+  default = {}
 }
 
 // Tags

@@ -11,6 +11,34 @@ locals {
   vpc_attachments_with_routes = chunklist(flatten([
     for k, v in var.vpc_attachments : setproduct([map("key", k)], v["tgw_routes"]) if length(lookup(v, "tgw_routes", {})) > 0
   ]), 2)
+
+  mapping_of_logical_names_vpn_and_vpc_to_attachments_ids = merge(flatten([
+    {for vpn_name, attachment in data.aws_ec2_transit_gateway_vpn_attachment.this: vpn_name => attachment.id},
+    {for vpc_name, attachment in aws_ec2_transit_gateway_vpc_attachment.this: vpc_name => attachment.id}
+  ])...)
+
+  transposed_map_of_routes_from_var_transit_route_tables_map = merge(flatten([[ # merge(flatten([<some_object>])...) is a workaround for merging list of maps (see https://github.com/hashicorp/terraform/issues/22404#issuecomment-579081472)
+    for tr_rtb_name,tr_rtb_spec in var.transit_route_tables_map: {
+      for cidr,attachment_name in transpose(tr_rtb_spec["static_routes"]): "${tr_rtb_name}#${attachment_name[0]}#${cidr}" => {
+        "destination_cidr_block": cidr,
+        "transit_gateway_route_table_name": tr_rtb_name,
+        "attachment_name": attachment_name[0],
+        "has_error_in_static_routes_of_transit_route_table": (length(attachment_name) != 1 ? "${tr_rtb_name}" : "") # there should be only one name of attachment (or blackhole) per route
+      }
+    }
+  ]])...)
+
+  # resulting map structure: {<tgw_route_table_logical_name>: <attachment_logical_name>}
+  transposed_map_of_attachments_from_var_transit_route_tables_map = transpose({for tr_rtb_name,tr_rtb_spec in var.transit_route_tables_map: tr_rtb_name => tr_rtb_spec["attachments"]})
+
+  transposed_map_of_propagations_from_var_transit_route_tables_map = merge(flatten([[ # merge(flatten([<some_object>])...) is a workaround for merging list of maps (see https://github.com/hashicorp/terraform/issues/22404#issuecomment-579081472)
+    for tr_rtb_name,tr_rtb_spec in var.transit_route_tables_map: {
+      for propagation in tr_rtb_spec["propagations"]: "${tr_rtb_name}#${propagation}" => {
+        "transit_gateway_route_table_name": tr_rtb_name,
+        "attachment_name": propagation
+      }
+    }
+  ]])...)
 }
 
 resource "aws_ec2_transit_gateway" "this" {
@@ -33,11 +61,40 @@ resource "aws_ec2_transit_gateway" "this" {
   )
 }
 
-#########################
-# Route table and routes
-#########################
+################
+# Input testing
+################
+locals {
+  has_error_in_uniqueness_of_vpn_vpc_names = length(setunion(keys(var.vpn_attachments), keys(var.vpc_attachments))) == length(keys(var.vpn_attachments)) + length(keys(var.vpc_attachments))
+
+  has_error_of_vpc_attachments_with_routes_while_using_transit_route_tables_map = length(local.vpc_attachments_with_routes) > 0 && var.transit_route_tables_map != {}
+
+  has_error_of_correctness_of_transit_route_tables_map_static_routes = length(compact(flatten([for k,v in local.transposed_map_of_routes_from_var_transit_route_tables_map: v["has_error_in_static_routes_of_transit_route_table"]]))) > 0
+
+  has_error_of_correctness_of_transit_route_tables_map_attachments_assignment_per_transit_gateway_route_table = length([for k,v in local.transposed_map_of_attachments_from_var_transit_route_tables_map: k if length(v) != 1]) > 0
+}
+
+resource "null_resource" "check_uniqueness_of_vpn_vpc_names" {
+  count = local.has_error_in_uniqueness_of_vpn_vpc_names ? 0 : "ERROR: Arbitrary names of VPN in var.vpn_attachments and arbitrary names of VPC attachments in var.vpc_attachments should be unique for both variables together."
+}
+
+resource "null_resource" "check_vpc_attachments_with_routes_while_using_transit_route_tables_map" {
+  count = local.has_error_of_vpc_attachments_with_routes_while_using_transit_route_tables_map ? "ERROR: There is no possibility to use both var.vpc_attachments with routes and non-empty var.transit_route_tables_map." : 0
+}
+
+resource "null_resource" "check_correctness_of_transit_route_tables_map_static_routes" {
+  count = local.has_error_of_correctness_of_transit_route_tables_map_static_routes ? "ERROR: There is error in var.transit_route_tables_map static_routes. Static routes in the same route table should be unique" : 0
+}
+
+resource "null_resource" "check_correctness_of_transit_route_tables_map_attachments_assignment_per_transit_gateway_route_table" {
+  count = local.has_error_of_correctness_of_transit_route_tables_map_attachments_assignment_per_transit_gateway_route_table ? "ERROR: There is error assignment of the same attachment to different transit route tables or not assigning some attachment to any transit route table" : 0
+}
+
+######################################################################
+# Route table and routes created using var.vpc_attachments with routes
+######################################################################
 resource "aws_ec2_transit_gateway_route_table" "this" {
-  count = var.create_tgw ? 1 : 0
+  count = var.create_tgw && var.transit_route_tables_map == {} ? 1 : 0
 
   transit_gateway_id = aws_ec2_transit_gateway.this[0].id
 
@@ -52,7 +109,7 @@ resource "aws_ec2_transit_gateway_route_table" "this" {
 
 // VPC attachment routes
 resource "aws_ec2_transit_gateway_route" "this" {
-  count = length(local.vpc_attachments_with_routes)
+  count = var.transit_route_tables_map != {} ? 0 : length(local.vpc_attachments_with_routes)
 
   destination_cidr_block = local.vpc_attachments_with_routes[count.index][1]["destination_cidr_block"]
   blackhole              = lookup(local.vpc_attachments_with_routes[count.index][1], "blackhole", null)
@@ -61,15 +118,43 @@ resource "aws_ec2_transit_gateway_route" "this" {
   transit_gateway_attachment_id  = tobool(lookup(local.vpc_attachments_with_routes[count.index][1], "blackhole", false)) == false ? aws_ec2_transit_gateway_vpc_attachment.this[local.vpc_attachments_with_routes[count.index][0]["key"]].id : null
 }
 
+###################################################################
+# Route table and routes created using var.transit_route_tables_map
+###################################################################
+resource "aws_ec2_transit_gateway_route_table" "from_var_transit_route_tables_map" {
+  for_each = var.create_tgw ? var.transit_route_tables_map : {}
+
+  transit_gateway_id = aws_ec2_transit_gateway.this[0].id
+
+  tags = merge(
+    {
+      "Name" = "${var.name}-${each.key}"
+    },
+    var.tags,
+    var.tgw_route_table_tags,
+  )
+}
+
+// Routes via var.transit_route_tables_map
+resource "aws_ec2_transit_gateway_route" "from_var_transit_route_tables_map" {
+  for_each = var.create_tgw ? local.transposed_map_of_routes_from_var_transit_route_tables_map : {}
+
+  destination_cidr_block = each.value.destination_cidr_block
+  blackhole              = each.value.attachment_name == "blackhole" ? true : false
+
+  transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.from_var_transit_route_tables_map[each.value.transit_gateway_route_table_name].id
+  transit_gateway_attachment_id  = each.value.attachment_name != "blackhole" ? local.mapping_of_logical_names_vpn_and_vpc_to_attachments_ids[each.value.attachment_name] : null
+}
+
 ###########################################################
-# VPC Attachments, route table association and propagation
+# VPC,VPN Attachments, route table association and propagation
 ###########################################################
 resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
   for_each = var.vpc_attachments
 
   transit_gateway_id = lookup(each.value, "tgw_id", aws_ec2_transit_gateway.this[0].id)
-  vpc_id             = each.value["vpc_id"]
-  subnet_ids         = each.value["subnet_ids"]
+  vpc_id             = each.value.vpc_id
+  subnet_ids         = each.value.subnet_ids
 
   dns_support                                     = lookup(each.value, "dns_support", true) ? "enable" : "disable"
   ipv6_support                                    = lookup(each.value, "ipv6_support", false) ? "enable" : "disable"
@@ -86,7 +171,7 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
 }
 
 resource "aws_ec2_transit_gateway_route_table_association" "this" {
-  for_each = local.vpc_attachments_without_default_route_table_association
+  for_each = var.transit_route_tables_map != {} ? {} : local.vpc_attachments_without_default_route_table_association
 
   // Create association if it was not set already by aws_ec2_transit_gateway_vpc_attachment resource
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.this[each.key].id
@@ -94,11 +179,35 @@ resource "aws_ec2_transit_gateway_route_table_association" "this" {
 }
 
 resource "aws_ec2_transit_gateway_route_table_propagation" "this" {
-  for_each = local.vpc_attachments_without_default_route_table_association
+  for_each = var.transit_route_tables_map != {} ? {} : local.vpc_attachments_without_default_route_table_association
 
   // Create association if it was not set already by aws_ec2_transit_gateway_vpc_attachment resource
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.this[each.key].id
   transit_gateway_route_table_id = coalesce(lookup(each.value, "transit_gateway_route_table_id", null), var.transit_gateway_route_table_id, aws_ec2_transit_gateway_route_table.this[0].id)
+}
+
+data "aws_ec2_transit_gateway_vpn_attachment" "this" {
+  for_each           = var.vpn_attachments
+  transit_gateway_id = lookup(each.value, "tgw_id", aws_ec2_transit_gateway.this[0].id)
+  vpn_connection_id  = each.value.vpn_id
+}
+
+############################################################################
+# route table association and propagation using var.transit_route_tables_map
+############################################################################
+
+resource "aws_ec2_transit_gateway_route_table_association" "from_var_transit_route_tables_map" {
+  for_each = var.create_tgw ? local.transposed_map_of_attachments_from_var_transit_route_tables_map : {}
+
+  transit_gateway_attachment_id  = local.mapping_of_logical_names_vpn_and_vpc_to_attachments_ids[each.key]
+  transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.from_var_transit_route_tables_map[each.value[0]].id
+}
+
+resource "aws_ec2_transit_gateway_route_table_propagation" "from_var_transit_route_tables_map" {
+  for_each = var.create_tgw ? local.transposed_map_of_propagations_from_var_transit_route_tables_map : {}
+
+  transit_gateway_attachment_id  = local.mapping_of_logical_names_vpn_and_vpc_to_attachments_ids[each.value.attachment_name]
+  transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.from_var_transit_route_tables_map[each.value.transit_gateway_route_table_name].id
 }
 
 ##########################
