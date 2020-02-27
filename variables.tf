@@ -75,9 +75,16 @@ variable "transit_gateway_route_table_id" {
 
 // TGW Route Tables mapping
 variable transit_route_tables_map {
-  description = "Map of TGW Route Tables using names of VPN and VPC attachments"
-  type = map(any)
-  default = {}
+  description = "Map of TGW Route Tables using logical names of VPN and VPC attachments"
+  type        = map(any)
+  default     = {}
+}
+
+// Tags of vpc route tables (that will be attached to tgw)
+variable enable_tgw_connectivity_in_vpc_route_tables_by_tags {
+  description = "Map of tags on vpc route tables, that will be enabled for TGW connectivity"
+  type        = map(string)
+  default     = {}
 }
 
 // Tags
