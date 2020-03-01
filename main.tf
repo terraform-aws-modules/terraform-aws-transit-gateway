@@ -224,7 +224,7 @@ data "aws_ec2_transit_gateway_vpn_attachment" "this" {
 }
 
 ############################################################################################
-# transit gateway route table association and propagation using var.transit_route_tables_map
+# Transit Gateway route table association and propagation using var.transit_route_tables_map
 ############################################################################################
 
 resource "aws_ec2_transit_gateway_route_table_association" "from_var_transit_route_tables_map" {
@@ -241,7 +241,7 @@ resource "aws_ec2_transit_gateway_route_table_propagation" "from_var_transit_rou
   transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.from_var_transit_route_tables_map[each.value.transit_gateway_route_table_name].id
 }
 ##################################################################
-# vpc route table routes update using var.transit_route_tables_map
+# VPC route table routes update using var.transit_route_tables_map
 ##################################################################
 
 data aws_vpc from_var_transit_route_tables_map {

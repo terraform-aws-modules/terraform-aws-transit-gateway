@@ -43,13 +43,19 @@ output "this_ec2_transit_gateway_route_table_id" {
 // aws_ec2_transit_gateway_route
 output "this_ec2_transit_gateway_route_ids" {
   description = "List of EC2 Transit Gateway Route Table identifier combined with destination"
-  value       = aws_ec2_transit_gateway_route.this.*.id
+  value       = var.transit_route_tables_map == {} ? aws_ec2_transit_gateway_route.this.*.id : values(aws_ec2_transit_gateway_route.from_var_transit_route_tables_map)[*].id
 }
 
 // aws_ec2_transit_gateway_vpc_attachment
 output "this_ec2_transit_gateway_vpc_attachment_ids" {
   description = "List of EC2 Transit Gateway VPC Attachment identifiers"
   value       = [for k, v in aws_ec2_transit_gateway_vpc_attachment.this : v.id]
+}
+
+// aws_ec2_transit_gateway_vpn_attachment
+output "this_ec2_transit_gateway_vpn_attachment_ids" {
+  description = "List of EC2 Transit Gateway VPN Attachment identifiers"
+  value       = [for k, v in data.aws_ec2_transit_gateway_vpn_attachment.this : v.id]
 }
 
 output "this_ec2_transit_gateway_vpc_attachment" {
@@ -59,24 +65,46 @@ output "this_ec2_transit_gateway_vpc_attachment" {
 
 // aws_ec2_transit_gateway_route_table_association
 output "this_ec2_transit_gateway_route_table_association_ids" {
-  description = "List of EC2 Transit Gateway Route Table Association identifiers"
+  description = "List of EC2 Transit Gateway Route Table Association identifiers using vpc_attachments with routes"
   value       = [for k, v in aws_ec2_transit_gateway_route_table_association.this : v.id]
 }
 
 output "this_ec2_transit_gateway_route_table_association" {
-  description = "Map of EC2 Transit Gateway Route Table Association attributes"
+  description = "Map of EC2 Transit Gateway Route Table Association attributes using vpc_attachments with routes"
   value       = aws_ec2_transit_gateway_route_table_association.this
 }
 
 // aws_ec2_transit_gateway_route_table_propagation
 output "this_ec2_transit_gateway_route_table_propagation_ids" {
-  description = "List of EC2 Transit Gateway Route Table Propagation identifiers"
+  description = "List of EC2 Transit Gateway Route Table Propagation identifiers using vpc_attachments with routes"
   value       = [for k, v in aws_ec2_transit_gateway_route_table_propagation.this : v.id]
 }
 
 output "this_ec2_transit_gateway_route_table_propagation" {
-  description = "Map of EC2 Transit Gateway Route Table Propagation attributes"
+  description = "Map of EC2 Transit Gateway Route Table Propagation attributes using vpc_attachments with routes"
   value       = aws_ec2_transit_gateway_route_table_propagation.this
+}
+
+// aws_ec2_transit_gateway_route_table_association
+output "transit_route_tables_map_ec2_transit_gateway_route_table_association_ids" {
+  description = "List of EC2 Transit Gateway Route Table Association identifiers using variable transit_route_tables_map"
+  value       = { for k, v in aws_ec2_transit_gateway_route_table_association.from_var_transit_route_tables_map : k => v.id }
+}
+
+output "transit_route_tables_map_ec2_transit_gateway_route_table_association" {
+  description = "Map of EC2 Transit Gateway Route Table Association attributes using variable transit_route_tables_map"
+  value       = aws_ec2_transit_gateway_route_table_association.from_var_transit_route_tables_map
+}
+
+// aws_ec2_transit_gateway_route_table_propagation
+output "transit_route_tables_map_ec2_transit_gateway_route_table_propagation_ids" {
+  description = "List of EC2 Transit Gateway Route Table Propagation identifiers using variable transit_route_tables_map"
+  value       = { for k, v in aws_ec2_transit_gateway_route_table_propagation.from_var_transit_route_tables_map : k => v.id }
+}
+
+output "transit_route_tables_map_ec2_transit_gateway_route_table_propagation" {
+  description = "Map of EC2 Transit Gateway Route Table Propagation attributes using variable transit_route_tables_map"
+  value       = aws_ec2_transit_gateway_route_table_propagation.from_var_transit_route_tables_map
 }
 
 // aws_ram_resource_share
