@@ -47,10 +47,12 @@ module "tgw" {
           destination_cidr_block = "40.0.0.0/20"
         }
       ]
-      subnet_routes = {
-          destination_cidr_block = ""
-          route_table_ids = []
-      }
+      add_routes = [
+        {
+          destination_cidr_block = "30.0.0.0/16"
+          route_table_ids = concat(module.vpc.public_route_table_ids, module.vpc.private_route_table_ids)
+        }
+      ]
     }
   }
 
@@ -92,7 +94,7 @@ With the help of this additional block, we are creating routes in all provided r
 add_routes = [
   {
     destination_cidr_block = "10.0.0.0/8"
-    route_table_ids = concat(module.main-vpc.public_route_table_ids, module.main-vpc.private_route_table_ids)
+    route_table_ids = concat(module.vpc.public_route_table_ids, module.vpc.private_route_table_ids)
   }
 ]
 ```
