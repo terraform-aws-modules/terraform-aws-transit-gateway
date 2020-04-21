@@ -67,7 +67,7 @@ resource "aws_ec2_transit_gateway_route" "this" {
 resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
   for_each = var.vpc_attachments
 
-  transit_gateway_id = lookup(each.value, "tgw_id", aws_ec2_transit_gateway.this[0].id)
+  transit_gateway_id = lookup(each.value, "tgw_id", try(aws_ec2_transit_gateway.this[0].id, null))
   vpc_id             = each.value["vpc_id"]
   subnet_ids         = each.value["subnet_ids"]
 
