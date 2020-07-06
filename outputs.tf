@@ -88,5 +88,6 @@ output "ram_resource_share_id" {
 # aws_ram_principal_association
 output "ram_principal_association_id" {
   description = "The Amazon Resource Name (ARN) of the Resource Share and the principal, separated by a comma"
-  value       = element(concat(aws_ram_principal_association.this.*.id, [""]), 0)
+  value       = [ for k, v in aws_ram_principal_association.this : v.id ]
+
 }
