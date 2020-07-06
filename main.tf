@@ -160,7 +160,7 @@ resource "aws_ram_resource_association" "this" {
 }
 
 resource "aws_ram_principal_association" "this" {
-  for_each = toset(var.ram_principals)
+  for_each           = toset(var.ram_principals)
   principal          = each.value
   resource_share_arn = aws_ram_resource_share.this[0].arn
 }
