@@ -17,7 +17,7 @@ Not supported yet:
 
 ## Terraform versions
 
-Only Terraform 0.12 is supported.
+Only Terraform 0.12 or newer is supported.
 
 ## Usage with VPC module
 
@@ -80,36 +80,49 @@ module "vpc" {
 * [Complete example](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/tree/master/examples/complete) shows TGW in combination with the [VPC module](https://github.com/terraform-aws-modules/terraform-aws-vpc) and [Resource Access Manager (RAM)](https://aws.amazon.com/ram/).
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+## Requirements
+
+| Name | Version |
+|------|---------|
+| terraform | >= 0.12.7, < 0.14 |
+| aws | >= 2.18, < 4.0 |
+
+## Providers
+
+| Name | Version |
+|------|---------|
+| aws | >= 2.18, < 4.0 |
+
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|:----:|:-----:|:-----:|
-| amazon\_side\_asn | The Autonomous System Number \(ASN\) for the Amazon side of the gateway. By default the TGW is created with the current default Amazon ASN. | string | `"64512"` | no |
-| create\_tgw | Controls if TGW should be created \(it affects almost all resources\) | bool | `"true"` | no |
-| description | Description of the EC2 Transit Gateway | string | `"null"` | no |
-| enable\_auto\_accept\_shared\_attachments | Whether resource attachment requests are automatically accepted | bool | `"false"` | no |
-| enable\_default\_route\_table\_association | Whether resource attachments are automatically associated with the default association route table | bool | `"true"` | no |
-| enable\_default\_route\_table\_propagation | Whether resource attachments automatically propagate routes to the default propagation route table | bool | `"true"` | no |
-| enable\_dns\_support | Should be true to enable DNS support in the TGW | bool | `"true"` | no |
-| enable\_vpn\_ecmp\_support | Whether VPN Equal Cost Multipath Protocol support is enabled | bool | `"true"` | no |
-| name | Name to be used on all the resources as identifier | string | `""` | no |
-| ram\_allow\_external\_principals | Indicates whether principals outside your organization can be associated with a resource share. | bool | `"false"` | no |
-| ram\_name | The name of the resource share of TGW | string | `""` | no |
-| ram\_principals | A list of principals to share TGW with. Possible values are an AWS account ID, an AWS Organizations Organization ARN, or an AWS Organizations Organization Unit ARN | list(string) | `[]` | no |
-| ram\_tags | Additional tags for the RAM | map(string) | `{}` | no |
-| share\_tgw | Whether to share your transit gateway with other accounts | bool | `"true"` | no |
-| tags | A map of tags to add to all resources | map(string) | `{}` | no |
-| tgw\_route\_table\_tags | Additional tags for the TGW route table | map(string) | `{}` | no |
-| tgw\_tags | Additional tags for the TGW | map(string) | `{}` | no |
-| tgw\_vpc\_attachment\_tags | Additional tags for VPC attachments | map(string) | `{}` | no |
-| transit\_gateway\_route\_table\_id | Identifier of EC2 Transit Gateway Route Table to use with the Target Gateway when reusing it between multiple TGWs | string | `"null"` | no |
-| vpc\_attachments | Maps of maps of VPC details to attach to TGW. Type 'any' to disable type validation by Terraform. | any | `{}` | no |
+|------|-------------|------|---------|:--------:|
+| amazon\_side\_asn | The Autonomous System Number (ASN) for the Amazon side of the gateway. By default the TGW is created with the current default Amazon ASN. | `string` | `"64512"` | no |
+| create\_tgw | Controls if TGW should be created (it affects almost all resources) | `bool` | `true` | no |
+| description | Description of the EC2 Transit Gateway | `string` | `null` | no |
+| enable\_auto\_accept\_shared\_attachments | Whether resource attachment requests are automatically accepted | `bool` | `false` | no |
+| enable\_default\_route\_table\_association | Whether resource attachments are automatically associated with the default association route table | `bool` | `true` | no |
+| enable\_default\_route\_table\_propagation | Whether resource attachments automatically propagate routes to the default propagation route table | `bool` | `true` | no |
+| enable\_dns\_support | Should be true to enable DNS support in the TGW | `bool` | `true` | no |
+| enable\_vpn\_ecmp\_support | Whether VPN Equal Cost Multipath Protocol support is enabled | `bool` | `true` | no |
+| name | Name to be used on all the resources as identifier | `string` | `""` | no |
+| ram\_allow\_external\_principals | Indicates whether principals outside your organization can be associated with a resource share. | `bool` | `false` | no |
+| ram\_name | The name of the resource share of TGW | `string` | `""` | no |
+| ram\_principals | A list of principals to share TGW with. Possible values are an AWS account ID, an AWS Organizations Organization ARN, or an AWS Organizations Organization Unit ARN | `list(string)` | `[]` | no |
+| ram\_tags | Additional tags for the RAM | `map(string)` | `{}` | no |
+| share\_tgw | Whether to share your transit gateway with other accounts | `bool` | `true` | no |
+| tags | A map of tags to add to all resources | `map(string)` | `{}` | no |
+| tgw\_route\_table\_tags | Additional tags for the TGW route table | `map(string)` | `{}` | no |
+| tgw\_tags | Additional tags for the TGW | `map(string)` | `{}` | no |
+| tgw\_vpc\_attachment\_tags | Additional tags for VPC attachments | `map(string)` | `{}` | no |
+| transit\_gateway\_route\_table\_id | Identifier of EC2 Transit Gateway Route Table to use with the Target Gateway when reusing it between multiple TGWs | `string` | `null` | no |
+| vpc\_attachments | Maps of maps of VPC details to attach to TGW. Type 'any' to disable type validation by Terraform. | `any` | `{}` | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| this\_ec2\_transit\_gateway\_arn | EC2 Transit Gateway Amazon Resource Name \(ARN\) |
+| this\_ec2\_transit\_gateway\_arn | EC2 Transit Gateway Amazon Resource Name (ARN) |
 | this\_ec2\_transit\_gateway\_association\_default\_route\_table\_id | Identifier of the default association route table |
 | this\_ec2\_transit\_gateway\_id | EC2 Transit Gateway identifier |
 | this\_ec2\_transit\_gateway\_owner\_id | Identifier of the AWS account that owns the EC2 Transit Gateway |
@@ -124,8 +137,8 @@ module "vpc" {
 | this\_ec2\_transit\_gateway\_route\_table\_propagation\_ids | List of EC2 Transit Gateway Route Table Propagation identifiers |
 | this\_ec2\_transit\_gateway\_vpc\_attachment | Map of EC2 Transit Gateway VPC Attachment attributes |
 | this\_ec2\_transit\_gateway\_vpc\_attachment\_ids | List of EC2 Transit Gateway VPC Attachment identifiers |
-| this\_ram\_principal\_association\_id | The Amazon Resource Name \(ARN\) of the Resource Share and the principal, separated by a comma |
-| this\_ram\_resource\_share\_id | The Amazon Resource Name \(ARN\) of the resource share |
+| this\_ram\_principal\_association\_id | The Amazon Resource Name (ARN) of the Resource Share and the principal, separated by a comma |
+| this\_ram\_resource\_share\_id | The Amazon Resource Name (ARN) of the resource share |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
