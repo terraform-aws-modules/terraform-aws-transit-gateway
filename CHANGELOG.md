@@ -1,6 +1,17 @@
+# Change Log
+
+All notable changes to this project will be documented in this file.
+
 <a name="unreleased"></a>
 ## [Unreleased]
 
+
+
+<a name="v1.2.0"></a>
+## [v1.2.0] - 2020-08-17
+
+- chore: Minor updates in docs
+- fix: fix variable in aws_ec2_transit_gateway_route_table_propagation ([#13](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/13))
 
 
 <a name="v1.1.0"></a>
@@ -12,7 +23,6 @@
 <a name="v1.0.0"></a>
 ## [v1.0.0] - 2020-01-15
 
-- Updated CHANGELOG
 - Added code for the module
 
 
@@ -22,6 +32,7 @@
 - Initial commit
 
 
-[Unreleased]: https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v1.2.0...HEAD
+[v1.2.0]: https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v1.1.0...v1.2.0
 [v1.1.0]: https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v1.0.0...v1.1.0
 [v1.0.0]: https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v0.0.1...v1.0.0
