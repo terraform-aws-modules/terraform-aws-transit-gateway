@@ -94,7 +94,7 @@ resource "aws_ec2_transit_gateway_route_table_association" "this" {
 }
 
 resource "aws_ec2_transit_gateway_route_table_propagation" "this" {
-  for_each = local.vpc_attachments_without_default_route_table_association
+  for_each = local.vpc_attachments_without_default_route_table_propagation
 
   // Create association if it was not set already by aws_ec2_transit_gateway_vpc_attachment resource
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.this[each.key].id
