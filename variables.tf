@@ -121,6 +121,7 @@ variable "ram_principals" {
   type        = list(string)
   default     = []
 }
+
 variable "ram_resource_share_arn" {
   description = "ARN of RAM resource share"
   type        = string

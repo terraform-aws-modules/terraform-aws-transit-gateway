@@ -1,15 +1,13 @@
 provider "aws" {
-  # AWS Profile is required so terraform knows difference between main and secondary AWS Account
   region = "eu-west-1"
-  profile = "AWS_PROFILE"
 }
+
+# This provider is required for attachment only installation in another AWS Account.
 provider "aws" {
-  # This is required for attachment only installation in another AWS Account.
-  # It will accept RAM and install Attachment based on AWS CLI $AWS_PROFILE
-  alias   = "peer"
-  region  = "eu-west-1"
-  profile = "AWS_PROFILE"
+  region = "eu-west-1"
+  alias  = "peer"
 }
+
 // See Notes in README.md for explanation regarding using data-sources and computed values
 data "aws_vpc" "default" {
   default = true
@@ -76,6 +74,10 @@ module "tgw_peer" {
   # This is optional and connects to another account. Meaning you need to be authenticated with 2 separate AWS Accounts
   source = "../../"
 
+  providers = {
+    aws = aws.peer
+  }
+
   name            = "my-tgw-peer"
   description     = "My TGW shared with several other AWS accounts"
   amazon_side_asn = 64532
@@ -84,10 +86,6 @@ module "tgw_peer" {
   create_tgw                            = false
   ram_resource_share_arn                = module.tgw.this_ram_resource_share_id
   enable_auto_accept_shared_attachments = true // When "true" there is no need for RAM resources if using multiple AWS accounts
-
-  providers = {
-    aws = aws.peer
-  }
 
   vpc_attachments = {
     vpc1 = {

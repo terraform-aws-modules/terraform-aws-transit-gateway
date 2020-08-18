@@ -67,7 +67,7 @@ resource "aws_ec2_transit_gateway_route" "this" {
 resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
   for_each = var.vpc_attachments
 
-  transit_gateway_id = var.create_tgw ? lookup(each.value, "tgw_id", aws_ec2_transit_gateway.this[0].id) : lookup(each.value, "tgw_id", null)
+  transit_gateway_id = lookup(each.value, "tgw_id", var.create_tgw ? aws_ec2_transit_gateway.this[0].id : null)
   vpc_id             = each.value["vpc_id"]
   subnet_ids         = each.value["subnet_ids"]
 
@@ -132,8 +132,9 @@ resource "aws_ram_principal_association" "this" {
   principal          = var.ram_principals[count.index]
   resource_share_arn = aws_ram_resource_share.this[0].arn
 }
-// Accept RAM on peer account
+
 resource "aws_ram_resource_share_accepter" "this" {
-  count     = ! var.create_tgw && var.share_tgw ? 1 : 0
+  count = ! var.create_tgw && var.share_tgw ? 1 : 0
+
   share_arn = var.ram_resource_share_arn
 }
