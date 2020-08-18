@@ -78,6 +78,7 @@ module "vpc" {
 ## Examples
 
 * [Complete example](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/tree/master/examples/complete) shows TGW in combination with the [VPC module](https://github.com/terraform-aws-modules/terraform-aws-vpc) and [Resource Access Manager (RAM)](https://aws.amazon.com/ram/).
+* [Multi-account example](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/tree/master/examples/multi-account) shows TGW resources shared with different AWS accounts (via [Resource Access Manager (RAM)](https://aws.amazon.com/ram/)).
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
@@ -85,13 +86,13 @@ module "vpc" {
 | Name | Version |
 |------|---------|
 | terraform | >= 0.12.7, < 0.14 |
-| aws | >= 2.18, < 4.0 |
+| aws | >= 2.24, < 4.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| aws | >= 2.18, < 4.0 |
+| aws | >= 2.24, < 4.0 |
 
 ## Inputs
 
@@ -109,6 +110,7 @@ module "vpc" {
 | ram\_allow\_external\_principals | Indicates whether principals outside your organization can be associated with a resource share. | `bool` | `false` | no |
 | ram\_name | The name of the resource share of TGW | `string` | `""` | no |
 | ram\_principals | A list of principals to share TGW with. Possible values are an AWS account ID, an AWS Organizations Organization ARN, or an AWS Organizations Organization Unit ARN | `list(string)` | `[]` | no |
+| ram\_resource\_share\_arn | ARN of RAM resource share | `string` | `""` | no |
 | ram\_tags | Additional tags for the RAM | `map(string)` | `{}` | no |
 | share\_tgw | Whether to share your transit gateway with other accounts | `bool` | `true` | no |
 | tags | A map of tags to add to all resources | `map(string)` | `{}` | no |

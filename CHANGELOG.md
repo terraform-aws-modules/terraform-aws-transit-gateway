@@ -5,7 +5,8 @@ All notable changes to this project will be documented in this file.
 <a name="unreleased"></a>
 ## [Unreleased]
 
-
+- Added RAM share accepter
+- fixed error when **create_tgw = false**
 
 <a name="v1.2.0"></a>
 ## [v1.2.0] - 2020-08-17
