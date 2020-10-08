@@ -31,7 +31,8 @@ resource "aws_ec2_transit_gateway" "this" {
 
   tags = merge(
     {
-      "Name" = format("%s", var.name)
+      Name = format("%s", var.name)
+      Source = "terraform-aws-transit-gateway"
     },
     var.tags,
     var.tgw_tags,
@@ -48,7 +49,8 @@ resource "aws_ec2_transit_gateway_route_table" "this" {
 
   tags = merge(
     {
-      "Name" = format("%s", var.name)
+      Name   = format("%s", var.name)
+      Source = "terraform-aws-transit-gateway"
     },
     var.tags,
     var.tgw_route_table_tags,
@@ -84,6 +86,7 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
   tags = merge(
     {
       Name = format("%s-%s", var.name, each.key)
+      Source = "terraform-aws-transit-gateway"
     },
     var.tags,
     var.tgw_vpc_attachment_tags,
@@ -117,7 +120,8 @@ resource "aws_ram_resource_share" "this" {
 
   tags = merge(
     {
-      "Name" = format("%s", coalesce(var.ram_name, var.name))
+      Name = format("%s", coalesce(var.ram_name, var.name))
+      Source = "terraform-aws-transit-gateway"
     },
     var.tags,
     var.ram_tags,
