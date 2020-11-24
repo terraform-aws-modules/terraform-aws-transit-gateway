@@ -7,6 +7,13 @@ All notable changes to this project will be documented in this file.
 
 
 
+<a name="v1.4.0"></a>
+## [v1.4.0] - 2020-11-24
+
+- fix: Updated supported Terraform versions ([#30](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/30))
+- docs: typos on example readme.mds ([#21](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/21))
+
+
 <a name="v1.3.0"></a>
 ## [v1.3.0] - 2020-08-18
 
@@ -38,7 +45,8 @@ All notable changes to this project will be documented in this file.
 - Initial commit
 
 
-[Unreleased]: https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v1.4.0...HEAD
+[v1.4.0]: https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v1.3.0...v1.4.0
 [v1.3.0]: https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v1.2.0...v1.3.0
 [v1.2.0]: https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v1.1.0...v1.2.0
 [v1.1.0]: https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v1.0.0...v1.1.0
