@@ -8,7 +8,7 @@ provider "aws" {
   alias  = "peer"
 }
 
-// See Notes in README.md for explanation regarding using data-sources and computed values
+# See Notes in README.md for explanation regarding using data-sources and computed values
 data "aws_vpc" "default" {
   default = true
 }
@@ -24,7 +24,7 @@ module "tgw" {
   description     = "My TGW shared with several other AWS accounts"
   amazon_side_asn = 64532
 
-  enable_auto_accept_shared_attachments = true // When "true" there is no need for RAM resources if using multiple AWS accounts
+  enable_auto_accept_shared_attachments = true # When "true" there is no need for RAM resources if using multiple AWS accounts
 
   vpc_attachments = {
     vpc1 = {
@@ -34,7 +34,7 @@ module "tgw" {
       ipv6_support                                    = true
       transit_gateway_default_route_table_association = false
       transit_gateway_default_route_table_propagation = false
-      //      transit_gateway_route_table_id = "tgw-rtb-073a181ee589b360f"
+      #      transit_gateway_route_table_id = "tgw-rtb-073a181ee589b360f"
 
       tgw_routes = [
         {
@@ -85,7 +85,7 @@ module "tgw_peer" {
   share_tgw                             = true
   create_tgw                            = false
   ram_resource_share_arn                = module.tgw.this_ram_resource_share_id
-  enable_auto_accept_shared_attachments = true // When "true" there is no need for RAM resources if using multiple AWS accounts
+  enable_auto_accept_shared_attachments = true # When "true" there is no need for RAM resources if using multiple AWS accounts
 
   vpc_attachments = {
     vpc1 = {
@@ -96,7 +96,7 @@ module "tgw_peer" {
       ipv6_support                                    = true
       transit_gateway_default_route_table_association = false
       transit_gateway_default_route_table_propagation = false
-      //      transit_gateway_route_table_id = "tgw-rtb-073a181ee589b360f"
+      #      transit_gateway_route_table_id = "tgw-rtb-073a181ee589b360f"
 
       tgw_routes = [
         {

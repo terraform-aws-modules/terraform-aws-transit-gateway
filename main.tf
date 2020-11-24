@@ -7,7 +7,7 @@ locals {
     for k, v in var.vpc_attachments : k => v if lookup(v, "transit_gateway_default_route_table_propagation", true) != true
   }
 
-  // List of maps with key and route values
+  # List of maps with key and route values
   vpc_attachments_with_routes = chunklist(flatten([
     for k, v in var.vpc_attachments : setproduct([map("key", k)], v["tgw_routes"]) if length(lookup(v, "tgw_routes", {})) > 0
   ]), 2)
@@ -50,7 +50,7 @@ resource "aws_ec2_transit_gateway_route_table" "this" {
   )
 }
 
-// VPC attachment routes
+# VPC attachment routes
 resource "aws_ec2_transit_gateway_route" "this" {
   count = length(local.vpc_attachments_with_routes)
 
@@ -88,7 +88,7 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
 resource "aws_ec2_transit_gateway_route_table_association" "this" {
   for_each = local.vpc_attachments_without_default_route_table_association
 
-  // Create association if it was not set already by aws_ec2_transit_gateway_vpc_attachment resource
+  # Create association if it was not set already by aws_ec2_transit_gateway_vpc_attachment resource
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.this[each.key].id
   transit_gateway_route_table_id = coalesce(lookup(each.value, "transit_gateway_route_table_id", null), var.transit_gateway_route_table_id, aws_ec2_transit_gateway_route_table.this[0].id)
 }
@@ -96,7 +96,7 @@ resource "aws_ec2_transit_gateway_route_table_association" "this" {
 resource "aws_ec2_transit_gateway_route_table_propagation" "this" {
   for_each = local.vpc_attachments_without_default_route_table_propagation
 
-  // Create association if it was not set already by aws_ec2_transit_gateway_vpc_attachment resource
+  # Create association if it was not set already by aws_ec2_transit_gateway_vpc_attachment resource
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.this[each.key].id
   transit_gateway_route_table_id = coalesce(lookup(each.value, "transit_gateway_route_table_id", null), var.transit_gateway_route_table_id, aws_ec2_transit_gateway_route_table.this[0].id)
 }
