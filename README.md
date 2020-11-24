@@ -85,14 +85,14 @@ module "vpc" {
 
 | Name | Version |
 |------|---------|
-| terraform | >= 0.12.7, < 0.14 |
-| aws | >= 2.24, < 4.0 |
+| terraform | >= 0.12.7 |
+| aws | >= 2.24 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| aws | >= 2.24, < 4.0 |
+| aws | >= 2.24 |
 
 ## Inputs
 
