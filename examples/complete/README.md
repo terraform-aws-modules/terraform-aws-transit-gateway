@@ -6,7 +6,7 @@ Configuration in this directory creates AWS Transit Gateway, attach VPC to it an
 
 There is a famous limitation in Terraform which prevents us from using computed values in `count`. For this reason this example is using data-sources to discover already created default VPC and subnets.
 
-In real-world scenario you will have to split creation of VPC (using [terraform-aws-vpc modules](https://github.com/terraform-aws-modules/terraform-aws-vpc)) and creation of TGW resources using this module. 
+In real-world scenario you will have to split creation of VPC (using [terraform-aws-vpc modules](https://github.com/terraform-aws-modules/terraform-aws-vpc)) and creation of TGW resources using this module.
 
 ## Usage
 
@@ -14,6 +14,8 @@ To run this example you need to execute:
 
 ```bash
 $ terraform init
+$ terraform plan -target module.vpc1 -target module.vpc2
+$ terraform apply -target module.vpc1 -target module.vpc2
 $ terraform plan
 $ terraform apply
 ```
