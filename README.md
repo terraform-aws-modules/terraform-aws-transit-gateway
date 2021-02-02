@@ -115,6 +115,7 @@ module "vpc" {
 | share\_tgw | Whether to share your transit gateway with other accounts | `bool` | `true` | no |
 | tags | A map of tags to add to all resources | `map(string)` | `{}` | no |
 | tgw\_route\_table\_tags | Additional tags for the TGW route table | `map(string)` | `{}` | no |
+| tgw\_default\_route\_table\_tags | Additional tags for the Default TGW route table | `map(string)` | `{}` | no |
 | tgw\_tags | Additional tags for the TGW | `map(string)` | `{}` | no |
 | tgw\_vpc\_attachment\_tags | Additional tags for VPC attachments | `map(string)` | `{}` | no |
 | transit\_gateway\_route\_table\_id | Identifier of EC2 Transit Gateway Route Table to use with the Target Gateway when reusing it between multiple TGWs | `string` | `null` | no |
