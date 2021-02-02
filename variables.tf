@@ -85,6 +85,12 @@ variable "tgw_route_table_tags" {
   default     = {}
 }
 
+variable "tgw_default_route_table_tags" {
+  description = "Additional tags for the Default TGW route table"
+  type        = map(string)
+  default     = {}
+}
+
 variable "tgw_vpc_attachment_tags" {
   description = "Additional tags for VPC attachments"
   type        = map(string)

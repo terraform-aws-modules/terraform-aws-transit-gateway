@@ -33,6 +33,14 @@ resource "aws_ec2_transit_gateway" "this" {
   )
 }
 
+resource "aws_ec2_tag" "this" {
+  count = var.create_tgw ? length(var.tgw_default_route_table_tags) : 0
+
+  resource_id = aws_ec2_transit_gateway.this[0].association_default_route_table_id
+  key         = keys(var.tgw_default_route_table_tags)[count.index]
+  value       = values(var.tgw_default_route_table_tags)[count.index]
+}
+
 #########################
 # Route table and routes
 #########################
