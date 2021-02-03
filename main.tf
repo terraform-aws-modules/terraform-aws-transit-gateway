@@ -28,7 +28,6 @@ locals {
     ]
   ])
 }
-#
 
 resource "aws_ec2_transit_gateway" "this" {
   count = var.create_tgw ? 1 : 0
