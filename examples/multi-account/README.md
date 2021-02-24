@@ -34,6 +34,21 @@ Note that this example may create resources which cost money. Run `terraform des
 |------|---------|
 | aws | >= 2.24 |
 
+## Modules
+
+| Name | Source | Version |
+|------|--------|---------|
+| tgw | ../../ |  |
+| tgw_peer | ../../ |  |
+| vpc1 | terraform-aws-modules/vpc/aws | ~> 2.0 |
+
+## Resources
+
+| Name |
+|------|
+| [aws_subnet_ids](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet_ids) |
+| [aws_vpc](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpc) |
+
 ## Inputs
 
 No input.
@@ -59,5 +74,4 @@ No input.
 | this\_ec2\_transit\_gateway\_vpc\_attachment\_ids | List of EC2 Transit Gateway VPC Attachment identifiers |
 | this\_ram\_principal\_association\_id | The Amazon Resource Name (ARN) of the Resource Share and the principal, separated by a comma |
 | this\_ram\_resource\_share\_id | The Amazon Resource Name (ARN) of the resource share |
-
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
