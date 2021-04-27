@@ -84,12 +84,12 @@ module "tgw_peer" {
 
   share_tgw                             = true
   create_tgw                            = false
-  ram_resource_share_arn                = module.tgw.this_ram_resource_share_id
+  ram_resource_share_arn                = module.tgw.ram_resource_share_id
   enable_auto_accept_shared_attachments = true # When "true" there is no need for RAM resources if using multiple AWS accounts
 
   vpc_attachments = {
     vpc1 = {
-      tgw_id                                          = module.tgw.this_ec2_transit_gateway_id
+      tgw_id                                          = module.tgw.ec2_transit_gateway_id
       vpc_id                                          = data.aws_vpc.default.id      # module.vpc1.vpc_id
       subnet_ids                                      = data.aws_subnet_ids.this.ids # module.vpc1.private_subnets
       dns_support                                     = true
@@ -120,7 +120,7 @@ module "tgw_peer" {
 
 module "vpc1" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "~> 2.0"
+  version = "~> 3.0"
 
   name = "vpc1"
 
