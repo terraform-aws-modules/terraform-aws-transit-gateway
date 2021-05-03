@@ -2,33 +2,16 @@
 
 Terraform module which creates Transit Gateway resources on AWS.
 
-This type of resources are supported:
-
-* [Transit Gateway](https://www.terraform.io/docs/providers/aws/r/ec2_transit_gateway.html)
-* [Transit Gateway Route](https://www.terraform.io/docs/providers/aws/r/ec2_transit_gateway_route.html)
-* [Transit Gateway Route Table](https://www.terraform.io/docs/providers/aws/r/ec2_transit_gateway_route_table.html)
-* [Transit Gateway Route Table Association](https://www.terraform.io/docs/providers/aws/r/ec2_transit_gateway_route_table_association.html)
-* [Transit Gateway Route Table Propagation](https://www.terraform.io/docs/providers/aws/r/ec2_transit_gateway_route_table_propagation.html)
-* [Transit Gateway VPC Attachment](https://www.terraform.io/docs/providers/aws/r/ec2_transit_gateway_vpc_attachment.html)
-
-Not supported yet:
-
-* [Transit Gateway VPC Attachment Accepter](https://www.terraform.io/docs/providers/aws/r/ec2_transit_gateway_vpc_attachment_accepter.html)
-
-## Terraform versions
-
-Only Terraform 0.12 or newer is supported.
-
 ## Usage with VPC module
 
 ```hcl
 module "tgw" {
   source  = "terraform-aws-modules/transit-gateway/aws"
   version = "~> 2.0"
-  
+
   name        = "my-tgw"
   description = "My TGW shared with several other AWS accounts"
-  
+
   enable_auto_accept_shared_attachments = true
 
   vpc_attachments = {
@@ -77,8 +60,8 @@ module "vpc" {
 
 ## Examples
 
-* [Complete example](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/tree/master/examples/complete) shows TGW in combination with the [VPC module](https://github.com/terraform-aws-modules/terraform-aws-vpc) and [Resource Access Manager (RAM)](https://aws.amazon.com/ram/).
-* [Multi-account example](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/tree/master/examples/multi-account) shows TGW resources shared with different AWS accounts (via [Resource Access Manager (RAM)](https://aws.amazon.com/ram/)).
+- [Complete example](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/tree/master/examples/complete) shows TGW in combination with the [VPC module](https://github.com/terraform-aws-modules/terraform-aws-vpc) and [Resource Access Manager (RAM)](https://aws.amazon.com/ram/).
+- [Multi-account example](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/tree/master/examples/multi-account) shows TGW resources shared with different AWS accounts (via [Resource Access Manager (RAM)](https://aws.amazon.com/ram/)).
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
@@ -164,8 +147,8 @@ No modules.
 
 ## Authors
 
-Module managed by [Anton Babenko](https://github.com/antonbabenko).
+Module is maintained by [Anton Babenko](https://github.com/antonbabenko) with help from [these awesome contributors](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/graphs/contributors).
 
 ## License
 
-Apache 2 Licensed. See LICENSE for full details.
+Apache 2 Licensed. See [LICENSE](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/tree/master/LICENSE) for full details.
