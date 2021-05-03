@@ -9,7 +9,7 @@ locals {
 
   # List of maps with key and route values
   vpc_attachments_with_routes = chunklist(flatten([
-    for k, v in var.vpc_attachments : setproduct([map("key", k)], v["tgw_routes"]) if length(lookup(v, "tgw_routes", {})) > 0
+    for k, v in var.vpc_attachments : setproduct([tomap({"key" = k})], v["tgw_routes"]) if length(lookup(v, "tgw_routes", {})) > 0
   ]), 2)
 }
 
