@@ -12,7 +12,7 @@ locals {
     for k, v in var.vpc_attachments : setproduct([map("key", k)], v["tgw_routes"]) if length(lookup(v, "tgw_routes", {})) > 0
   ]), 2)
 }
-
+# comment
 resource "aws_ec2_transit_gateway" "this" {
   count = var.create_tgw ? 1 : 0
 
