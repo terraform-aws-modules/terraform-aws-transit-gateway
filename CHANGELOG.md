@@ -7,6 +7,13 @@ All notable changes to this project will be documented in this file.
 
 
 
+<a name="v2.1.0"></a>
+## [v2.1.0] - 2021-05-05
+
+- fix: Update map function to work in Terraform 0.15 ([#44](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/44))
+- chore: update CI/CD to use stable `terraform-docs` release artifact and discoverable Apache2.0 license ([#42](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/42))
+
+
 <a name="v2.0.0"></a>
 ## [v2.0.0] - 2021-04-27
 
@@ -67,7 +74,8 @@ All notable changes to this project will be documented in this file.
 - Initial commit
 
 
-[Unreleased]: https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.1.0...HEAD
+[v2.1.0]: https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.0.0...v2.1.0
 [v2.0.0]: https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v1.4.0...v2.0.0
 [v1.4.0]: https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v1.3.0...v1.4.0
 [v1.3.0]: https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v1.2.0...v1.3.0
