@@ -73,6 +73,7 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
 
   dns_support                                     = lookup(each.value, "dns_support", true) ? "enable" : "disable"
   ipv6_support                                    = lookup(each.value, "ipv6_support", false) ? "enable" : "disable"
+  appliance_mode_support                          = lookup(each.value, "appliance_mode_support", false) ? "enable" : "disable"
   transit_gateway_default_route_table_association = lookup(each.value, "transit_gateway_default_route_table_association", true)
   transit_gateway_default_route_table_propagation = lookup(each.value, "transit_gateway_default_route_table_propagation", true)
 
