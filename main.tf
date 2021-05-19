@@ -11,6 +11,14 @@ locals {
   vpc_attachments_with_routes = chunklist(flatten([
     for k, v in var.vpc_attachments : setproduct([{ key = k }], v["tgw_routes"]) if length(lookup(v, "tgw_routes", {})) > 0
   ]), 2)
+
+  tgw_default_route_table_tags_merged = merge(
+    {
+      "Name" = format("%s", var.name)
+    },
+    var.tags,
+    var.tgw_default_route_table_tags,
+  )
 }
 
 resource "aws_ec2_transit_gateway" "this" {
@@ -31,6 +39,13 @@ resource "aws_ec2_transit_gateway" "this" {
     var.tags,
     var.tgw_tags,
   )
+}
+
+resource "aws_ec2_tag" "this" {
+  for_each    = var.create_tgw ? local.tgw_default_route_table_tags_merged : {}
+  resource_id = aws_ec2_transit_gateway.this[0].association_default_route_table_id
+  key         = each.key
+  value       = each.value
 }
 
 #########################
