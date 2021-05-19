@@ -7,6 +7,12 @@ All notable changes to this project will be documented in this file.
 
 
 
+<a name="v2.2.0"></a>
+## [v2.2.0] - 2021-05-19
+
+- feat: adding appliance_mode_support to vpc attachments ([#48](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/48))
+
+
 <a name="v2.1.0"></a>
 ## [v2.1.0] - 2021-05-05
 
@@ -42,18 +48,6 @@ All notable changes to this project will be documented in this file.
 
 - chore: Minor updates in docs
 - fix: fix variable in aws_ec2_transit_gateway_route_table_propagation ([#13](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/13))
-- Merge pull request [#9](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/9) from terraform-aws-modules/terraform-provider-githubfile-1584635435927389000
-- [ci skip] Create ".chglog/CHANGELOG.tpl.md".
-- Merge pull request [#7](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/7) from terraform-aws-modules/terraform-provider-githubfile-1584537532882701000
-- Merge pull request [#6](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/6) from terraform-aws-modules/terraform-provider-githubfile-1584537532882283000
-- Merge pull request [#8](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/8) from terraform-aws-modules/terraform-provider-githubfile-1584537532882726000
-- Merge pull request [#4](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/4) from terraform-aws-modules/terraform-provider-githubfile-1584537532882251000
-- Merge pull request [#5](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/5) from terraform-aws-modules/terraform-provider-githubfile-1584537532882200000
-- [ci skip] Create ".editorconfig".
-- [ci skip] Create "LICENSE".
-- [ci skip] Create ".gitignore".
-- [ci skip] Create ".pre-commit-config.yaml".
-- [ci skip] Create "Makefile".
 
 
 <a name="v1.1.0"></a>
@@ -74,7 +68,8 @@ All notable changes to this project will be documented in this file.
 - Initial commit
 
 
-[Unreleased]: https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.1.0...HEAD
+[Unreleased]: https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.2.0...HEAD
+[v2.2.0]: https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.1.0...v2.2.0
 [v2.1.0]: https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.0.0...v2.1.0
 [v2.0.0]: https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v1.4.0...v2.0.0
 [v1.4.0]: https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v1.3.0...v1.4.0
