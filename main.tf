@@ -42,11 +42,10 @@ resource "aws_ec2_transit_gateway" "this" {
 }
 
 resource "aws_ec2_tag" "this" {
-  count = var.create_tgw ? length(local.tgw_default_route_table_tags_merged) : 0
-
+  for_each    = var.create_tgw ? local.tgw_default_route_table_tags_merged : {}
   resource_id = aws_ec2_transit_gateway.this[0].association_default_route_table_id
-  key         = keys(local.tgw_default_route_table_tags_merged)[count.index]
-  value       = values(local.tgw_default_route_table_tags_merged)[count.index]
+  key         = each.key
+  value       = each.value
 }
 
 #########################
