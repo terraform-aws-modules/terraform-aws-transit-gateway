@@ -7,15 +7,23 @@ locals {
     for k, v in var.vpc_attachments : k => v if lookup(v, "transit_gateway_default_route_table_propagation", true) != true
   }
 
-  // List of maps with key and route values
+  # List of maps with key and route values
   vpc_attachments_with_routes = chunklist(flatten([
-    for k, v in var.vpc_attachments : setproduct([map("key", k)], v["tgw_routes"]) if length(lookup(v, "tgw_routes", {})) > 0
+    for k, v in var.vpc_attachments : setproduct([{ key = k }], v["tgw_routes"]) if length(lookup(v, "tgw_routes", {})) > 0
   ]), 2)
 
   vpc_attachments_with_add_routes = chunklist(flatten([
     for k, v in var.vpc_attachments :
       [for route in v["add_routes"] : setproduct([route["destination_cidr_block"]], route["route_table_ids"])] if length(lookup(v, "add_routes", {})) > 0
   ]), 2)
+
+  tgw_default_route_table_tags_merged = merge(
+    {
+      "Name" = format("%s", var.name)
+    },
+    var.tags,
+    var.tgw_default_route_table_tags,
+  )
 }
 
 resource "aws_ec2_transit_gateway" "this" {
@@ -39,6 +47,13 @@ resource "aws_ec2_transit_gateway" "this" {
   )
 }
 
+resource "aws_ec2_tag" "this" {
+  for_each    = var.create_tgw ? local.tgw_default_route_table_tags_merged : {}
+  resource_id = aws_ec2_transit_gateway.this[0].association_default_route_table_id
+  key         = each.key
+  value       = each.value
+}
+
 #########################
 # Route table and routes
 #########################
@@ -57,7 +72,7 @@ resource "aws_ec2_transit_gateway_route_table" "this" {
   )
 }
 
-// VPC attachment routes
+# VPC attachment routes
 resource "aws_ec2_transit_gateway_route" "this" {
   count = length(local.vpc_attachments_with_routes)
 
@@ -74,12 +89,13 @@ resource "aws_ec2_transit_gateway_route" "this" {
 resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
   for_each = var.vpc_attachments
 
-  transit_gateway_id = lookup(each.value, "tgw_id", aws_ec2_transit_gateway.this[0].id)
+  transit_gateway_id = lookup(each.value, "tgw_id", var.create_tgw ? aws_ec2_transit_gateway.this[0].id : null)
   vpc_id             = each.value["vpc_id"]
   subnet_ids         = each.value["subnet_ids"]
 
   dns_support                                     = lookup(each.value, "dns_support", true) ? "enable" : "disable"
   ipv6_support                                    = lookup(each.value, "ipv6_support", false) ? "enable" : "disable"
+  appliance_mode_support                          = lookup(each.value, "appliance_mode_support", false) ? "enable" : "disable"
   transit_gateway_default_route_table_association = lookup(each.value, "transit_gateway_default_route_table_association", true)
   transit_gateway_default_route_table_propagation = lookup(each.value, "transit_gateway_default_route_table_propagation", true)
 
@@ -96,15 +112,15 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
 resource "aws_ec2_transit_gateway_route_table_association" "this" {
   for_each = local.vpc_attachments_without_default_route_table_association
 
-  // Create association if it was not set already by aws_ec2_transit_gateway_vpc_attachment resource
+  # Create association if it was not set already by aws_ec2_transit_gateway_vpc_attachment resource
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.this[each.key].id
   transit_gateway_route_table_id = coalesce(lookup(each.value, "transit_gateway_route_table_id", null), var.transit_gateway_route_table_id, aws_ec2_transit_gateway_route_table.this[0].id)
 }
 
 resource "aws_ec2_transit_gateway_route_table_propagation" "this" {
-  for_each = local.vpc_attachments_without_default_route_table_association
+  for_each = local.vpc_attachments_without_default_route_table_propagation
 
-  // Create association if it was not set already by aws_ec2_transit_gateway_vpc_attachment resource
+  # Create association if it was not set already by aws_ec2_transit_gateway_vpc_attachment resource
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.this[each.key].id
   transit_gateway_route_table_id = coalesce(lookup(each.value, "transit_gateway_route_table_id", null), var.transit_gateway_route_table_id, aws_ec2_transit_gateway_route_table.this[0].id)
 }
@@ -142,6 +158,12 @@ resource "aws_ram_principal_association" "this" {
   resource_share_arn = aws_ram_resource_share.this[0].arn
 }
 
+resource "aws_ram_resource_share_accepter" "this" {
+  count = !var.create_tgw && var.share_tgw ? 1 : 0
+
+  share_arn = var.ram_resource_share_arn
+}
+
 ##########################
 # Entries to existing route tables
 ##########################
@@ -151,4 +173,3 @@ resource "aws_route" "this" {
   destination_cidr_block = local.vpc_attachments_with_add_routes[count.index][0]
   route_table_id         = local.vpc_attachments_with_add_routes[count.index][1]
   transit_gateway_id     = aws_ec2_transit_gateway.this[0].id
-}
