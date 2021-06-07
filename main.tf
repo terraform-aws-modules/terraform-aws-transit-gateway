@@ -173,3 +173,4 @@ resource "aws_route" "this" {
   destination_cidr_block = local.vpc_attachments_with_add_routes[count.index][0]
   route_table_id         = local.vpc_attachments_with_add_routes[count.index][1]
   transit_gateway_id     = aws_ec2_transit_gateway.this[0].id
+}
