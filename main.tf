@@ -14,7 +14,7 @@ locals {
 
   vpc_attachments_with_add_routes = chunklist(flatten([
     for k, v in var.vpc_attachments :
-      [for route in v["add_routes"] : setproduct([route["destination_cidr_block"]], route["route_table_ids"])] if length(lookup(v, "add_routes", {})) > 0
+    [for route in v["add_routes"] : setproduct([route["destination_cidr_block"]], route["route_table_ids"])] if length(lookup(v, "add_routes", {})) > 0
   ]), 2)
 
   tgw_default_route_table_tags_merged = merge(
@@ -39,7 +39,7 @@ resource "aws_ec2_transit_gateway" "this" {
 
   tags = merge(
     {
-      Name = format("%s", var.name)
+      Name   = format("%s", var.name)
       Source = "terraform-aws-transit-gateway"
     },
     var.tags,
@@ -101,7 +101,7 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
 
   tags = merge(
     {
-      Name = format("%s-%s", var.name, each.key)
+      Name   = format("%s-%s", var.name, each.key)
       Source = "terraform-aws-transit-gateway"
     },
     var.tags,
@@ -136,7 +136,7 @@ resource "aws_ram_resource_share" "this" {
 
   tags = merge(
     {
-      Name = format("%s", coalesce(var.ram_name, var.name))
+      Name   = format("%s", coalesce(var.ram_name, var.name))
       Source = "terraform-aws-transit-gateway"
     },
     var.tags,
