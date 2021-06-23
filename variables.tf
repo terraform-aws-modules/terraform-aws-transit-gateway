@@ -52,21 +52,21 @@ variable "enable_vpn_ecmp_support" {
   default     = true
 }
 
-// VPC attachments
+# VPC attachments
 variable "vpc_attachments" {
   description = "Maps of maps of VPC details to attach to TGW. Type 'any' to disable type validation by Terraform."
   type        = any
   default     = {}
 }
 
-// TGW Route Table association and propagation
+# TGW Route Table association and propagation
 variable "transit_gateway_route_table_id" {
   description = "Identifier of EC2 Transit Gateway Route Table to use with the Target Gateway when reusing it between multiple TGWs"
   type        = string
   default     = null
 }
 
-// Tags
+# Tags
 variable "tags" {
   description = "A map of tags to add to all resources"
   type        = map(string)
@@ -85,13 +85,19 @@ variable "tgw_route_table_tags" {
   default     = {}
 }
 
+variable "tgw_default_route_table_tags" {
+  description = "Additional tags for the Default TGW route table"
+  type        = map(string)
+  default     = {}
+}
+
 variable "tgw_vpc_attachment_tags" {
   description = "Additional tags for VPC attachments"
   type        = map(string)
   default     = {}
 }
 
-// TGW resource sharing
+# TGW resource sharing
 variable "share_tgw" {
   description = "Whether to share your transit gateway with other accounts"
   type        = bool
