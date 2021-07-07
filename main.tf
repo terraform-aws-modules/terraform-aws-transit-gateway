@@ -51,7 +51,7 @@ resource "aws_ec2_transit_gateway" "this" {
 }
 
 resource "aws_ec2_tag" "this" {
-  for_each    = var.create_tgw ? local.tgw_default_route_table_tags_merged : {}
+  for_each    = var.create_tgw && var.enable_default_route_table_association ? local.tgw_default_route_table_tags_merged : {}
   resource_id = aws_ec2_transit_gateway.this[0].association_default_route_table_id
   key         = each.key
   value       = each.value
