@@ -32,14 +32,14 @@ Note that this example may create resources which cost money. Run `terraform des
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 2.24 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 3.40.0 |
 
 ## Modules
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_tgw"></a> [tgw](#module\_tgw) | ../../ |  |
-| <a name="module_tgw_peer"></a> [tgw\_peer](#module\_tgw\_peer) | ../../ |  |
+| <a name="module_tgw"></a> [tgw](#module\_tgw) | ../../ | n/a |
+| <a name="module_tgw_peer"></a> [tgw\_peer](#module\_tgw\_peer) | ../../ | n/a |
 | <a name="module_vpc1"></a> [vpc1](#module\_vpc1) | terraform-aws-modules/vpc/aws | ~> 3.0 |
 
 ## Resources
