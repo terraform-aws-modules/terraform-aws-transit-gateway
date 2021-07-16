@@ -75,7 +75,7 @@ module "vpc" {
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 3.15.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 3.40.0 |
 
 ## Modules
 
