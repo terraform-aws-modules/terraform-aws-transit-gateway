@@ -12,6 +12,11 @@ locals {
     for k, v in var.vpc_attachments : setproduct([{ key = k }], v["tgw_routes"]) if length(lookup(v, "tgw_routes", {})) > 0
   ]), 2)
 
+  vpc_attachments_with_add_routes = chunklist(flatten([
+    for k, v in var.vpc_attachments :
+    [for route in v["add_routes"] : setproduct([route["destination_cidr_block"]], route["route_table_ids"])] if length(lookup(v, "add_routes", {})) > 0
+  ]), 2)
+
   tgw_default_route_table_tags_merged = merge(
     {
       "Name" = format("%s", var.name)
@@ -43,7 +48,8 @@ resource "aws_ec2_transit_gateway" "this" {
 
   tags = merge(
     {
-      "Name" = format("%s", var.name)
+      Name   = format("%s", var.name)
+      Source = "terraform-aws-transit-gateway"
     },
     var.tags,
     var.tgw_tags,
@@ -67,7 +73,8 @@ resource "aws_ec2_transit_gateway_route_table" "this" {
 
   tags = merge(
     {
-      "Name" = format("%s", var.name)
+      Name   = format("%s", var.name)
+      Source = "terraform-aws-transit-gateway"
     },
     var.tags,
     var.tgw_route_table_tags,
@@ -111,7 +118,8 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
 
   tags = merge(
     {
-      Name = format("%s-%s", var.name, each.key)
+      Name   = format("%s-%s", var.name, each.key)
+      Source = "terraform-aws-transit-gateway"
     },
     var.tags,
     var.tgw_vpc_attachment_tags,
@@ -145,7 +153,8 @@ resource "aws_ram_resource_share" "this" {
 
   tags = merge(
     {
-      "Name" = format("%s", coalesce(var.ram_name, var.name))
+      Name   = format("%s", coalesce(var.ram_name, var.name))
+      Source = "terraform-aws-transit-gateway"
     },
     var.tags,
     var.ram_tags,
@@ -170,4 +179,15 @@ resource "aws_ram_resource_share_accepter" "this" {
   count = !var.create_tgw && var.share_tgw ? 1 : 0
 
   share_arn = var.ram_resource_share_arn
+}
+
+##########################
+# Entries to existing route tables
+##########################
+resource "aws_route" "this" {
+  count = length(local.vpc_attachments_with_add_routes)
+
+  destination_cidr_block = local.vpc_attachments_with_add_routes[count.index][0]
+  route_table_id         = local.vpc_attachments_with_add_routes[count.index][1]
+  transit_gateway_id     = aws_ec2_transit_gateway.this[0].id
 }

@@ -30,6 +30,12 @@ module "tgw" {
           destination_cidr_block = "40.0.0.0/20"
         }
       ]
+      add_routes = [
+        {
+          destination_cidr_block = "30.0.0.0/16"
+          route_table_ids = concat(module.vpc.public_route_table_ids, module.vpc.private_route_table_ids)
+        }
+      ]
     }
   }
 
@@ -62,6 +68,20 @@ module "vpc" {
 
 - [Complete example](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/tree/master/examples/complete) shows TGW in combination with the [VPC module](https://github.com/terraform-aws-modules/terraform-aws-vpc) and [Resource Access Manager (RAM)](https://aws.amazon.com/ram/).
 - [Multi-account example](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/tree/master/examples/multi-account) shows TGW resources shared with different AWS accounts (via [Resource Access Manager (RAM)](https://aws.amazon.com/ram/)).
+
+## Additional routes in VPC_attachment {}
+
+When using the [terraform-aws-modules/terraform-aws-vpc module](https://github.com/terraform-aws-modules/terraform-aws-vpc), each subnet created will be associated with its own routing table. This makes the default VPC routing table unused.
+With the help of this additional block, we are creating routes in all provided route tables.
+
+```
+add_routes = [
+  {
+    destination_cidr_block = "10.0.0.0/8"
+    route_table_ids = concat(module.vpc.public_route_table_ids, module.vpc.private_route_table_ids)
+  }
+]
+```
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
