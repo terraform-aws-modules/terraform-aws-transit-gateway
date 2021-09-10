@@ -76,7 +76,7 @@ resource "aws_ec2_transit_gateway_route_table" "this" {
 
 # VPC attachment routes
 resource "aws_ec2_transit_gateway_route" "this" {
-  count = length(local.vpc_attachments_with_routes)
+  count = var.create_tgw ? length(local.vpc_attachments_with_routes) : 0
 
   destination_cidr_block = local.vpc_attachments_with_routes[count.index][1]["destination_cidr_block"]
   blackhole              = lookup(local.vpc_attachments_with_routes[count.index][1], "blackhole", null)
@@ -123,7 +123,7 @@ resource "aws_ec2_transit_gateway_route_table_association" "this" {
 
   # Create association if it was not set already by aws_ec2_transit_gateway_vpc_attachment resource
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.this[each.key].id
-  transit_gateway_route_table_id = coalesce(lookup(each.value, "transit_gateway_route_table_id", null), var.create_tgw ? aws_ec2_transit_gateway_route_table.this[0].id : var.transit_gateway_route_table_id )
+  transit_gateway_route_table_id = coalesce(lookup(each.value, "transit_gateway_route_table_id", null), var.create_tgw ? aws_ec2_transit_gateway_route_table.this[0].id : var.transit_gateway_route_table_id)
 }
 
 resource "aws_ec2_transit_gateway_route_table_propagation" "this" {
