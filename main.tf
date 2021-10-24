@@ -61,7 +61,7 @@ resource "aws_ec2_tag" "this" {
 # Route table and routes
 #########################
 resource "aws_ec2_transit_gateway_route_table" "this" {
-  count = var.create_tgw ? 1 : 0
+  count = (var.create_tgw && (length(local.vpc_attachments_without_default_route_table_association) > 0 || length(local.vpc_attachments_without_default_route_table_propagation) > 0)) ? 1 : 0
 
   transit_gateway_id = aws_ec2_transit_gateway.this[0].id
 
