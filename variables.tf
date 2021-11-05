@@ -66,6 +66,12 @@ variable "transit_gateway_route_table_id" {
   default     = null
 }
 
+variable "transit_gateway_id" {
+  description = "Identifier of EC2 Transit Gateway ID to use when using configuring for cross account usage"
+  type        = string
+  default     = null
+}
+
 # Tags
 variable "tags" {
   description = "A map of tags to add to all resources"

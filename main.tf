@@ -90,7 +90,7 @@ resource "aws_route" "this" {
 
   route_table_id         = each.key
   destination_cidr_block = each.value
-  transit_gateway_id     = aws_ec2_transit_gateway.this[0].id
+  transit_gateway_id     = var.create_tgw ? aws_ec2_transit_gateway.this[0].id : var.transit_gateway_id
 }
 
 ###########################################################
@@ -99,7 +99,7 @@ resource "aws_route" "this" {
 resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
   for_each = var.vpc_attachments
 
-  transit_gateway_id = lookup(each.value, "tgw_id", var.create_tgw ? aws_ec2_transit_gateway.this[0].id : null)
+  transit_gateway_id = lookup(each.value, "tgw_id", var.create_tgw ? aws_ec2_transit_gateway.this[0].id : var.transit_gateway_id)
   vpc_id             = each.value["vpc_id"]
   subnet_ids         = each.value["subnet_ids"]
 
@@ -167,7 +167,7 @@ resource "aws_ram_principal_association" "this" {
 }
 
 resource "aws_ram_resource_share_accepter" "this" {
-  count = !var.create_tgw && var.share_tgw ? 1 : 0
+  count = ! var.create_tgw && var.share_tgw ? 1 : 0
 
   share_arn = var.ram_resource_share_arn
 }
