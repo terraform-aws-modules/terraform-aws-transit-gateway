@@ -111,7 +111,7 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
 
   tags = merge(
     {
-      Name = format("%s-%s", var.name, each.key)
+      Name = lookup(each.value, "name", format("%s-%s", var.name, each.key))
     },
     var.tags,
     var.tgw_vpc_attachment_tags,
