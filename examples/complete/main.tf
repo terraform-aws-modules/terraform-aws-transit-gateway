@@ -93,4 +93,3 @@ module "vpc2" {
 
   enable_ipv6 = false
 }
-
