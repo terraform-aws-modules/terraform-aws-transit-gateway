@@ -1,3 +1,14 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+### [2.5.1](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.5.0...v2.5.1) (2022-01-10)
+
+
+### Bug Fixes
+
+* update CI/CD process to enable auto-release workflow ([#63](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/63)) ([558f5ff](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/commit/558f5ff261d9e5b25304c3f38ae0242850c92b2b))
+
 <a name="v2.5.0"></a>
 ## [v2.5.0] - 2021-07-07
 
