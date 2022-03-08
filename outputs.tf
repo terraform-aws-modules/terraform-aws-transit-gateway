@@ -19,6 +19,11 @@ output "ec2_transit_gateway_owner_id" {
   value       = element(concat(aws_ec2_transit_gateway.this.*.owner_id, [""]), 0)
 }
 
+output "ec2_transit_gateway_cidr_blocks" {
+  description = "The list of associated CIDR blocks"
+  value       = aws_ec2_transit_gateway.this.*.transit_gateway_cidr_blocks
+}
+
 output "ec2_transit_gateway_propagation_default_route_table_id" {
   description = "Identifier of the default propagation route table"
   value       = element(concat(aws_ec2_transit_gateway.this.*.propagation_default_route_table_id, [""]), 0)
