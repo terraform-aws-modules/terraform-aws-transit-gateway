@@ -133,3 +133,9 @@ variable "ram_resource_share_arn" {
   type        = string
   default     = ""
 }
+
+variable "transit_gateway_cidr_blocks" {
+  description = "The list of associated CIDR blocks. It can contain up to 1 IPv4 CIDR block of size up to /24 and up to one IPv6 CIDR block of size up to /64. The IPv4 block must not be from range 169.254.0.0/16."
+  type        = list(string)
+  default     = []
+}
