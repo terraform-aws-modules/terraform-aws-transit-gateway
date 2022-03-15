@@ -28,6 +28,8 @@ locals {
       }
     ]
   ])
+
+  tgw_route_table_id = try(var.transit_gateway_route_table_id, aws_ec2_transit_gateway_route_table.this[0].id)
 }
 
 resource "aws_ec2_transit_gateway" "this" {
@@ -123,7 +125,7 @@ resource "aws_ec2_transit_gateway_route_table_association" "this" {
 
   # Create association if it was not set already by aws_ec2_transit_gateway_vpc_attachment resource
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.this[each.key].id
-  transit_gateway_route_table_id = coalesce(lookup(each.value, "transit_gateway_route_table_id", null), var.transit_gateway_route_table_id, aws_ec2_transit_gateway_route_table.this[0].id)
+  transit_gateway_route_table_id = coalesce(lookup(each.value, "transit_gateway_route_table_id", null), local.tgw_route_table_id)
 }
 
 resource "aws_ec2_transit_gateway_route_table_propagation" "this" {
@@ -131,7 +133,8 @@ resource "aws_ec2_transit_gateway_route_table_propagation" "this" {
 
   # Create association if it was not set already by aws_ec2_transit_gateway_vpc_attachment resource
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.this[each.key].id
-  transit_gateway_route_table_id = coalesce(lookup(each.value, "transit_gateway_route_table_id", null), var.transit_gateway_route_table_id, aws_ec2_transit_gateway_route_table.this[0].id)
+  transit_gateway_route_table_id = coalesce(lookup(each.value, "transit_gateway_route_table_id", null), local.tgw_route_table_id)
+
 }
 
 ##########################
