@@ -24,18 +24,18 @@ module "tgw" {
   description     = "My TGW shared with several other AWS accounts"
   amazon_side_asn = 64532
 
-  enable_auto_accept_shared_attachments = true # When "true" there is no need for RAM resources if using multiple AWS accounts
+  # When "true" there is no need for RAM resources if using multiple AWS accounts
+  enable_auto_accept_shared_attachments = true
 
   vpc_attachments = {
     vpc1 = {
-      vpc_id       = data.aws_vpc.vpc1.id      # module.vpc1.vpc_id
-      subnet_ids   = data.aws_subnets.vpc1.ids # module.vpc1.private_subnets
+      vpc_id       = module.vpc1.vpc_id
+      subnet_ids   = module.vpc1.private_subnets
       dns_support  = true
       ipv6_support = true
 
       transit_gateway_default_route_table_association = false
       transit_gateway_default_route_table_propagation = false
-      # transit_gateway_route_table_id                  = "tgw-rtb-073a181ee589b360f"
 
       tgw_routes = [
         {
@@ -48,8 +48,8 @@ module "tgw" {
       ]
     },
     vpc2 = {
-      vpc_id     = data.aws_vpc.vpc2.id      # module.vpc2.vpc_id
-      subnet_ids = data.aws_subnets.vpc2.ids # module.vpc2.private_subnets
+      vpc_id     = module.vpc2.vpc_id
+      subnet_ids = module.vpc2.private_subnets
 
       tgw_routes = [
         {
@@ -90,18 +90,6 @@ module "vpc1" {
   tags = local.tags
 }
 
-# See Notes in README.md for explanation regarding using data-sources and computed values
-data "aws_vpc" "vpc1" {
-  id = module.vpc1.vpc_id
-}
-
-data "aws_subnets" "vpc1" {
-  filter {
-    name   = "vpc-id"
-    values = [module.vpc1.vpc_id]
-  }
-}
-
 module "vpc2" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "~> 3.0"
@@ -115,16 +103,4 @@ module "vpc2" {
   enable_ipv6 = false
 
   tags = local.tags
-}
-
-# See Notes in README.md for explanation regarding using data-sources and computed values
-data "aws_vpc" "vpc2" {
-  id = module.vpc2.vpc_id
-}
-
-data "aws_subnets" "vpc2" {
-  filter {
-    name   = "vpc-id"
-    values = [module.vpc2.vpc_id]
-  }
 }

@@ -30,18 +30,18 @@ module "tgw" {
   description     = "My TGW shared with several other AWS accounts"
   amazon_side_asn = 64532
 
-  enable_auto_accept_shared_attachments = true # When "true" there is no need for RAM resources if using multiple AWS accounts
+  # When "true" there is no need for RAM resources if using multiple AWS accounts
+  enable_auto_accept_shared_attachments = true
 
   vpc_attachments = {
     vpc1 = {
-      vpc_id       = data.aws_vpc.vpc1.id      # module.vpc1.vpc_id
-      subnet_ids   = data.aws_subnets.vpc1.ids # module.vpc1.private_subnets
+      vpc_id       = module.vpc1.vpc_id
+      subnet_ids   = module.vpc1.private_subnets
       dns_support  = true
       ipv6_support = true
 
       transit_gateway_default_route_table_association = false
       transit_gateway_default_route_table_propagation = false
-      # transit_gateway_route_table_id                  = "tgw-rtb-073a181ee589b360f"
 
       tgw_routes = [
         {
@@ -54,8 +54,8 @@ module "tgw" {
       ]
     },
     vpc2 = {
-      vpc_id     = data.aws_vpc.vpc1.id      # module.vpc2.vpc_id
-      subnet_ids = data.aws_subnets.vpc1.ids # module.vpc2.private_subnets
+      vpc_id     = module.vpc2.vpc_id
+      subnet_ids = module.vpc2.private_subnets
 
       tgw_routes = [
         {
@@ -87,22 +87,22 @@ module "tgw_peer" {
   description     = "My TGW shared with several other AWS accounts"
   amazon_side_asn = 64532
 
-  create_tgw                            = false
-  share_tgw                             = true
-  ram_resource_share_arn                = module.tgw.ram_resource_share_id
-  enable_auto_accept_shared_attachments = true # When "true" there is no need for RAM resources if using multiple AWS accounts
+  create_tgw             = false
+  share_tgw              = true
+  ram_resource_share_arn = module.tgw.ram_resource_share_id
+  # When "true" there is no need for RAM resources if using multiple AWS accounts
+  enable_auto_accept_shared_attachments = true
 
   vpc_attachments = {
     vpc1 = {
       tgw_id       = module.tgw.ec2_transit_gateway_id
-      vpc_id       = data.aws_vpc.vpc1.id      # module.vpc1.vpc_id
-      subnet_ids   = data.aws_subnets.vpc1.ids # module.vpc1.private_subnets
+      vpc_id       = module.vpc1.vpc_id
+      subnet_ids   = module.vpc1.private_subnets
       dns_support  = true
       ipv6_support = true
 
       transit_gateway_default_route_table_association = false
       transit_gateway_default_route_table_propagation = false
-      # transit_gateway_route_table_id                  = "tgw-rtb-073a181ee589b360f"
 
       tgw_routes = [
         {
@@ -143,14 +143,22 @@ module "vpc1" {
   tags = local.tags
 }
 
-# See Notes in README.md for explanation regarding using data-sources and computed values
-data "aws_vpc" "vpc1" {
-  id = module.vpc1.vpc_id
-}
 
-data "aws_subnets" "vpc1" {
-  filter {
-    name   = "vpc-id"
-    values = [module.vpc1.vpc_id]
+module "vpc2" {
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "~> 3.0"
+
+  providers = {
+    aws = aws.peer
   }
+
+  name = "${local.name}-vpc2"
+  cidr = "10.20.0.0/16"
+
+  azs             = ["${local.region}a", "${local.region}b", "${local.region}c"]
+  private_subnets = ["10.20.1.0/24", "10.20.2.0/24", "10.20.3.0/24"]
+
+  enable_ipv6 = false
+
+  tags = local.tags
 }
