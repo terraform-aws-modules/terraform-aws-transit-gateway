@@ -46,8 +46,10 @@ Note that this example may create resources which cost money. Run `terraform des
 
 | Name | Type |
 |------|------|
-| [aws_subnet_ids.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet_ids) | data source |
-| [aws_vpc.default](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpc) | data source |
+| [aws_subnet_ids.vpc1](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet_ids) | data source |
+| [aws_subnet_ids.vpc2](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet_ids) | data source |
+| [aws_vpc.vpc1](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpc) | data source |
+| [aws_vpc.vpc2](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpc) | data source |
 
 ## Inputs
 
