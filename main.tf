@@ -1,7 +1,7 @@
 locals {
   # List of maps with key and route values
   vpc_attachments_with_routes = chunklist(flatten([
-    for k, v in var.vpc_attachments : setproduct([{ key = k }], v.tgw_routes) if can(v.tgw_routes)
+    for k, v in var.vpc_attachments : setproduct([{ key = k }], v.tgw_routes) if var.create_tgw && can(v.tgw_routes)
   ]), 2)
 
   tgw_default_route_table_tags_merged = merge(
@@ -110,7 +110,7 @@ resource "aws_route" "this" {
 
 resource "aws_ec2_transit_gateway_route_table_association" "this" {
   for_each = {
-    for k, v in var.vpc_attachments : k => v if try(v.transit_gateway_default_route_table_association, true) != true
+    for k, v in var.vpc_attachments : k => v if var.create_tgw && try(v.transit_gateway_default_route_table_association, true) != true
   }
 
   # Create association if it was not set already by aws_ec2_transit_gateway_vpc_attachment resource
@@ -120,7 +120,7 @@ resource "aws_ec2_transit_gateway_route_table_association" "this" {
 
 resource "aws_ec2_transit_gateway_route_table_propagation" "this" {
   for_each = {
-    for k, v in var.vpc_attachments : k => v if try(v.transit_gateway_default_route_table_propagation, true) != true
+    for k, v in var.vpc_attachments : k => v if var.create_tgw && try(v.transit_gateway_default_route_table_propagation, true) != true
   }
 
   # Create association if it was not set already by aws_ec2_transit_gateway_vpc_attachment resource

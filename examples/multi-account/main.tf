@@ -87,8 +87,8 @@ module "tgw_peer" {
   description     = "My TGW shared with several other AWS accounts"
   amazon_side_asn = 64532
 
-  share_tgw                             = true
   create_tgw                            = false
+  share_tgw                             = true
   ram_resource_share_arn                = module.tgw.ram_resource_share_id
   enable_auto_accept_shared_attachments = true # When "true" there is no need for RAM resources if using multiple AWS accounts
 
