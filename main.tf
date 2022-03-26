@@ -13,10 +13,8 @@ locals {
   ]), 2)
 
   tgw_default_route_table_tags_merged = merge(
-    {
-      "Name" = format("%s", var.name)
-    },
     var.tags,
+    { Name = var.name },
     var.tgw_default_route_table_tags,
   )
 
@@ -42,10 +40,8 @@ resource "aws_ec2_transit_gateway" "this" {
   dns_support                     = var.enable_dns_support ? "enable" : "disable"
 
   tags = merge(
-    {
-      "Name" = format("%s", var.name)
-    },
     var.tags,
+    { Name = var.name },
     var.tgw_tags,
   )
 }
@@ -60,16 +56,15 @@ resource "aws_ec2_tag" "this" {
 #########################
 # Route table and routes
 #########################
+
 resource "aws_ec2_transit_gateway_route_table" "this" {
   count = var.create_tgw ? 1 : 0
 
   transit_gateway_id = aws_ec2_transit_gateway.this[0].id
 
   tags = merge(
-    {
-      "Name" = format("%s", var.name)
-    },
     var.tags,
+    { Name = var.name },
     var.tgw_route_table_tags,
   )
 }
@@ -96,6 +91,7 @@ resource "aws_route" "this" {
 ###########################################################
 # VPC Attachments, route table association and propagation
 ###########################################################
+
 resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
   for_each = var.vpc_attachments
 
@@ -110,10 +106,8 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
   transit_gateway_default_route_table_propagation = lookup(each.value, "transit_gateway_default_route_table_propagation", true)
 
   tags = merge(
-    {
-      Name = format("%s-%s", var.name, each.key)
-    },
     var.tags,
+    { Name = var.name },
     var.tgw_vpc_attachment_tags,
   )
 }
@@ -137,6 +131,7 @@ resource "aws_ec2_transit_gateway_route_table_propagation" "this" {
 ##########################
 # Resource Access Manager
 ##########################
+
 resource "aws_ram_resource_share" "this" {
   count = var.create_tgw && var.share_tgw ? 1 : 0
 
@@ -144,10 +139,8 @@ resource "aws_ram_resource_share" "this" {
   allow_external_principals = var.ram_allow_external_principals
 
   tags = merge(
-    {
-      "Name" = format("%s", coalesce(var.ram_name, var.name))
-    },
     var.tags,
+    { Name = coalesce(var.ram_name, var.name) },
     var.ram_tags,
   )
 }
