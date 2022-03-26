@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.7.0](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.6.0...v2.7.0) (2022-03-26)
+
+
+### Features
+
+* Add support for transit gateway CIDR blocks ([#69](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/69)) ([131ed50](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/commit/131ed5006713aec86a20147796ce6489f6daadc6))
+
 ## [2.6.0](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.5.1...v2.6.0) (2022-03-26)
 
 
