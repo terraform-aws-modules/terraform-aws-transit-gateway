@@ -34,6 +34,13 @@ resource "aws_ec2_transit_gateway" "this" {
   auto_accept_shared_attachments  = var.enable_auto_accept_shared_attachments ? "enable" : "disable"
   vpn_ecmp_support                = var.enable_vpn_ecmp_support ? "enable" : "disable"
   dns_support                     = var.enable_dns_support ? "enable" : "disable"
+  transit_gateway_cidr_blocks     = var.transit_gateway_cidr_blocks
+
+  timeouts {
+    create = try(var.timeouts.create, null)
+    update = try(var.timeouts.update, null)
+    delete = try(var.timeouts.delete, null)
+  }
 
   tags = merge(
     var.tags,
