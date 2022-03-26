@@ -2,12 +2,6 @@
 
 Configuration in this directory creates AWS Transit Gateway, attach VPC to it and share it with other AWS principals using [Resource Access Manager (RAM)](https://aws.amazon.com/ram/).
 
-## Notes
-
-There is a famous limitation in Terraform which prevents us from using computed values in `count`. For this reason this example is using data-sources to discover already created default VPC and subnets.
-
-In real-world scenario you will have to split creation of VPC (using [terraform-aws-vpc modules](https://github.com/terraform-aws-modules/terraform-aws-vpc)) and creation of TGW resources using this module. 
-
 ## Usage
 
 To run this example you need to execute:
@@ -25,14 +19,12 @@ Note that this example may create resources which cost money. Run `terraform des
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.12.26 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 2.24 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.1 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 3.15 |
 
 ## Providers
 
-| Name | Version |
-|------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 2.24 |
+No providers.
 
 ## Modules
 
@@ -44,10 +36,7 @@ Note that this example may create resources which cost money. Run `terraform des
 
 ## Resources
 
-| Name | Type |
-|------|------|
-| [aws_subnet_ids.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet_ids) | data source |
-| [aws_vpc.default](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/vpc) | data source |
+No resources.
 
 ## Inputs
 
