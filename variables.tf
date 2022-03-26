@@ -29,7 +29,7 @@ variable "description" {
 variable "amazon_side_asn" {
   description = "The Autonomous System Number (ASN) for the Amazon side of the gateway. By default the TGW is created with the current default Amazon ASN."
   type        = string
-  default     = "64512"
+  default     = null
 }
 
 variable "enable_default_route_table_association" {
@@ -60,6 +60,18 @@ variable "enable_dns_support" {
   description = "Should be true to enable DNS support in the TGW"
   type        = bool
   default     = true
+}
+
+variable "transit_gateway_cidr_blocks" {
+  description = "One or more IPv4 or IPv6 CIDR blocks for the transit gateway. Must be a size /24 CIDR block or larger for IPv4, or a size /64 CIDR block or larger for IPv6"
+  type        = list(string)
+  default     = []
+}
+
+variable "timeouts" {
+  description = "Create, update, and delete timeout configurations for the transit gateway"
+  type        = map(string)
+  default     = {}
 }
 
 variable "tgw_tags" {

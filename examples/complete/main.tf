@@ -24,6 +24,8 @@ module "tgw" {
   description     = "My TGW shared with several other AWS accounts"
   amazon_side_asn = 64532
 
+  transit_gateway_cidr_blocks = ["10.99.0.0/24"]
+
   # When "true" there is no need for RAM resources if using multiple AWS accounts
   enable_auto_accept_shared_attachments = true
 
