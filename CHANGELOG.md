@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.6.0](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.5.1...v2.6.0) (2022-03-26)
+
+
+### Features
+
+* Update Terraform minimum supported version to `v0.13.1` ([#68](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/68)) ([4e8f9c9](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/commit/4e8f9c95d429d8f623db563388fe759707e38379))
+
 ### [2.5.1](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.5.0...v2.5.1) (2022-01-10)
 
 
