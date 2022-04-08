@@ -117,22 +117,22 @@ resource "aws_route" "this" {
 
 resource "aws_ec2_transit_gateway_route_table_association" "this" {
   for_each = {
-    for k, v in var.vpc_attachments : k => v if try(v.transit_gateway_default_route_table_association, true) != true
+    for k, v in var.vpc_attachments : k => v if try(v.transit_gateway_default_route_table_association, true) != true && try(v.associate_tgw_rtb, true)
   }
 
   # Create association if it was not set already by aws_ec2_transit_gateway_vpc_attachment resource
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.this[each.key].id
-  transit_gateway_route_table_id = try(each.value.transit_gateway_route_table_id, var.transit_gateway_route_table_id, aws_ec2_transit_gateway_route_table.this[0].id)
+  transit_gateway_route_table_id = var.create_tgw ? try(each.value.transit_gateway_association_route_table_id, aws_ec2_transit_gateway_route_table.this[0].id) : try(each.value.transit_gateway_association_route_table_id, each.value.transit_gateway_route_table_id, var.transit_gateway_route_table_id)
 }
 
 resource "aws_ec2_transit_gateway_route_table_propagation" "this" {
   for_each = {
-    for k, v in var.vpc_attachments : k => v if try(v.transit_gateway_default_route_table_propagation, true) != true
+    for k, v in var.vpc_attachments : k => v if try(v.transit_gateway_default_route_table_propagation, true) != true && try(v.propagaate_tgw_rtb, true)
   }
 
   # Create association if it was not set already by aws_ec2_transit_gateway_vpc_attachment resource
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.this[each.key].id
-  transit_gateway_route_table_id = try(each.value.transit_gateway_route_table_id, var.transit_gateway_route_table_id, aws_ec2_transit_gateway_route_table.this[0].id)
+  transit_gateway_route_table_id = var.create_tgw ? try(each.value.transit_gateway_propagation_route_table_id, aws_ec2_transit_gateway_route_table.this[0].id) : try(each.value.transit_gateway_propagation_route_table_id, each.value.transit_gateway_route_table_id, var.transit_gateway_route_table_id)
 }
 
 ################################################################################
