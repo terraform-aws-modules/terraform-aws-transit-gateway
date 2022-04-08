@@ -127,7 +127,7 @@ resource "aws_ec2_transit_gateway_route_table_association" "this" {
 
 resource "aws_ec2_transit_gateway_route_table_propagation" "this" {
   for_each = {
-    for k, v in var.vpc_attachments : k => v if try(v.transit_gateway_default_route_table_propagation, true) != true && try(v.propagaate_tgw_rtb, true)
+    for k, v in var.vpc_attachments : k => v if try(v.transit_gateway_default_route_table_propagation, true) != true && try(v.propagate_tgw_rtb, true)
   }
 
   # Create association if it was not set already by aws_ec2_transit_gateway_vpc_attachment resource
