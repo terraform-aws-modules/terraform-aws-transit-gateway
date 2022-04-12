@@ -15,7 +15,7 @@ locals {
       for rtb_id in try(v.vpc_route_table_ids, []) : {
         rtb_id = rtb_id
         cidr   = v.tgw_destination_cidr
-        tgw_id = v.tgw_id
+        tgw_id = try(v.tgw_id, null)
       }
     ]
   ])
