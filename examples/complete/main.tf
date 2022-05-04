@@ -29,6 +29,9 @@ module "tgw" {
   # When "true" there is no need for RAM resources if using multiple AWS accounts
   enable_auto_accept_shared_attachments = true
 
+  # When "true", allows service discovery through IGMP
+  enable_mutlicast_support = false
+
   vpc_attachments = {
     vpc1 = {
       vpc_id       = module.vpc1.vpc_id
