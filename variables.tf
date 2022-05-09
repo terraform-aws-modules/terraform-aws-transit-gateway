@@ -56,6 +56,12 @@ variable "enable_vpn_ecmp_support" {
   default     = true
 }
 
+variable "enable_mutlicast_support" {
+  description = "Whether multicast support is enabled"
+  type        = bool
+  default     = false
+}
+
 variable "enable_dns_support" {
   description = "Should be true to enable DNS support in the TGW"
   type        = bool
