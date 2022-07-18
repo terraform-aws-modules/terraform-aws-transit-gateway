@@ -16,6 +16,7 @@ module "tgw" {
 
   vpc_attachments = {
     vpc = {
+      name         = "my-vpc"
       vpc_id       = module.vpc.vpc_id
       subnet_ids   = module.vpc.private_subnets
       dns_support  = true
