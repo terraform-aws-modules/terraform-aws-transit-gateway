@@ -188,8 +188,10 @@ resource "aws_ram_resource_share_accepter" "this" {
 resource "aws_flow_log" "this" {
   count = local.enable_flow_log ? 1 : 0
 
+  log_destination      = local.flow_log_destination_arn
   log_destination_type = var.flow_log_destination_type
   log_format           = var.flow_log_log_format
+  iam_role_arn         = local.flow_log_iam_role_arn
   traffic_type         = var.flow_log_traffic_type
   transit_gateway_id   = aws_ec2_transit_gateway.this[0].id
 
