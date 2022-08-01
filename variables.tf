@@ -185,6 +185,12 @@ variable "create_flow_log_cloudwatch_log_group" {
   default     = false
 }
 
+variable "flow_log_cloudwatch_iam_role_arn" {
+  description = "The ARN for the IAM role that's used to post flow logs to a CloudWatch Logs log group. When flow_log_destination_arn is set to ARN of Cloudwatch Logs, this argument needs to be provided."
+  type        = string
+  default     = ""
+}
+
 variable "flow_log_cloudwatch_log_group_kms_key_id" {
   description = "(Optional) The ARN of the KMS Key to use when encrypting log data for Transit Gateway flow logs."
   type        = string
