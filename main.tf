@@ -1,4 +1,13 @@
 locals {
+  # Only create flow log if user selected to create a Transit Gateway as well.
+  enable_flow_log = var.create_tgw && var.enable_flow_log
+
+  create_flow_log_cloudwatch_iam_role  = local.enable_flow_log && var.flow_log_destination_type != "s3" && var.create_flow_log_cloudwatch_iam_role
+  create_flow_log_cloudwatch_log_group = local.enable_flow_log && var.flow_log_destination_type != "s3" && var.create_flow_log_cloudwatch_log_group
+
+  flow_log_destination_arn = local.create_flow_log_cloudwatch_log_group ? aws_cloudwatch_log_group.flow_log[0].arn : var.flow_log_destination_arn
+  flow_log_iam_role_arn    = var.flow_log_destination_type != "s3" && local.create_flow_log_cloudwatch_iam_role ? aws_iam_role.vpc_flow_log_cloudwatch[0].arn : var.flow_log_cloudwatch_iam_role_arn
+
   # List of maps with key and route values
   vpc_attachments_with_routes = chunklist(flatten([
     for k, v in var.vpc_attachments : setproduct([{ key = k }], v.tgw_routes) if var.create_tgw && can(v.tgw_routes)
@@ -171,4 +180,115 @@ resource "aws_ram_resource_share_accepter" "this" {
   count = !var.create_tgw && var.share_tgw ? 1 : 0
 
   share_arn = var.ram_resource_share_arn
+}
+
+################################################################################
+# Flow Log
+################################################################################
+resource "aws_flow_log" "this" {
+  count = local.enable_flow_log ? 1 : 0
+
+  log_destination_type = var.flow_log_destination_type
+  log_format           = var.flow_log_log_format
+  traffic_type         = var.flow_log_traffic_type
+  transit_gateway_id   = aws_ec2_transit_gateway.this[0].id
+
+  dynamic "destination_options" {
+    for_each = var.flow_log_destination_type == "s3" ? [true] : []
+
+    content {
+      file_format                = var.flow_log_file_format
+      hive_compatible_partitions = var.flow_log_hive_compatible_partitions
+      per_hour_partition         = var.flow_log_per_hour_partition
+    }
+  }
+
+  tags = merge(
+    var.tags,
+    var.flow_log_tags
+  )
+}
+
+################################################################################
+# Flow Log CloudWatch
+################################################################################
+resource "aws_cloudwatch_log_group" "tgw_flow_log" {
+  count = local.create_flow_log_cloudwatch_log_group ? 1 : 0
+
+  name              = "${var.flow_log_cloudwatch_log_group_name_prefix}${aws_ec2_transit_gateway.this[0].id}"
+  retention_in_days = var.flow_log_cloudwatch_log_group_retention_in_days
+  kms_key_id        = var.flow_log_cloudwatch_log_group_kms_key_id
+
+  tags = merge(
+    var.tags,
+    var.flow_log_tags
+  )
+}
+
+resource "aws_iam_role" "tgw_flow_log_cloudwatch" {
+  count = local.create_flow_log_cloudwatch_iam_role ? 1 : 0
+
+  name_prefix          = "tgw-flow-log-role-"
+  assume_role_policy   = data.aws_iam_policy_document.tgw_flow_log_cloudwatch_assume_role[0].json
+  permissions_boundary = var.flow_log_cloudwatch_iam_role_permissions_boundary
+
+  tags = merge(
+    var.tags,
+    var.flow_log_tags
+  )
+}
+
+data "aws_iam_policy_document" "tgw_flow_log_cloudwatch_assume_role" {
+  count = local.create_flow_log_cloudwatch_iam_role ? 1 : 0
+
+  statement {
+    sid = "AWSVPCFlowLogsAssumeRole"
+
+    principals {
+      type        = "Service"
+      identifiers = ["vpc-flow-logs.amazonaws.com"]
+    }
+
+    effect = "Allow"
+
+    actions = ["sts:AssumeRole"]
+  }
+}
+
+resource "aws_iam_policy" "tgw_flow_log_cloudwatch" {
+  count = local.create_flow_log_cloudwatch_iam_role ? 1 : 0
+
+  name_prefix = "tgw-flow-log-to-cloudwatch-"
+  policy      = data.aws_iam_policy_document.tgw_flow_log_cloudwatch[0].json
+
+  tags = merge(
+    var.tags,
+    var.flow_log_tags
+  )
+}
+
+data "aws_iam_policy_document" "tgw_flow_log_cloudwatch" {
+  count = local.create_flow_log_cloudwatch_iam_role ? 1 : 0
+
+  statement {
+    sid = "AWSVPCFlowLogsPushToCloudWatch"
+
+    effect = "Allow"
+
+    actions = [
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+      "logs:DescribeLogGroups",
+      "logs:DescribeLogStreams",
+    ]
+
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "tgw_flow_log_cloudwatch" {
+  count = local.create_flow_log_cloudwatch_iam_role ? 1 : 0
+
+  role       = aws_iam_role.tgw_flow_log_cloudwatch[0].name
+  policy_arn = aws_iam_policy.tgw_flow_log_cloudwatch[0].arn
 }

@@ -29,6 +29,11 @@ module "tgw" {
   # When "true" there is no need for RAM resources if using multiple AWS accounts
   enable_auto_accept_shared_attachments = true
 
+  # Transit Gateway Flow Logs (Cloudwatch log group and IAM role will be created)
+  enable_flow_log                      = true
+  create_flow_log_cloudwatch_log_group = true
+  create_flow_log_cloudwatch_iam_role  = true
+
   # When "true", allows service discovery through IGMP
   enable_mutlicast_support = false
 
