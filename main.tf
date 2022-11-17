@@ -75,6 +75,15 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
   transit_gateway_default_route_table_association = try(each.value.transit_gateway_default_route_table_association, true)
   transit_gateway_default_route_table_propagation = try(each.value.transit_gateway_default_route_table_propagation, true)
 
+  # Workaround mentioned in https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/90
+  # Closes https://github.com/hashicorp/terraform-provider-aws/issues/8383#issuecomment-680847938
+  lifecycle {
+    ignore_changes = [
+      transit_gateway_default_route_table_association,
+      transit_gateway_default_route_table_propagation
+    ]
+  }
+  
   tags = merge(
     var.tags,
     { Name = var.name },
