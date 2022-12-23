@@ -161,9 +161,9 @@ resource "aws_ram_resource_association" "this" {
 }
 
 resource "aws_ram_principal_association" "this" {
-  count = var.create_tgw && var.share_tgw ? length(var.ram_principals) : 0
+  for_each = var.create_tgw && var.share_tgw ? toset(var.ram_principals) : []
 
-  principal          = var.ram_principals[count.index]
+  principal          = each.value
   resource_share_arn = aws_ram_resource_share.this[0].arn
 }
 
