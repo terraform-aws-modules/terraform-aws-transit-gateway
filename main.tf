@@ -172,3 +172,38 @@ resource "aws_ram_resource_share_accepter" "this" {
 
   share_arn = var.ram_resource_share_arn
 }
+
+################################################################################
+# Peering Attachment
+################################################################################
+
+resource "aws_ec2_transit_gateway_peering_attachment" "this" {
+  for_each = var.peering_attachments
+
+  transit_gateway_id      = var.create_tgw ? aws_ec2_transit_gateway.this[0].id : each.value.tgw_id
+  peer_account_id         = each.value.peer_account_id
+  peer_region             = each.value.peer_region
+  peer_transit_gateway_id = each.value.peer_transit_gateway_id
+
+  tags = merge(
+    var.tags,
+    { Name = var.name },
+    var.tgw_peering_attachment_tags,
+  )
+}
+
+################################################################################
+# Peering Attachment Accepter
+################################################################################
+
+resource "aws_ec2_transit_gateway_peering_attachment_accepter" "this" {
+  for_each = var.peering_attachment_accepters
+
+  transit_gateway_attachment_id = each.value.transit_gateway_peering_attachment_id
+
+  tags = merge(
+    var.tags,
+    { Name = var.name },
+    var.tgw_peering_attachment_accepter_tags,
+  )
+}

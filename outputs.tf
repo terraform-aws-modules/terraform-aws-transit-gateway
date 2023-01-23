@@ -98,3 +98,31 @@ output "ram_principal_association_id" {
   description = "The Amazon Resource Name (ARN) of the Resource Share and the principal, separated by a comma"
   value       = try(aws_ram_principal_association.this[0].id, "")
 }
+
+################################################################################
+# Peering Attachment
+################################################################################
+
+output "ec2_transit_gateway_peering_attachment_ids" {
+  description = "List of EC2 Transit Gateway Peering Attachment identifiers"
+  value       = [for k, v in aws_ec2_transit_gateway_peering_attachment.this : v.id]
+}
+
+output "ec2_transit_gateway_peering_attachment" {
+  description = "Map of EC2 Transit Gateway Peering Attachment attributes"
+  value       = aws_ec2_transit_gateway_peering_attachment.this
+}
+
+################################################################################
+# Peering Attachment Accepter
+################################################################################
+
+output "ec2_transit_gateway_peering_attachment_accepter_ids" {
+  description = "List of EC2 Transit Gateway Peering Attachment Accepter identifiers"
+  value       = [for k, v in aws_ec2_transit_gateway_peering_attachment_accepter.this : v.id]
+}
+
+output "ec2_transit_gateway_peering_accepter_attachment" {
+  description = "Map of EC2 Transit Gateway Peering Attachment Accepter attributes"
+  value       = aws_ec2_transit_gateway_peering_attachment_accepter.this
+}
