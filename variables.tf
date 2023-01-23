@@ -174,24 +174,6 @@ variable "peering_attachments" {
   default     = {}
 }
 
-variable "peer_account_id" {
-  description = "Identifier of the AWS account that owns the EC2 TGW peering."
-  type        = map(string)
-  default     = {}
-}
-
-variable "peer_region" {
-  description = "Region of EC2 Transit Gateway to peer with."
-  type        = map(string)
-  default     = {}
-}
-
-variable "peer_transit_gateway_id" {
-  description = "Identifier of EC2 Transit Gateway to peer with."
-  type        = map(string)
-  default     = {}
-}
-
 variable "tgw_peering_attachment_tags" {
   description = "Additional tags for Peering attachments."
   type        = map(string)
@@ -206,12 +188,6 @@ variable "peering_attachment_accepters" {
   description = "Maps of maps of Peering Attachment Accepters details. Type 'any' to disable type validation by Terraform."
   type        = any
   default     = {}
-}
-
-variable "transit_gateway_peering_attachment_id" {
-  description = "The ID of the EC2 Transit Gateway Peering Attachment to manage."
-  type        = string
-  default     = ""
 }
 
 variable "tgw_peering_attachment_accepter_tags" {

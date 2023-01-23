@@ -114,9 +114,6 @@ No modules.
 | <a name="input_enable_mutlicast_support"></a> [enable\_mutlicast\_support](#input\_enable\_mutlicast\_support) | Whether multicast support is enabled | `bool` | `false` | no |
 | <a name="input_enable_vpn_ecmp_support"></a> [enable\_vpn\_ecmp\_support](#input\_enable\_vpn\_ecmp\_support) | Whether VPN Equal Cost Multipath Protocol support is enabled | `bool` | `true` | no |
 | <a name="input_name"></a> [name](#input\_name) | Name to be used on all the resources as identifier | `string` | `""` | no |
-| <a name="input_peer_account_id"></a> [peer\_account\_id](#input\_peer\_account\_id) | Identifier of the AWS account that owns the EC2 TGW peering. | `map(string)` | `{}` | no |
-| <a name="input_peer_region"></a> [peer\_region](#input\_peer\_region) | Region of EC2 Transit Gateway to peer with. | `map(string)` | `{}` | no |
-| <a name="input_peer_transit_gateway_id"></a> [peer\_transit\_gateway\_id](#input\_peer\_transit\_gateway\_id) | Identifier of EC2 Transit Gateway to peer with. | `map(string)` | `{}` | no |
 | <a name="input_peering_attachment_accepters"></a> [peering\_attachment\_accepters](#input\_peering\_attachment\_accepters) | Maps of maps of Peering Attachment Accepters details. Type 'any' to disable type validation by Terraform. | `any` | `{}` | no |
 | <a name="input_peering_attachments"></a> [peering\_attachments](#input\_peering\_attachments) | Maps of maps of Peering Attachments details. Type 'any' to disable type validation by Terraform. | `any` | `{}` | no |
 | <a name="input_ram_allow_external_principals"></a> [ram\_allow\_external\_principals](#input\_ram\_allow\_external\_principals) | Indicates whether principals outside your organization can be associated with a resource share. | `bool` | `false` | no |
@@ -134,7 +131,6 @@ No modules.
 | <a name="input_tgw_vpc_attachment_tags"></a> [tgw\_vpc\_attachment\_tags](#input\_tgw\_vpc\_attachment\_tags) | Additional tags for VPC attachments | `map(string)` | `{}` | no |
 | <a name="input_timeouts"></a> [timeouts](#input\_timeouts) | Create, update, and delete timeout configurations for the transit gateway | `map(string)` | `{}` | no |
 | <a name="input_transit_gateway_cidr_blocks"></a> [transit\_gateway\_cidr\_blocks](#input\_transit\_gateway\_cidr\_blocks) | One or more IPv4 or IPv6 CIDR blocks for the transit gateway. Must be a size /24 CIDR block or larger for IPv4, or a size /64 CIDR block or larger for IPv6 | `list(string)` | `[]` | no |
-| <a name="input_transit_gateway_peering_attachment_id"></a> [transit\_gateway\_peering\_attachment\_id](#input\_transit\_gateway\_peering\_attachment\_id) | The ID of the EC2 Transit Gateway Peering Attachment to manage. | `string` | `""` | no |
 | <a name="input_transit_gateway_route_table_id"></a> [transit\_gateway\_route\_table\_id](#input\_transit\_gateway\_route\_table\_id) | Identifier of EC2 Transit Gateway Route Table to use with the Target Gateway when reusing it between multiple TGWs | `string` | `null` | no |
 | <a name="input_vpc_attachments"></a> [vpc\_attachments](#input\_vpc\_attachments) | Maps of maps of VPC details to attach to TGW. Type 'any' to disable type validation by Terraform. | `any` | `{}` | no |
 
