@@ -58,8 +58,7 @@ module "tgw" {
 
   peering_attachments = {
     peer_frankfurt = {
-      #peer_account_id         = "307990089504"
-      peer_account_id         = "270382647185"
+      peer_account_id         = "307990089504"
       peer_region             = local.region_peer
       peer_transit_gateway_id = module.tgw_peer.ec2_transit_gateway_id
     }
