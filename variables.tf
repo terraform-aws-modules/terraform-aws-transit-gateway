@@ -163,3 +163,35 @@ variable "ram_tags" {
   type        = map(string)
   default     = {}
 }
+
+################################################################################
+# Peering Attachment
+################################################################################
+
+variable "peering_attachments" {
+  description = "Maps of maps of Peering Attachments details. Type 'any' to disable type validation by Terraform."
+  type        = any
+  default     = {}
+}
+
+variable "tgw_peering_attachment_tags" {
+  description = "Additional tags for Peering attachments."
+  type        = map(string)
+  default     = {}
+}
+
+################################################################################
+# Peering Attachment Accepter
+################################################################################
+
+variable "peering_attachment_accepters" {
+  description = "Maps of maps of Peering Attachment Accepters details. Type 'any' to disable type validation by Terraform."
+  type        = any
+  default     = {}
+}
+
+variable "tgw_peering_attachment_accepter_tags" {
+  description = "Additional tags for Peering Attachment Accepters."
+  type        = map(string)
+  default     = {}
+}
