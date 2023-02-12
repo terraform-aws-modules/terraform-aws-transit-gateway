@@ -1,4 +1,7 @@
 locals {
+  # Store the list of principals and convert to set
+  ram_principals = var.create_tgw && var.share_tgw ? toset(var.ram_principals) : []
+
   # List of maps with key and route values
   vpc_attachments_with_routes = chunklist(flatten([
     for k, v in var.vpc_attachments : setproduct([{ key = k }], v.tgw_routes) if var.create_tgw && can(v.tgw_routes)
@@ -161,7 +164,7 @@ resource "aws_ram_resource_association" "this" {
 }
 
 resource "aws_ram_principal_association" "this" {
-  for_each = var.create_tgw && var.share_tgw ? toset(var.ram_principals) : []
+  for_each = local.ram_principals
 
   principal          = each.value
   resource_share_arn = aws_ram_resource_share.this[0].arn
