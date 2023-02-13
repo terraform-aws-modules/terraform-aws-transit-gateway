@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+### [2.8.2](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.8.1...v2.8.2) (2023-01-24)
+
+
+### Bug Fixes
+
+* Use a version for  to avoid GitHub API rate limiting on CI workflows ([#96](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/96)) ([de6e0cf](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/commit/de6e0cf41b7ee1b84e506f77415257f01f51065d))
+
 ### [2.8.1](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.8.0...v2.8.1) (2022-10-27)
 
 
