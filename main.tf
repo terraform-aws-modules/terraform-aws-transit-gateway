@@ -111,9 +111,10 @@ resource "aws_ec2_transit_gateway_route" "this" {
 resource "aws_route" "this" {
   for_each = { for x in local.vpc_route_table_destination_cidr : x.rtb_id => x.cidr }
 
-  route_table_id         = each.key
-  destination_cidr_block = each.value
-  transit_gateway_id     = aws_ec2_transit_gateway.this[0].id
+  route_table_id              = each.key
+  destination_cidr_block      = try(each.value.ipv6_support, false) ? null : each.value
+  destination_ipv6_cidr_block = try(each.value.ipv6_support, false) ? each.value : null
+  transit_gateway_id          = aws_ec2_transit_gateway.this[0].id
 }
 
 resource "aws_ec2_transit_gateway_route_table_association" "this" {
