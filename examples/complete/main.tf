@@ -65,6 +65,9 @@ module "tgw" {
           destination_cidr_block = "10.10.10.10/32"
         }
       ]
+      tags = {
+        Name = "${local.name}-vpc2"
+      }
     },
   }
 
