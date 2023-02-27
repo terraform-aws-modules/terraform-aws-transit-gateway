@@ -79,7 +79,7 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
     var.tags,
     { Name = var.name },
     var.tgw_vpc_attachment_tags,
-    each.value.tags,
+    try(each.value.tags, {}),
   )
 }
 
