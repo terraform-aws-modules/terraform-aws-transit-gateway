@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.9.0](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.8.2...v2.9.0) (2023-02-27)
+
+
+### Features
+
+* Added tags per VPC attachment ([#103](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/103)) ([e4d6df2](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/commit/e4d6df2aa4bab0d840bbab71276cca3bc69f9113))
+
 ### [2.8.2](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.8.1...v2.8.2) (2023-01-24)
 
 
