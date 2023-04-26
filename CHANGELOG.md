@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.10.0](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.9.0...v2.10.0) (2023-04-26)
+
+
+### Features
+
+* Fixed typo in mutlicast to multicast, also in the variable name ([#108](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/108)) ([baaa7f4](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/commit/baaa7f44c458d29b95d372e3faae7f89a148da0c))
+
 ## [2.9.0](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.8.2...v2.9.0) (2023-02-27)
 
 
