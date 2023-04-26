@@ -30,7 +30,7 @@ module "tgw" {
   enable_auto_accept_shared_attachments = true
 
   # When "true", allows service discovery through IGMP
-  enable_mutlicast_support = false
+  enable_multicast_support = false
 
   vpc_attachments = {
     vpc1 = {

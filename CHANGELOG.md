@@ -28,7 +28,7 @@ All notable changes to this project will be documented in this file.
 
 ### Features
 
-* Added TGW mutlicast support ([#73](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/73)) ([a4d569b](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/commit/a4d569b7f03443921d9dff7ce54f8acc06aed7fa))
+* Added TGW multicast support ([#73](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/73)) ([a4d569b](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/commit/a4d569b7f03443921d9dff7ce54f8acc06aed7fa))
 
 ## [2.7.0](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.6.0...v2.7.0) (2022-03-26)
 
