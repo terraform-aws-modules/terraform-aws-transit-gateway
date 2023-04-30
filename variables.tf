@@ -56,7 +56,7 @@ variable "enable_vpn_ecmp_support" {
   default     = true
 }
 
-variable "enable_mutlicast_support" {
+variable "enable_multicast_support" {
   description = "Whether multicast support is enabled"
   type        = bool
   default     = false
