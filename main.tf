@@ -36,12 +36,31 @@ locals {
     var.tgw_default_route_table_tags,
   )
 
-  vpc_route_table_destination_cidr = flatten([
-    for k, v in var.vpc_attachments : [
-      for rtb_id in try(v.vpc_route_table_ids, []) : {
-        rtb_id = rtb_id
-        cidr   = v.tgw_destination_cidr
-      }
+  tgw_route_table_propagations = flatten([
+    for attachment_key, attachment_value in var.attachments : [
+      for tgw_rtb_name, tgw_rtb_value in try(attachment_value.tgw_route_table_propagations, {}) : {
+        attachment_id      = try(data.aws_ec2_transit_gateway_vpc_attachment.this[attachment_key].id, null)
+        attachment_key     = attachment_key
+        enable_propagation = try(tgw_rtb_value.enable, false)
+        rtb_name           = tgw_rtb_name
+      } if var.create_tgw &&
+      try(attachment_value.create_tgw_routes, false) &&
+      try(attachment_value.transit_gateway_default_route_table_propagation, true) == false &&
+      attachment_value.attachment_type != "peering"
+    ]
+  ])
+
+  vpc_route_table_destinations = flatten([
+    for k, v in var.attachments : [
+      for rtb_id in try(v.vpc_route_table_ids, []) : [
+        for cidr in try(v.vpc_route_table_destination_cidrs, []) : {
+          cidr              = cidr
+          create_vpc_routes = try(v.create_vpc_routes, false)
+          ipv6_support      = try(v.ipv6_support, false)
+          rtb_id            = rtb_id
+          tgw_id            = !var.create_tgw ? try(v.tgw_id, null) : null
+        } if try(v.create_vpc_routes, false)
+      ]
     ]
   ])
 }
