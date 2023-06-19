@@ -108,7 +108,7 @@ resource "aws_ec2_tag" "this" {
 ################################################################################
 
 resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
-  for_each = var.vpc_attachments
+  for_each = { for k, v in var.attachments : k => v if v.attachment_type == "vpc" && try(v.create_vpc_attachment, false) }
 
   transit_gateway_id = var.create_tgw ? aws_ec2_transit_gateway.this[0].id : each.value.tgw_id
   vpc_id             = each.value.vpc_id
