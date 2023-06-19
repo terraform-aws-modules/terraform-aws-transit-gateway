@@ -6,10 +6,15 @@ locals {
   name   = "ex-tgw-${replace(basename(path.cwd), "_", "-")}"
   region = "eu-west-1"
 
+  account_id = "012345678901"
+
+  flow_logs_cloudwatch_dest_arn     = "arn:aws:logs:${local.region}:${local.account_id}:log-group:/aws/tgw/"
+  flow_logs_cloudwatch_iam_role_arn = "arn:aws:iam::${local.account_id}:role/tgw-flow-logs-to-cloudwatch"
+  flow_logs_s3_dest_arn             = "arn:aws:s3:::tgw-flow-logs-${local.account_id}-${local.region}"
+
   tags = {
     Example    = local.name
-    GithubRepo = "terraform-aws-eks"
-    GithubOrg  = "terraform-aws-transit-gateway"
+    GithubRepo = "terraform-aws-transit-gateway"
   }
 }
 
@@ -21,58 +26,172 @@ module "tgw" {
   source = "../../"
 
   name            = local.name
-  description     = "My TGW shared with several other AWS accounts"
+  description     = "My TGW connecting multiple VPCs"
   amazon_side_asn = 64532
+
+  create_tgw = true
+  # Creates RAM resources for hub (create_tgw = true) accounts
+  share_tgw = false
 
   transit_gateway_cidr_blocks = ["10.99.0.0/24"]
 
   # When "true" there is no need for RAM resources if using multiple AWS accounts
-  enable_auto_accept_shared_attachments = true
+  enable_auto_accept_shared_attachments = false
+
+  enable_default_route_table_association = false
+  enable_default_route_table_propagation = false
 
   # When "true", allows service discovery through IGMP
   enable_multicast_support = false
 
-  vpc_attachments = {
-    vpc1 = {
-      vpc_id       = module.vpc1.vpc_id
-      subnet_ids   = module.vpc1.private_subnets
-      dns_support  = true
-      ipv6_support = true
+  flow_logs = [
+    # Flow logs for the entire TGW
+    {
+      cloudwatch_dest_arn     = local.flow_logs_cloudwatch_dest_arn
+      cloudwatch_iam_role_arn = local.flow_logs_cloudwatch_iam_role_arn
+      dest_enabled            = true
+      dest_type               = "cloud-watch-logs"
+      key                     = "tgw"
+      s3_dest_arn             = null
+    },
+    {
+      cloudwatch_dest_arn     = null
+      cloudwatch_iam_role_arn = null
+      dest_enabled            = true
+      dest_type               = "s3"
+      key                     = "tgw"
+      s3_dest_arn             = local.flow_logs_s3_dest_arn
+    },
+    # Flow logs for individual attachments
+    {
+      attachment_type         = "vpc"
+      cloudwatch_dest_arn     = local.flow_logs_cloudwatch_dest_arn
+      cloudwatch_iam_role_arn = local.flow_logs_cloudwatch_iam_role_arn
+      create_tgw_peering      = false
+      create_vpc_attachment   = true
+      dest_enabled            = true
+      dest_type               = "cloud-watch-logs"
+      key                     = "vpc1"
+      s3_dest_arn             = null
+    },
+    {
+      attachment_type         = "vpc"
+      cloudwatch_dest_arn     = null
+      cloudwatch_iam_role_arn = null
+      create_tgw_peering      = false
+      create_vpc_attachment   = true
+      dest_enabled            = true
+      dest_type               = "s3"
+      key                     = "vpc1"
+      s3_dest_arn             = local.flow_logs_s3_dest_arn
+    },
+    {
+      attachment_type         = "vpc"
+      cloudwatch_dest_arn     = local.flow_logs_cloudwatch_dest_arn
+      cloudwatch_iam_role_arn = local.flow_logs_cloudwatch_iam_role_arn
+      create_tgw_peering      = false
+      create_vpc_attachment   = true
+      dest_enabled            = true
+      dest_type               = "cloud-watch-logs"
+      key                     = "vpc2"
+      s3_dest_arn             = null
+    },
+    {
+      attachment_type         = "vpc"
+      cloudwatch_dest_arn     = null
+      cloudwatch_iam_role_arn = null
+      create_tgw_peering      = false
+      create_vpc_attachment   = true
+      dest_enabled            = true
+      dest_type               = "s3"
+      key                     = "vpc2"
+      s3_dest_arn             = local.flow_logs_s3_dest_arn
+    },
+  ]
 
+  tgw_route_tables = [
+    "prod",
+    "staging",
+  ]
+
+  attachments = {
+    vpc1 = {
+      attachment_type       = "vpc"
+      create_vpc_attachment = true
+      # Keep enable_vpc_attachment = false until the corresponding VPC attachment is created/accepted
+      enable_vpc_attachment                           = false
+      vpc_id                                          = module.vpc1.vpc_id
+      subnet_ids                                      = module.vpc1.private_subnets
       transit_gateway_default_route_table_association = false
       transit_gateway_default_route_table_propagation = false
-
-      tgw_routes = [
-        {
-          destination_cidr_block = "30.0.0.0/16"
+      dns_support                                     = true
+      ipv6_support                                    = true
+      # Keep create_tgw_routes = false until the VPC/peering attachments exist/are accepted
+      create_tgw_routes = true
+      tgw_route_table_propagations = {
+        prod = {
+          enable = true
         },
-        {
-          blackhole              = true
-          destination_cidr_block = "0.0.0.0/0"
+        staging = {
+          enable = true
         }
-      ]
-    },
+      }
+      tgw_routes = {
+        vpc1 = {
+          destination_cidr_blocks = module.vpc1.private_subnets_cidr_blocks
+          route_table             = "prod"
+        }
+        blackhole = {
+          blackhole               = true
+          destination_cidr_blocks = ["0.0.0.0/0"]
+          route_table             = "prod"
+        }
+      }
+    }
     vpc2 = {
-      vpc_id     = module.vpc2.vpc_id
-      subnet_ids = module.vpc2.private_subnets
-
-      tgw_routes = [
-        {
-          destination_cidr_block = "50.0.0.0/16"
+      attachment_type       = "vpc"
+      create_vpc_attachment = true
+      # Keep enable_vpc_attachment = false until the corresponding VPC attachment is created/accepted
+      enable_vpc_attachment                           = false
+      vpc_id                                          = module.vpc2.vpc_id
+      subnet_ids                                      = module.vpc2.private_subnets
+      transit_gateway_default_route_table_association = false
+      transit_gateway_default_route_table_propagation = false
+      dns_support                                     = true
+      ipv6_support                                    = false
+      # Keep create_tgw_routes = false until the VPC/peering attachments exist/are accepted
+      create_tgw_routes = true
+      tgw_route_table_propagations = {
+        prod = {
+          enable = true
         },
-        {
-          blackhole              = true
-          destination_cidr_block = "10.10.10.10/32"
+        staging = {
+          enable = true
         }
-      ]
+      }
+      tgw_routes = {
+        vpc2 = {
+          destination_cidr_blocks = module.vpc2.private_subnets_cidr_blocks
+          route_table             = "prod"
+        }
+        blackhole = {
+          blackhole               = true
+          destination_cidr_blocks = ["0.0.0.0/0"]
+          route_table             = "prod"
+        }
+      }
+
       tags = {
         Name = "${local.name}-vpc2"
       }
-    },
+
+    }
   }
 
-  ram_allow_external_principals = true
-  ram_principals                = [307990089504]
+  ram_allow_external_principals = false
+  ram_principals = [
+    local.account_id
+  ]
 
   tags = local.tags
 }
