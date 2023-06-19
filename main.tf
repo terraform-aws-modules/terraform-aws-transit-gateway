@@ -1,8 +1,34 @@
 locals {
   # List of maps with key and route values
-  vpc_attachments_with_routes = chunklist(flatten([
-    for k, v in var.vpc_attachments : setproduct([{ key = k }], v.tgw_routes) if var.create_tgw && can(v.tgw_routes)
-  ]), 2)
+  attachments_with_route_keys = flatten([
+    for attachment_key, attachment_value in var.attachments : [
+      for route_key, route_value in try(attachment_value.tgw_routes, {}) : [
+        for cidr_block in try(route_value.destination_cidr_blocks, ["no-cidrs-defined"]) : {
+          accept_tgw_peering = try(attachment_value.accept_tgw_peering, null)
+          attachment_id = {
+            peering = try(
+              aws_ec2_transit_gateway_peering_attachment.this[attachment_key].id,
+              data.aws_ec2_transit_gateway_peering_attachment.this[attachment_key].id,
+              null
+            )
+            vpc = try(
+              data.aws_ec2_transit_gateway_vpc_attachment.this[attachment_key].id,
+              null
+            )
+          }[attachment_value.attachment_type]
+          attachment_key                      = attachment_key
+          attachment_type                     = attachment_value.attachment_type
+          create_tgw_routes                   = try(attachment_value.create_tgw_routes, false)
+          route_dest                          = cidr_block
+          route_key                           = route_key
+          route_table                         = try(route_value.route_table, var.tgw_route_tables[0])
+          route_value                         = route_value
+          tgw_default_route_table_association = try(attachment_value.transit_gateway_default_route_table_association, true)
+          tgw_default_route_table_propagation = try(attachment_value.transit_gateway_default_route_table_propagation, true)
+        } if var.create_tgw && try(attachment_value.create_tgw_routes, false)
+      ]
+    ]
+  ])
 
   tgw_default_route_table_tags_merged = merge(
     var.tags,
