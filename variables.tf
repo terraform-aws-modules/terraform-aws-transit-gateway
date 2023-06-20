@@ -96,13 +96,13 @@ variable "tgw_default_route_table_tags" {
 # VPC Attachment
 ################################################################################
 
-variable "vpc_attachments" {
+variable "attachments" {
   description = "Maps of maps of VPC details to attach to TGW. Type 'any' to disable type validation by Terraform."
   type        = any
   default     = {}
 }
 
-variable "tgw_vpc_attachment_tags" {
+variable "tgw_attachment_tags" {
   description = "Additional tags for VPC attachments"
   type        = map(string)
   default     = {}
@@ -122,6 +122,12 @@ variable "tgw_route_table_tags" {
   description = "Additional tags for the TGW route table"
   type        = map(string)
   default     = {}
+}
+
+variable "tgw_route_tables" {
+  description = "Custom TGW route tables to create"
+  type        = set(string)
+  default     = ["custom"]
 }
 
 ################################################################################
@@ -148,7 +154,7 @@ variable "ram_allow_external_principals" {
 
 variable "ram_principals" {
   description = "A list of principals to share TGW with. Possible values are an AWS account ID, an AWS Organizations Organization ARN, or an AWS Organizations Organization Unit ARN"
-  type        = list(string)
+  type        = set(string)
   default     = []
 }
 
