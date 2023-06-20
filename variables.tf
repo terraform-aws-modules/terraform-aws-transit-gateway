@@ -169,3 +169,19 @@ variable "ram_tags" {
   type        = map(string)
   default     = {}
 }
+
+################################################################################
+# Flow Logs
+################################################################################
+
+variable "flow_logs" {
+  description = "Flow Logs to create for Transit Gateway or attachments"
+  type        = any
+  default     = {}
+}
+
+variable "tgw_flow_log_tags" {
+  description = "Additional tags for TGW or attachment flow logs"
+  type        = map(string)
+  default     = {}
+}
