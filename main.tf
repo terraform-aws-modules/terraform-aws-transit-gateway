@@ -184,13 +184,13 @@ resource "aws_ec2_transit_gateway_vpc_attachment_accepter" "this" {
 ################################################################################
 
 resource "aws_ec2_transit_gateway_route_table" "this" {
-  count = var.create_tgw ? 1 : 0
+  for_each = var.create_tgw ? var.tgw_route_tables : toset([])
 
   transit_gateway_id = aws_ec2_transit_gateway.this[0].id
 
   tags = merge(
     var.tags,
-    { Name = var.name },
+    { Name = "${var.name}-${each.key}" },
     var.tgw_route_table_tags,
   )
 }
