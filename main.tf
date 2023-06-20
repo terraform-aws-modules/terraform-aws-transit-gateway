@@ -219,23 +219,30 @@ resource "aws_route" "this" {
 }
 
 resource "aws_ec2_transit_gateway_route_table_association" "this" {
-  for_each = {
-    for k, v in var.vpc_attachments : k => v if var.create_tgw && try(v.transit_gateway_default_route_table_association, true) != true
+  for_each = { for attachment_route in local.attachments_with_route_keys : "${attachment_route.attachment_key}-${attachment_route.route_table}" => attachment_route... if var.create_tgw && attachment_route.create_tgw_routes && attachment_route.accept_tgw_peering == null && attachment_route.tgw_default_route_table_association == false && contains(keys(aws_ec2_transit_gateway_route_table.this), attachment_route.route_table)
   }
 
-  # Create association if it was not set already by aws_ec2_transit_gateway_vpc_attachment resource
-  transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.this[each.key].id
-  transit_gateway_route_table_id = var.create_tgw ? aws_ec2_transit_gateway_route_table.this[0].id : try(each.value.transit_gateway_route_table_id, var.transit_gateway_route_table_id)
+  transit_gateway_attachment_id  = each.value[0].attachment_id
+  transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.this[each.value[0].route_table].id
+
+  depends_on = [
+    aws_ec2_transit_gateway_peering_attachment.this,
+    data.aws_ec2_transit_gateway_peering_attachment.this,
+    data.aws_ec2_transit_gateway_vpc_attachment.this,
+    aws_ec2_transit_gateway_route_table.this
+  ]
 }
 
 resource "aws_ec2_transit_gateway_route_table_propagation" "this" {
-  for_each = {
-    for k, v in var.vpc_attachments : k => v if var.create_tgw && try(v.transit_gateway_default_route_table_propagation, true) != true
-  }
+  for_each = { for attachment in local.tgw_route_table_propagations : "${attachment.attachment_key}-${attachment.rtb_name}" => attachment if attachment.enable_propagation && contains(keys(aws_ec2_transit_gateway_route_table.this), attachment.rtb_name) }
 
-  # Create association if it was not set already by aws_ec2_transit_gateway_vpc_attachment resource
-  transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.this[each.key].id
-  transit_gateway_route_table_id = var.create_tgw ? aws_ec2_transit_gateway_route_table.this[0].id : try(each.value.transit_gateway_route_table_id, var.transit_gateway_route_table_id)
+  transit_gateway_attachment_id  = each.value.attachment_id
+  transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.this[each.value.rtb_name].id
+
+  depends_on = [
+    data.aws_ec2_transit_gateway_vpc_attachment.this,
+    aws_ec2_transit_gateway_route_table.this
+  ]
 }
 
 ################################################################################
