@@ -196,13 +196,13 @@ resource "aws_ec2_transit_gateway_route_table" "this" {
 }
 
 resource "aws_ec2_transit_gateway_route" "this" {
-  count = length(local.vpc_attachments_with_routes)
+  for_each = { for attachment_route in local.attachments_with_route_keys : "${attachment_route.attachment_key}-${attachment_route.route_table}-${attachment_route.route_dest}" => attachment_route if var.create_tgw && attachment_route.route_dest != "no-cidrs-defined" }
 
-  destination_cidr_block = local.vpc_attachments_with_routes[count.index][1].destination_cidr_block
-  blackhole              = try(local.vpc_attachments_with_routes[count.index][1].blackhole, null)
+  destination_cidr_block = each.value.route_dest
+  blackhole              = try(each.value.route_value.blackhole, null)
 
-  transit_gateway_route_table_id = var.create_tgw ? aws_ec2_transit_gateway_route_table.this[0].id : var.transit_gateway_route_table_id
-  transit_gateway_attachment_id  = tobool(try(local.vpc_attachments_with_routes[count.index][1].blackhole, false)) == false ? aws_ec2_transit_gateway_vpc_attachment.this[local.vpc_attachments_with_routes[count.index][0].key].id : null
+  transit_gateway_route_table_id = var.create_tgw ? aws_ec2_transit_gateway_route_table.this[each.value.route_table].id : var.transit_gateway_route_table_id
+  transit_gateway_attachment_id  = try(each.value.route_value.blackhole, false) == false ? each.value.attachment_id : null
 }
 
 resource "aws_route" "this" {
