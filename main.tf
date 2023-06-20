@@ -122,10 +122,61 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
 
   tags = merge(
     var.tags,
-    { Name = var.name },
-    var.tgw_vpc_attachment_tags,
+    { Name = each.key },
+    var.tgw_attachment_tags,
+  )
+
+  lifecycle {
+    ignore_changes = [
+      transit_gateway_default_route_table_association,
+      transit_gateway_default_route_table_propagation,
+    ]
+  }
+}
+
+data "aws_ec2_transit_gateway_vpc_attachment" "this" {
+  for_each = { for k, v in var.attachments : k => v if v.attachment_type == "vpc" && try(v.enable_vpc_attachment, false) }
+
+  filter {
+    name   = "vpc-id"
+    values = [each.value.vpc_id]
+  }
+
+  filter {
+    name   = "transit-gateway-id"
+    values = [var.create_tgw ? aws_ec2_transit_gateway.this[0].id : each.value.tgw_id]
+  }
+
+  filter {
+    name   = "state"
+    values = ["pendingAcceptance", "available"]
+  }
+
+  depends_on = [
+    aws_ec2_transit_gateway_vpc_attachment.this
+  ]
+}
+
+resource "aws_ec2_transit_gateway_vpc_attachment_accepter" "this" {
+  for_each = { for k, v in var.attachments : k => v if v.attachment_type == "vpc" && try(v.accept_vpc_attachment, false) }
+
+  transit_gateway_attachment_id                   = data.aws_ec2_transit_gateway_vpc_attachment.this[each.key].id
+  transit_gateway_default_route_table_association = try(each.value.transit_gateway_default_route_table_association, true)
+  transit_gateway_default_route_table_propagation = try(each.value.transit_gateway_default_route_table_propagation, true)
+
+  tags = merge(
+    var.tags,
+    { Name = each.key },
+    var.tgw_attachment_tags,
     try(each.value.tags, {}),
   )
+
+  lifecycle {
+    ignore_changes = [
+      transit_gateway_default_route_table_association,
+      transit_gateway_default_route_table_propagation,
+    ]
+  }
 }
 
 ################################################################################
