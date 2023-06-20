@@ -281,3 +281,48 @@ resource "aws_ram_resource_share_accepter" "this" {
 
   share_arn = var.ram_resource_share_arn
 }
+
+################################################################################
+# TGW Peering
+################################################################################
+
+resource "aws_ec2_transit_gateway_peering_attachment" "this" {
+  for_each = { for k, v in var.attachments : k => v if v.attachment_type == "peering" && try(v.create_tgw_peering, false) }
+
+  peer_account_id         = each.value.peer_account_id
+  peer_region             = each.value.peer_region
+  peer_transit_gateway_id = each.value.peer_tgw_id
+  transit_gateway_id      = aws_ec2_transit_gateway.this[0].id
+
+  tags = merge(
+    var.tags,
+    { Name = var.name },
+    var.tgw_tags,
+  )
+}
+
+data "aws_ec2_transit_gateway_peering_attachment" "this" {
+  for_each = { for k, v in var.attachments : k => v if v.attachment_type == "peering" && try(v.enable_peering_attachment, false) && try(v.create_tgw_peering, false) == false }
+
+  filter {
+    name   = "remote-owner-id"
+    values = [each.value.peer_account_id]
+  }
+
+  filter {
+    name   = "state"
+    values = ["pendingAcceptance", "available"]
+  }
+}
+
+resource "aws_ec2_transit_gateway_peering_attachment_accepter" "this" {
+  for_each = { for k, v in var.attachments : k => v if try(v.accept_tgw_peering, false) }
+
+  transit_gateway_attachment_id = data.aws_ec2_transit_gateway_peering_attachment.this[each.key].id
+
+  tags = merge(
+    var.tags,
+    { Name = var.name },
+    var.tgw_tags,
+  )
+}
