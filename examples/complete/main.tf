@@ -202,7 +202,7 @@ module "tgw" {
 
 module "vpc1" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "~> 3.0"
+  version = "~> 5.0"
 
   name = "${local.name}-vpc1"
   cidr = "10.10.0.0/16"
@@ -219,15 +219,13 @@ module "vpc1" {
 
 module "vpc2" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "~> 3.0"
+  version = "~> 5.0"
 
   name = "${local.name}-vpc2"
   cidr = "10.20.0.0/16"
 
   azs             = ["${local.region}a", "${local.region}b", "${local.region}c"]
   private_subnets = ["10.20.1.0/24", "10.20.2.0/24", "10.20.3.0/24"]
-
-  enable_ipv6 = false
 
   tags = local.tags
 }

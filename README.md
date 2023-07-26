@@ -7,7 +7,6 @@ Terraform module which creates Transit Gateway resources on AWS.
 ```hcl
 module "tgw" {
   source  = "terraform-aws-modules/transit-gateway/aws"
-  version = "~> 3.0"
 
   name        = "my-tgw"
   description = "My TGW shared with several other AWS accounts"
@@ -21,8 +20,8 @@ module "tgw" {
       create_vpc_attachment = true
       # Keep enable_vpc_attachment = false until the corresponding VPC attachment is created
       enable_vpc_attachment = false
-      vpc_id       = module.vpc.vpc_id
-      subnet_ids   = module.vpc.private_subnets
+      vpc_id       = "vpc-1234556abcdef"
+      subnet_ids   = ["subnet-abcde012", "subnet-bcde012a", "subnet-fghi345a"]
       dns_support  = true
       ipv6_support = true
 
@@ -43,22 +42,6 @@ module "tgw" {
   tags = {
     Purpose = "tgw-complete-example"
   }
-}
-
-module "vpc" {
-  source  = "terraform-aws-modules/vpc/aws"
-  version = "~> 3.0"
-
-  name = "my-vpc"
-
-  cidr = "10.10.0.0/16"
-
-  azs             = ["eu-west-1a", "eu-west-1b", "eu-west-1c"]
-  private_subnets = ["10.10.1.0/24", "10.10.2.0/24", "10.10.3.0/24"]
-
-  enable_ipv6                                    = true
-  private_subnet_assign_ipv6_address_on_creation = true
-  private_subnet_ipv6_prefixes                   = [0, 1, 2]
 }
 ```
 
@@ -190,14 +173,14 @@ That's it!  You should now be able to test connectivity between VPCs/accounts an
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.1 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.4 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.4 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.0 |
 
 ## Modules
 

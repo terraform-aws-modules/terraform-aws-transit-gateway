@@ -19,8 +19,8 @@ Note that this example may create resources which cost money. Run `terraform des
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.1 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.4 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.0 |
 
 ## Providers
 
@@ -31,13 +31,13 @@ No providers.
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_peer_hub"></a> [peer\_hub](#module\_peer\_hub) | ../../ | n/a |
-| <a name="module_peer_hub_vpc"></a> [peer\_hub\_vpc](#module\_peer\_hub\_vpc) | terraform-aws-modules/vpc/aws | ~> 3.0 |
+| <a name="module_peer_hub_vpc"></a> [peer\_hub\_vpc](#module\_peer\_hub\_vpc) | terraform-aws-modules/vpc/aws | ~> 5.0 |
 | <a name="module_peer_spoke"></a> [peer\_spoke](#module\_peer\_spoke) | ../../ | n/a |
-| <a name="module_peer_spoke_vpc"></a> [peer\_spoke\_vpc](#module\_peer\_spoke\_vpc) | terraform-aws-modules/vpc/aws | ~> 3.0 |
+| <a name="module_peer_spoke_vpc"></a> [peer\_spoke\_vpc](#module\_peer\_spoke\_vpc) | terraform-aws-modules/vpc/aws | ~> 5.0 |
 | <a name="module_primary_hub"></a> [primary\_hub](#module\_primary\_hub) | ../../ | n/a |
-| <a name="module_primary_hub_vpc"></a> [primary\_hub\_vpc](#module\_primary\_hub\_vpc) | terraform-aws-modules/vpc/aws | ~> 3.0 |
+| <a name="module_primary_hub_vpc"></a> [primary\_hub\_vpc](#module\_primary\_hub\_vpc) | terraform-aws-modules/vpc/aws | ~> 5.0 |
 | <a name="module_primary_spoke"></a> [primary\_spoke](#module\_primary\_spoke) | ../../ | n/a |
-| <a name="module_primary_spoke_vpc"></a> [primary\_spoke\_vpc](#module\_primary\_spoke\_vpc) | terraform-aws-modules/vpc/aws | ~> 3.0 |
+| <a name="module_primary_spoke_vpc"></a> [primary\_spoke\_vpc](#module\_primary\_spoke\_vpc) | terraform-aws-modules/vpc/aws | ~> 5.0 |
 
 ## Resources
 

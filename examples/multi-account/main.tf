@@ -659,7 +659,7 @@ module "peer_spoke" {
 
 module "primary_hub_vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "~> 3.0"
+  version = "~> 5.0"
 
   name = "${local.name}-primary-hub-vpc"
   cidr = "10.10.0.0/16"
@@ -677,7 +677,7 @@ module "primary_hub_vpc" {
 
 module "peer_hub_vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "~> 3.0"
+  version = "~> 5.0"
 
   providers = {
     aws = aws.peer_hub
@@ -698,7 +698,7 @@ module "peer_hub_vpc" {
 
 module "primary_spoke_vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "~> 3.0"
+  version = "~> 5.0"
 
   providers = {
     aws = aws.primary_spoke
@@ -712,14 +712,14 @@ module "primary_spoke_vpc" {
 
   enable_ipv6                                    = true
   private_subnet_assign_ipv6_address_on_creation = true
-  private_subnet_ipv6_prefixes                   = [6, 7, 8]
+  private_subnet_ipv6_prefixes                   = [0, 1, 2]
 
   tags = local.tags
 }
 
 module "peer_spoke_vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "~> 3.0"
+  version = "~> 5.0"
 
   providers = {
     aws = aws.peer_spoke
