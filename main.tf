@@ -169,7 +169,7 @@ resource "aws_ram_principal_association" "this" {
 }
 
 resource "aws_ram_resource_share_accepter" "this" {
-  count = !var.create_tgw && var.share_tgw ? 1 : 0
+  count = !var.create_tgw && var.share_tgw && !var.ram_sharing_organization_enabled ? 1 : 0
 
   share_arn = var.ram_resource_share_arn
 }

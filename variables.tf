@@ -163,3 +163,9 @@ variable "ram_tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "ram_sharing_organization_enabled" {
+  description = "Whether or not the sharing of resource within your organization is enabled"
+  type        = bool
+  default     = false
+}
