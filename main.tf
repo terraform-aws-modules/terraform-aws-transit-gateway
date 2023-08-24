@@ -15,6 +15,7 @@ locals {
       for rtb_id in try(v.vpc_route_table_ids, []) : {
         rtb_id = rtb_id
         cidr   = v.tgw_destination_cidr
+        tgw_id = v.tgw_id
       }
     ]
   ])
@@ -110,11 +111,11 @@ resource "aws_ec2_transit_gateway_route" "this" {
 }
 
 resource "aws_route" "this" {
-  for_each = { for x in local.vpc_route_table_destination_cidr : x.rtb_id => x.cidr }
+  for_each = { for x in local.vpc_route_table_destination_cidr : x.tgw_id => { "rtb_id" : x.rtb_id, "cidr" : x.cidr } }
 
-  route_table_id         = each.key
-  destination_cidr_block = each.value
-  transit_gateway_id     = aws_ec2_transit_gateway.this[0].id
+  route_table_id         = each.value.rtb_id
+  destination_cidr_block = each.value.cidr
+  transit_gateway_id     = var.create_tgw ? aws_ec2_transit_gateway.this[0].id : each.key
 }
 
 resource "aws_ec2_transit_gateway_route_table_association" "this" {
