@@ -13,9 +13,10 @@ locals {
   vpc_route_table_destination_cidr = flatten([
     for k, v in var.vpc_attachments : [
       for rtb_id in try(v.vpc_route_table_ids, []) : {
-        rtb_id = rtb_id
-        cidr   = v.tgw_destination_cidr
-        tgw_id = v.tgw_id
+        vpc_attachment_id = k
+        rtb_id            = rtb_id
+        cidr              = v.tgw_destination_cidr
+        tgw_id            = v.tgw_id
       }
     ]
   ])
@@ -111,7 +112,7 @@ resource "aws_ec2_transit_gateway_route" "this" {
 }
 
 resource "aws_route" "this" {
-  for_each = { for index, x in local.vpc_route_table_destination_cidr : index => { "rtb_id" : x.rtb_id, "cidr" : x.cidr , "tgw_id": x.tgw_id} }
+  for_each = { for index, x in local.vpc_route_table_destination_cidr : x.vpc_attachment_id => { "rtb_id" : x.rtb_id, "cidr" : x.cidr, "tgw_id" : x.tgw_id } }
 
   route_table_id         = each.value.rtb_id
   destination_cidr_block = each.value.cidr
