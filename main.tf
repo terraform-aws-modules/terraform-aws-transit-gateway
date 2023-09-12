@@ -111,11 +111,11 @@ resource "aws_ec2_transit_gateway_route" "this" {
 }
 
 resource "aws_route" "this" {
-  for_each = { for index, x in local.vpc_route_table_destination_cidr : index => { "rtb_id" : x.rtb_id, "cidr" : x.cidr } }
+  for_each = { for index, x in local.vpc_route_table_destination_cidr : index => { "rtb_id" : x.rtb_id, "cidr" : x.cidr , "tgw_id": x.tgw_id} }
 
   route_table_id         = each.value.rtb_id
   destination_cidr_block = each.value.cidr
-  transit_gateway_id     = var.create_tgw ? aws_ec2_transit_gateway.this[0].id : each.key
+  transit_gateway_id     = var.create_tgw ? aws_ec2_transit_gateway.this[0].id : each.value.tgw_id
 }
 
 resource "aws_ec2_transit_gateway_route_table_association" "this" {
