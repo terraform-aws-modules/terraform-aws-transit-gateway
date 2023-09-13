@@ -12,12 +12,14 @@ locals {
 
   vpc_route_table_destination_cidr = flatten([
     for k, v in var.vpc_attachments : [
-      for rtb_id in try(v.vpc_route_table_ids, []) : {
-        vpc_attachment_id = k
-        rtb_id            = rtb_id
-        cidr              = v.tgw_destination_cidr
-        tgw_id            = v.tgw_id
-      }
+      for rtb_id in try(v.vpc_route_table_ids, []) : [
+        for tgw_route in try(v.tgw_routes, []) : {
+          vpc_attachment_id = k
+          rtb_id            = rtb_id
+          cidr              = tgw_route.destination_cidr_block
+          tgw_id            = v.tgw_id
+        }
+      ]
     ]
   ])
 }
