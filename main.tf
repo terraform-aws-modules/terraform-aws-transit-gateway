@@ -177,3 +177,55 @@ resource "aws_ram_resource_share_accepter" "this" {
 
   share_arn = var.ram_resource_share_arn
 }
+
+# Transit Gateway Peering Attachment
+resource "aws_ec2_transit_gateway_peering_attachment" "this" {
+  for_each = var.tgw_peering_attachments
+
+  transit_gateway_id         = aws_ec2_transit_gateway.this[0].id
+  peer_transit_gateway_id    = each.value.peer_transit_gateway_id
+  peer_region                = each.value.peer_region
+  peer_account_id            = each.value.peer_account_id
+
+  tags = merge(
+    var.tags,
+    { Name = "${var.name}-peering-${each.key}" }
+  )
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# Accepting Peering Attachment
+resource "aws_ec2_transit_gateway_peering_attachment_accepter" "this" {
+  count = length([for k, v in var.tgw_peering_attachments : v if v.request_accepter])
+
+  transit_gateway_attachment_id = tolist([for attachment in aws_ec2_transit_gateway_peering_attachment.this : attachment.id])[count.index]
+
+  tags = merge(
+    var.tags,
+    { Name = "${var.name}-peering-accepter-${count.index}" }
+  )
+}
+
+# Transit Gateway Peering Route Table
+resource "aws_ec2_transit_gateway_route_table" "peering" {
+  count = length(var.tgw_peering_attachments) > 0 ? 1 : 0
+
+  transit_gateway_id = aws_ec2_transit_gateway.this[0].id
+
+  tags = merge(
+    var.tags,
+    { Name = "${var.name}-tgw-peering-route-table" }
+  )
+}
+
+# Routes for Peering Attachments
+resource "aws_ec2_transit_gateway_route" "peering" {
+  for_each = { for r in var.tgw_peering_route_table_routes : "${r.peering_attachment_key}-${r.destination_cidr_block}" => r }
+
+  destination_cidr_block         = each.value.destination_cidr_block
+  transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.peering[0].id
+  transit_gateway_attachment_id  = aws_ec2_transit_gateway_peering_attachment.this[each.value.peering_attachment_key].id
+}

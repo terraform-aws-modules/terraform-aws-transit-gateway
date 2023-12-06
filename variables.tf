@@ -163,3 +163,27 @@ variable "ram_tags" {
   type        = map(string)
   default     = {}
 }
+
+################################################################################
+# TGW Peering Settings
+################################################################################
+variable "tgw_peering_attachments" {
+  description = "A map of transit gateway peering attachments"
+  type = map(object({
+    peer_transit_gateway_id = string
+    peer_region             = string
+    peer_account_id         = string
+    request_accepter        = bool
+  }))
+  default = {}
+}
+
+variable "tgw_peering_route_table_routes" {
+  description = "A list of routes for the Transit Gateway Peering Route Table"
+  type = list(object({
+    destination_cidr_block = string
+    peering_attachment_key = string
+  }))
+  default = []
+}
+
