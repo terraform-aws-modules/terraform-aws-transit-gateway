@@ -1,6 +1,5 @@
 locals {
   enable_peering = var.enable_peering && !var.create_tgw
-  enable_tgw     = var.create_tgw && !var.enable_peering
 
   tgw_default_route_table_tags_merged = merge(
     var.tags,
@@ -8,9 +7,9 @@ locals {
     var.tgw_default_route_table_tags,
   )
 
-  tgw_peering_attachments = var.enable_peering ? var.tgw_peering_attachments : {}
-
-  tgw_peering_route_table_routes = { for r in var.tgw_peering_route_table_routes : "${r.peering_attachment_key}-${r.destination_cidr_block}" => r }
+  tgw_peering_attachments              = var.enable_peering ? var.tgw_peering_attachments : {}
+  tgw_peering_attachments_associations = { for k, v in aws_ec2_transit_gateway_peering_attachment.this : k => v }
+  tgw_peering_route_table_routes       = local.enable_peering ? { for r in var.tgw_peering_route_table_routes : "${r.peering_attachment_key}-${r.destination_cidr_block}" => r } : {}
 
   vpc_attachments_with_routes = chunklist(flatten([
     for k, v in var.vpc_attachments : setproduct([{ key = k }], v.tgw_routes) if var.create_tgw && can(v.tgw_routes)
@@ -185,6 +184,7 @@ resource "aws_ram_resource_share_accepter" "this" {
 # Transit Gateway Peering
 ################################################################################
 
+# Transit Gateway Peering Attachment
 resource "aws_ec2_transit_gateway_peering_attachment" "this" {
   for_each = local.tgw_peering_attachments
 
@@ -203,8 +203,9 @@ resource "aws_ec2_transit_gateway_peering_attachment" "this" {
   }
 }
 
+# Transit Gateway Route Table
 resource "aws_ec2_transit_gateway_route" "peering" {
-  for_each = local.enable_peering ? { for r in var.tgw_peering_route_table_routes : "${r.peering_attachment_key}-${r.destination_cidr_block}" => r } : {}
+  for_each = local.tgw_peering_route_table_routes
 
   destination_cidr_block         = each.value.destination_cidr_block
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_peering_attachment.this[each.value.peering_attachment_key].id
@@ -213,7 +214,7 @@ resource "aws_ec2_transit_gateway_route" "peering" {
 
 # Transit Gateway Route Table Association
 resource "aws_ec2_transit_gateway_route_table_association" "tgw_association" {
-  for_each = { for k, v in aws_ec2_transit_gateway_peering_attachment.this : k => v }
+  for_each = local.tgw_peering_attachments_associations
 
   transit_gateway_attachment_id  = each.value.id
   transit_gateway_route_table_id = var.tgw_association_default_route_table_id
