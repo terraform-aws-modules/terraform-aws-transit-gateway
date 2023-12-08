@@ -1,8 +1,15 @@
 locals {
   enable_peering = var.enable_peering && !var.create_tgw
 
-  tgw_default_route_table_tags_merged = merge(
+  tags = merge(
     var.tags,
+    {
+      Module = "terraform-aws-transit-gateway"
+    }
+  )
+
+  tgw_default_route_table_tags_merged = merge(
+    local.tags,
     { Name = var.name },
     var.tgw_default_route_table_tags,
   )
@@ -53,7 +60,7 @@ resource "aws_ec2_transit_gateway" "this" {
   }
 
   tags = merge(
-    var.tags,
+    local.tags,
     { Name = var.name },
     var.tgw_tags,
   )
@@ -85,7 +92,7 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
   vpc_id                                          = each.value.vpc_id
 
   tags = merge(
-    var.tags,
+    local.tags,
     { Name = var.name },
     var.tgw_vpc_attachment_tags,
     try(each.value.tags, {}),
@@ -102,7 +109,7 @@ resource "aws_ec2_transit_gateway_route_table" "this" {
   transit_gateway_id = aws_ec2_transit_gateway.this[0].id
 
   tags = merge(
-    var.tags,
+    local.tags,
     { Name = var.name },
     var.tgw_route_table_tags,
   )
@@ -168,7 +175,7 @@ resource "aws_ram_resource_share" "this" {
   name                      = coalesce(var.ram_name, var.name)
 
   tags = merge(
-    var.tags,
+    local.tags,
     { Name = coalesce(var.ram_name, var.name) },
     var.ram_tags,
   )
@@ -190,11 +197,11 @@ resource "aws_ec2_transit_gateway_peering_attachment" "this" {
 
   peer_account_id         = each.value.peer_account_id
   peer_region             = each.value.peer_region
-  peer_transit_gateway_id = each.value.peeer_acceptor_tgw_id
+  peer_transit_gateway_id = each.value.peer_acceptor_tgw_id
   transit_gateway_id      = var.peer_requester_tgw_id
 
   tags = merge(
-    var.tags,
+    local.tags,
     { Name = "peering-${each.value.peer_region}" }
   )
 
