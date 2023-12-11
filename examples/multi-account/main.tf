@@ -131,7 +131,7 @@ module "tgw_peer" {
 
 module "vpc1" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "~> 4.0"
+  version = "~> 5.0"
 
   name = "${local.name}-vpc1"
   cidr = "10.10.0.0/16"
@@ -149,7 +149,7 @@ module "vpc1" {
 
 module "vpc2" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "~> 4.0"
+  version = "~> 5.0"
 
   providers = {
     aws = aws.peer
