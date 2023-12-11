@@ -119,7 +119,7 @@ resource "aws_route" "this" {
   route_table_id              = each.key
   destination_cidr_block      = try(each.value.ipv6_support, false) ? null : each.value["cidr"]
   destination_ipv6_cidr_block = try(each.value.ipv6_support, false) ? each.value["cidr"] : null
-  transit_gateway_id          = aws_ec2_transit_gateway.this[0].id
+  transit_gateway_id          = each.value["tgw_id"]
 }
 
 resource "aws_ec2_transit_gateway_route_table_association" "this" {
