@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.12.0](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.11.0...v2.12.0) (2023-12-11)
+
+
+### Features
+
+* Allow creating VPC routes for already existing or shared TGW ([#114](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/114)) ([20c4dc4](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/commit/20c4dc4f698bc9edc7b7936ee7befb50043ded8a))
+
+## [2.11.0](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.10.0...v2.11.0) (2023-12-11)
+
+
+### Features
+
+* Make TGW routing creation optional ([#119](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/119)) ([1661dfa](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/commit/1661dfa3f538c8d5b4f612a7c0982e4afd20daca))
+
 ## [2.10.0](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.9.0...v2.10.0) (2023-04-26)
 
 
