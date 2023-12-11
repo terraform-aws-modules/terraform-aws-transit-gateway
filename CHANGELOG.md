@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+### [2.12.1](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.12.0...v2.12.1) (2023-12-11)
+
+
+### Bug Fixes
+
+* Use IPv6 CIDR block destination on route when IPv6 support is enabled ([#102](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/102)) ([f70ec98](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/commit/f70ec98e82ebab67b03450ccb4b2717ae8a42578))
+
 ## [2.12.0](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.11.0...v2.12.0) (2023-12-11)
 
 
