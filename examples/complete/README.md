@@ -31,8 +31,8 @@ No providers.
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_tgw"></a> [tgw](#module\_tgw) | ../../ | n/a |
-| <a name="module_vpc1"></a> [vpc1](#module\_vpc1) | terraform-aws-modules/vpc/aws | ~> 3.0 |
-| <a name="module_vpc2"></a> [vpc2](#module\_vpc2) | terraform-aws-modules/vpc/aws | ~> 3.0 |
+| <a name="module_vpc1"></a> [vpc1](#module\_vpc1) | terraform-aws-modules/vpc/aws | ~> 5.0 |
+| <a name="module_vpc2"></a> [vpc2](#module\_vpc2) | terraform-aws-modules/vpc/aws | ~> 5.0 |
 
 ## Resources
 
