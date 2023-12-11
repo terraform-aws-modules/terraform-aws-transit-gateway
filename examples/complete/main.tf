@@ -83,7 +83,7 @@ module "tgw" {
 
 module "vpc1" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "~> 3.0"
+  version = "~> 5.0"
 
   name = "${local.name}-vpc1"
   cidr = "10.10.0.0/16"
@@ -100,7 +100,7 @@ module "vpc1" {
 
 module "vpc2" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "~> 3.0"
+  version = "~> 5.0"
 
   name = "${local.name}-vpc2"
   cidr = "10.20.0.0/16"
