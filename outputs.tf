@@ -98,3 +98,35 @@ output "ram_principal_association_id" {
   description = "The Amazon Resource Name (ARN) of the Resource Share and the principal, separated by a comma"
   value       = try(aws_ram_principal_association.this[0].id, "")
 }
+
+################################################################################
+# TGW Peering
+################################################################################
+
+output "tgw_peering_attachments" {
+  value = { for k, v in aws_ec2_transit_gateway_peering_attachment.this : k => {
+    id              = v.id
+    peer_account_id = v.peer_account_id
+    peer_region     = v.peer_region
+    tags            = v.tags
+  } }
+  description = "The transit gateway peering attachments."
+}
+
+output "tgw_peering_routes" {
+  value = { for k, v in aws_ec2_transit_gateway_route.peering : k => {
+    id                          = v.id
+    destination_cidr_block      = v.destination_cidr_block
+    transit_gateway_attachment  = v.transit_gateway_attachment_id
+    transit_gateway_route_table = v.transit_gateway_route_table_id
+  } }
+  description = "The transit gateway peering routes."
+}
+
+output "tgw_association" {
+  description = "Transit Gateway Route Table Association"
+  value = { for k, v in aws_ec2_transit_gateway_route_table_association.tgw_association : k => {
+    transit_gateway_attachment_id  = v.transit_gateway_attachment_id
+    transit_gateway_route_table_id = v.transit_gateway_route_table_id
+  } }
+}

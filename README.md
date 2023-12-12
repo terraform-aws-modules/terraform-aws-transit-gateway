@@ -87,8 +87,11 @@ No modules.
 |------|------|
 | [aws_ec2_tag.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ec2_tag) | resource |
 | [aws_ec2_transit_gateway.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ec2_transit_gateway) | resource |
+| [aws_ec2_transit_gateway_peering_attachment.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ec2_transit_gateway_peering_attachment) | resource |
+| [aws_ec2_transit_gateway_route.peering](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ec2_transit_gateway_route) | resource |
 | [aws_ec2_transit_gateway_route.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ec2_transit_gateway_route) | resource |
 | [aws_ec2_transit_gateway_route_table.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ec2_transit_gateway_route_table) | resource |
+| [aws_ec2_transit_gateway_route_table_association.tgw_association](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ec2_transit_gateway_route_table_association) | resource |
 | [aws_ec2_transit_gateway_route_table_association.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ec2_transit_gateway_route_table_association) | resource |
 | [aws_ec2_transit_gateway_route_table_propagation.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ec2_transit_gateway_route_table_propagation) | resource |
 | [aws_ec2_transit_gateway_vpc_attachment.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ec2_transit_gateway_vpc_attachment) | resource |
@@ -110,8 +113,10 @@ No modules.
 | <a name="input_enable_default_route_table_propagation"></a> [enable\_default\_route\_table\_propagation](#input\_enable\_default\_route\_table\_propagation) | Whether resource attachments automatically propagate routes to the default propagation route table | `bool` | `true` | no |
 | <a name="input_enable_dns_support"></a> [enable\_dns\_support](#input\_enable\_dns\_support) | Should be true to enable DNS support in the TGW | `bool` | `true` | no |
 | <a name="input_enable_multicast_support"></a> [enable\_multicast\_support](#input\_enable\_multicast\_support) | Whether multicast support is enabled | `bool` | `false` | no |
+| <a name="input_enable_peering"></a> [enable\_peering](#input\_enable\_peering) | Enable Transit Gateway Peering | `bool` | `false` | no |
 | <a name="input_enable_vpn_ecmp_support"></a> [enable\_vpn\_ecmp\_support](#input\_enable\_vpn\_ecmp\_support) | Whether VPN Equal Cost Multipath Protocol support is enabled | `bool` | `true` | no |
 | <a name="input_name"></a> [name](#input\_name) | Name to be used on all the resources as identifier | `string` | `""` | no |
+| <a name="input_peer_requester_tgw_id"></a> [peer\_requester\_tgw\_id](#input\_peer\_requester\_tgw\_id) | Existing Transit Gateway ID to use instead of creating a new one | `string` | `null` | no |
 | <a name="input_ram_allow_external_principals"></a> [ram\_allow\_external\_principals](#input\_ram\_allow\_external\_principals) | Indicates whether principals outside your organization can be associated with a resource share. | `bool` | `false` | no |
 | <a name="input_ram_name"></a> [ram\_name](#input\_ram\_name) | The name of the resource share of TGW | `string` | `""` | no |
 | <a name="input_ram_principals"></a> [ram\_principals](#input\_ram\_principals) | A list of principals to share TGW with. Possible values are an AWS account ID, an AWS Organizations Organization ARN, or an AWS Organizations Organization Unit ARN | `list(string)` | `[]` | no |
@@ -119,7 +124,10 @@ No modules.
 | <a name="input_ram_tags"></a> [ram\_tags](#input\_ram\_tags) | Additional tags for the RAM | `map(string)` | `{}` | no |
 | <a name="input_share_tgw"></a> [share\_tgw](#input\_share\_tgw) | Whether to share your transit gateway with other accounts | `bool` | `true` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to add to all resources | `map(string)` | `{}` | no |
+| <a name="input_tgw_association_default_route_table_id"></a> [tgw\_association\_default\_route\_table\_id](#input\_tgw\_association\_default\_route\_table\_id) | Existing Transit Gateway Route Table ID to use instead of creating a new one | `string` | `"tgw-rtb-0e2771324a8b5ccbc"` | no |
 | <a name="input_tgw_default_route_table_tags"></a> [tgw\_default\_route\_table\_tags](#input\_tgw\_default\_route\_table\_tags) | Additional tags for the Default TGW route table | `map(string)` | `{}` | no |
+| <a name="input_tgw_peering_attachments"></a> [tgw\_peering\_attachments](#input\_tgw\_peering\_attachments) | A map of transit gateway peering attachments | <pre>map(object({<br>    peer_acceptor_tgw_id = string<br>    peer_region          = string<br>    peer_account_id      = string<br>    request_acceptor     = bool<br>  }))</pre> | `{}` | no |
+| <a name="input_tgw_peering_route_table_routes"></a> [tgw\_peering\_route\_table\_routes](#input\_tgw\_peering\_route\_table\_routes) | A list of routes for the Transit Gateway Peering Route Table | <pre>list(object({<br>    destination_cidr_block = string<br>    peering_attachment_key = string<br>  }))</pre> | `[]` | no |
 | <a name="input_tgw_route_table_tags"></a> [tgw\_route\_table\_tags](#input\_tgw\_route\_table\_tags) | Additional tags for the TGW route table | `map(string)` | `{}` | no |
 | <a name="input_tgw_tags"></a> [tgw\_tags](#input\_tgw\_tags) | Additional tags for the TGW | `map(string)` | `{}` | no |
 | <a name="input_tgw_vpc_attachment_tags"></a> [tgw\_vpc\_attachment\_tags](#input\_tgw\_vpc\_attachment\_tags) | Additional tags for VPC attachments | `map(string)` | `{}` | no |
@@ -149,6 +157,9 @@ No modules.
 | <a name="output_ec2_transit_gateway_vpc_attachment_ids"></a> [ec2\_transit\_gateway\_vpc\_attachment\_ids](#output\_ec2\_transit\_gateway\_vpc\_attachment\_ids) | List of EC2 Transit Gateway VPC Attachment identifiers |
 | <a name="output_ram_principal_association_id"></a> [ram\_principal\_association\_id](#output\_ram\_principal\_association\_id) | The Amazon Resource Name (ARN) of the Resource Share and the principal, separated by a comma |
 | <a name="output_ram_resource_share_id"></a> [ram\_resource\_share\_id](#output\_ram\_resource\_share\_id) | The Amazon Resource Name (ARN) of the resource share |
+| <a name="output_tgw_association"></a> [tgw\_association](#output\_tgw\_association) | Transit Gateway Route Table Association |
+| <a name="output_tgw_peering_attachments"></a> [tgw\_peering\_attachments](#output\_tgw\_peering\_attachments) | The transit gateway peering attachments. |
+| <a name="output_tgw_peering_routes"></a> [tgw\_peering\_routes](#output\_tgw\_peering\_routes) | The transit gateway peering routes. |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
 ## Authors

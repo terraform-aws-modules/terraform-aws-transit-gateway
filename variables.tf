@@ -1,3 +1,6 @@
+################################################################################
+# Common
+################################################################################
 variable "name" {
   description = "Name to be used on all the resources as identifier"
   type        = string
@@ -8,6 +11,47 @@ variable "tags" {
   description = "A map of tags to add to all resources"
   type        = map(string)
   default     = {}
+}
+################################################################################
+# TGW Peering Settings
+################################################################################
+variable "peer_requester_tgw_id" {
+  description = "Existing Transit Gateway ID to use instead of creating a new one"
+  type        = string
+  default     = null
+}
+
+variable "tgw_association_default_route_table_id" {
+  description = "Existing Transit Gateway Route Table ID to use instead of creating a new one"
+  type        = string
+  default     = "tgw-rtb-0e2771324a8b5ccbc"
+}
+
+
+variable "tgw_peering_attachments" {
+  description = "A map of transit gateway peering attachments"
+  type = map(object({
+    peer_acceptor_tgw_id = string
+    peer_region          = string
+    peer_account_id      = string
+    request_acceptor     = bool
+  }))
+  default = {}
+}
+
+variable "tgw_peering_route_table_routes" {
+  description = "A list of routes for the Transit Gateway Peering Route Table"
+  type = list(object({
+    destination_cidr_block = string
+    peering_attachment_key = string
+  }))
+  default = []
+}
+
+variable "enable_peering" {
+  description = "Enable Transit Gateway Peering"
+  type        = bool
+  default     = false
 }
 
 ################################################################################
