@@ -129,7 +129,7 @@ resource "aws_ec2_transit_gateway_route_table_association" "this" {
 
   # Create association if it was not set already by aws_ec2_transit_gateway_vpc_attachment resource
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.this[each.key].id
-  transit_gateway_route_table_id = var.create_tgw ? aws_ec2_transit_gateway_route_table.this[0].id : try(each.value.transit_gateway_route_table_id, var.transit_gateway_route_table_id)
+  transit_gateway_route_table_id = try(each.value.transit_gateway_route_table_id, var.create_tgw ? aws_ec2_transit_gateway_route_table.this[0].id : var.transit_gateway_route_table_id)
 }
 
 resource "aws_ec2_transit_gateway_route_table_propagation" "this" {
