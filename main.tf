@@ -231,6 +231,7 @@ resource "aws_ec2_transit_gateway_peering_attachment_accepter" "this" {
     create_before_destroy = true
   }
 }
+
 # Transit Gateway Route Table
 resource "aws_ec2_transit_gateway_route" "peering" {
   for_each = local.tgw_peering_route_table_routes
@@ -241,11 +242,3 @@ resource "aws_ec2_transit_gateway_route" "peering" {
 
   depends_on = [aws_ec2_transit_gateway_peering_attachment_accepter.this]
 }
-
-# Transit Gateway Route Table Association
-# resource "aws_ec2_transit_gateway_route_table_association" "tgw_association" {
-#   for_each = local.tgw_peering_attachments_associations
-
-#   transit_gateway_attachment_id  = each.value.id
-#   transit_gateway_route_table_id = var.tgw_association_default_route_table_id
-# }
