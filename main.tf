@@ -207,7 +207,7 @@ resource "aws_ec2_transit_gateway_peering_attachment" "this" {
 
   tags = merge(
     local.tags,
-    { Name = "peering-${each.value.peer_region}" }
+    { Name = replace("peering-${each.key}-${each.value.peer_region}","_","-") }
   )
 
   lifecycle {
@@ -224,7 +224,7 @@ resource "aws_ec2_transit_gateway_peering_attachment_accepter" "this" {
 
   tags = merge(
     local.tags,
-    { Name = "peering-accepter-${each.value.peer_region}" }
+    { Name = replace("peering-accepter-${each.key}-${each.value.peer_region}","_","-") }
   )
 
   lifecycle {
