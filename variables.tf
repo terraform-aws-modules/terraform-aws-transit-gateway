@@ -136,6 +136,12 @@ variable "tgw_default_route_table_tags" {
   default     = {}
 }
 
+variable "accepter_region" {
+  description = "The region of the accepter VPC of the TGW Peering"
+  type        = string
+  default     = "eu-central-1"
+}
+
 ################################################################################
 # VPC Attachment
 ################################################################################

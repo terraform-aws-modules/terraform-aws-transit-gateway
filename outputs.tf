@@ -123,10 +123,10 @@ output "tgw_peering_routes" {
   description = "The transit gateway peering routes."
 }
 
-output "tgw_association" {
-  description = "Transit Gateway Route Table Association"
-  value = { for k, v in aws_ec2_transit_gateway_route_table_association.tgw_association : k => {
-    transit_gateway_attachment_id  = v.transit_gateway_attachment_id
-    transit_gateway_route_table_id = v.transit_gateway_route_table_id
-  } }
-}
+# output "tgw_association" {
+#   description = "Transit Gateway Route Table Association"
+#   value = { for k, v in aws_ec2_transit_gateway_route_table_association.tgw_association : k => {
+#     transit_gateway_attachment_id  = v.transit_gateway_attachment_id
+#     transit_gateway_route_table_id = v.transit_gateway_route_table_id
+#   } }
+# }
