@@ -58,6 +58,23 @@ module "vpc" {
 }
 ```
 
+## Peering Routes Module
+
+This module is used to manage peering routes.
+Usage
+```hcl
+module "peering_routes" {
+  source = "../modules/peering-routes"
+
+  tgw_id = "your_tgw_id"
+  cidr_blocks = ["your_cidr_blocks"]
+  tgw_peering_tag_name_value = "your_tgw_peering_tag_name_value"
+}
+```
+
+Additional info can be found in the [README.md](modules/peering-routes/README.md) file.
+
+
 ## Examples
 
 - [Complete example](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/tree/master/examples/complete) shows TGW in combination with the [VPC module](https://github.com/terraform-aws-modules/terraform-aws-vpc) and [Resource Access Manager (RAM)](https://aws.amazon.com/ram/).

@@ -27,12 +27,6 @@ variable "tgw_association_default_route_table_id" {
   default     = "tgw-rtb-0e2771324a8b5ccbc"
 }
 
-variable "extra_peering_routes_cidr_blocks" {
-  description = "A list of CIDR blocks to route"
-  type        = list(string)
-  default     = []
-}
-
 variable "tgw_peering_attachments" {
   description = "A map of transit gateway peering attachments"
   type = map(object({
