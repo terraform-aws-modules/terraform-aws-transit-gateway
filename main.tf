@@ -66,6 +66,8 @@ resource "aws_ec2_tag" "this" {
 resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
   for_each = var.vpc_attachments
 
+  depends_on = [ aws_ram_resource_share_accepter.this ]
+
   transit_gateway_id = var.create_tgw ? aws_ec2_transit_gateway.this[0].id : each.value.tgw_id
   vpc_id             = each.value.vpc_id
   subnet_ids         = each.value.subnet_ids
@@ -111,6 +113,7 @@ resource "aws_ec2_transit_gateway_route" "this" {
 }
 
 resource "aws_route" "this" {
+  depends_on = [ aws_ec2_transit_gateway_vpc_attachment.this ]
   for_each = { for x in local.vpc_route_table_destination_cidr : x.rtb_id => {
     cidr   = x.cidr,
     tgw_id = x.tgw_id
