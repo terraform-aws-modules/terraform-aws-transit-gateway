@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.12.2](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.12.1...v2.12.2) (2024-03-06)
+
+
+### Bug Fixes
+
+* Update CI workflow versions to remove deprecated runtime warnings ([#130](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/130)) ([d3391d6](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/commit/d3391d692ef1de6e8b3ccedfa1bf4aac54b91ca0))
+
 ### [2.12.1](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.12.0...v2.12.1) (2023-12-11)
 
 
