@@ -105,7 +105,8 @@ module "tgw_peer" {
       transit_gateway_default_route_table_propagation = false
 
       vpc_route_table_ids  = module.vpc1.private_route_table_ids
-      tgw_destination_cidr = "0.0.0.0/0"
+      tgw_destination_cidr = "10.0.0.0/8"
+      tgw_additional_cidrs = ["172.0.0/12"]
 
       tgw_routes = [
         {
