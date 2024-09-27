@@ -34,10 +34,11 @@ module "tgw" {
 
   vpc_attachments = {
     vpc1 = {
-      vpc_id       = module.vpc1.vpc_id
-      subnet_ids   = module.vpc1.private_subnets
-      dns_support  = true
-      ipv6_support = true
+      vpc_id                             = module.vpc1.vpc_id
+      subnet_ids                         = module.vpc1.private_subnets
+      security_group_referencing_support = true
+      dns_support                        = true
+      ipv6_support                       = true
 
       transit_gateway_default_route_table_association = false
       transit_gateway_default_route_table_propagation = false
