@@ -29,6 +29,9 @@ module "tgw" {
   # When "true" there is no need for RAM resources if using multiple AWS accounts
   enable_auto_accept_shared_attachments = true
 
+  # When "true", SG referencing support is enabled at the Transit Gateway level
+  enable_sg_referencing_support = true
+
   # When "true", allows service discovery through IGMP
   enable_multicast_support = false
 
