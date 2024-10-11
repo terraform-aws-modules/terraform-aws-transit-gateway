@@ -29,15 +29,19 @@ module "tgw" {
   # When "true" there is no need for RAM resources if using multiple AWS accounts
   enable_auto_accept_shared_attachments = true
 
+  # When "true", SG referencing support is enabled at the Transit Gateway level
+  enable_sg_referencing_support = true
+
   # When "true", allows service discovery through IGMP
   enable_multicast_support = false
 
   vpc_attachments = {
     vpc1 = {
-      vpc_id       = module.vpc1.vpc_id
-      subnet_ids   = module.vpc1.private_subnets
-      dns_support  = true
-      ipv6_support = true
+      vpc_id                             = module.vpc1.vpc_id
+      subnet_ids                         = module.vpc1.private_subnets
+      security_group_referencing_support = true
+      dns_support                        = true
+      ipv6_support                       = true
 
       transit_gateway_default_route_table_association = false
       transit_gateway_default_route_table_propagation = false

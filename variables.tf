@@ -92,6 +92,12 @@ variable "tgw_default_route_table_tags" {
   default     = {}
 }
 
+variable "enable_sg_referencing_support" {
+  description = "Indicates whether to enable security group referencing support"
+  type        = bool
+  default     = true
+}
+
 ################################################################################
 # VPC Attachment
 ################################################################################
