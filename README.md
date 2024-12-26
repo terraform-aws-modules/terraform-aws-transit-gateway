@@ -5,7 +5,7 @@ Terraform module which creates Transit Gateway resources on AWS.
 ## Usage with VPC module
 
 ```hcl
-module "tgw" {
+module "transit_gateway" {
   source  = "terraform-aws-modules/transit-gateway/aws"
 
   name        = "example"

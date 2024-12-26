@@ -20,11 +20,11 @@ locals {
 # Transit Gateway Module
 ################################################################################
 
-module "tgw" {
+module "transit_gateway" {
   source = "../../"
 
   name                        = local.name
-  description                 = "Example TGW connecting multiple VPCs"
+  description                 = "Example Transit Gateway connecting multiple VPCs"
   amazon_side_asn             = 64532
   transit_gateway_cidr_blocks = ["10.99.0.0/24"]
 
@@ -78,15 +78,15 @@ module "transit_gateway_route_table" {
   source = "../../modules/route-table"
 
   name               = local.name
-  transit_gateway_id = module.tgw.id
+  transit_gateway_id = module.transit_gateway.id
 
   associations = {
     vpc1 = {
-      transit_gateway_attachment_id = module.tgw.vpc_attachments["vpc1"].id
+      transit_gateway_attachment_id = module.transit_gateway.vpc_attachments["vpc1"].id
       propagate_route_table         = true
     }
     vpc2 = {
-      transit_gateway_attachment_id = module.tgw.vpc_attachments["vpc2"].id
+      transit_gateway_attachment_id = module.transit_gateway.vpc_attachments["vpc2"].id
       propagate_route_table         = true
     }
   }
