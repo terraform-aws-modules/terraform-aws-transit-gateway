@@ -14,7 +14,7 @@ variable "tags" {
 # Transit Gateway
 ################################################################################
 
-variable "create_tgw" {
+variable "create" {
   description = "Controls if TGW should be created (it affects almost all resources)"
   type        = bool
   default     = true
@@ -86,12 +86,6 @@ variable "tgw_tags" {
   default     = {}
 }
 
-variable "tgw_default_route_table_tags" {
-  description = "Additional tags for the Default TGW route table"
-  type        = map(string)
-  default     = {}
-}
-
 ################################################################################
 # VPC Attachment
 ################################################################################
@@ -102,7 +96,7 @@ variable "attachments" {
   default     = {}
 }
 
-variable "tgw_attachment_tags" {
+variable "attachment_tags" {
   description = "Additional tags for VPC attachments"
   type        = map(string)
   default     = {}
@@ -112,8 +106,8 @@ variable "tgw_attachment_tags" {
 # Route Table / Routes
 ################################################################################
 
-variable "create_tgw_routes" {
-  description = "Controls if TGW Route Table / Routes should be created"
+variable "create_route_table" {
+  description = "Controls if TGW Route Table should be created"
   type        = bool
   default     = true
 }
@@ -124,16 +118,10 @@ variable "transit_gateway_route_table_id" {
   default     = null
 }
 
-variable "tgw_route_table_tags" {
+variable "route_table_tags" {
   description = "Additional tags for the TGW route table"
   type        = map(string)
   default     = {}
-}
-
-variable "tgw_route_tables" {
-  description = "Custom TGW route tables to create"
-  type        = set(string)
-  default     = ["custom"]
 }
 
 ################################################################################
@@ -164,12 +152,6 @@ variable "ram_principals" {
   default     = []
 }
 
-variable "ram_resource_share_arn" {
-  description = "ARN of RAM resource share"
-  type        = string
-  default     = ""
-}
-
 variable "ram_tags" {
   description = "Additional tags for the RAM"
   type        = map(string)
@@ -186,7 +168,7 @@ variable "flow_logs" {
   default     = {}
 }
 
-variable "tgw_flow_log_tags" {
+variable "flow_log_tags" {
   description = "Additional tags for TGW or attachment flow logs"
   type        = map(string)
   default     = {}

@@ -8,43 +8,36 @@ locals {
           attachment_id = {
             peering = try(
               aws_ec2_transit_gateway_peering_attachment.this[attachment_key].id,
-              data.aws_ec2_transit_gateway_peering_attachment.this[attachment_key].id,
               null
             )
             vpc = try(
-              data.aws_ec2_transit_gateway_vpc_attachment.this[attachment_key].id,
+              aws_ec2_transit_gateway_vpc_attachment.this[attachment_key].id,
               null
             )
           }[attachment_value.attachment_type]
-          attachment_key                      = attachment_key
-          attachment_type                     = attachment_value.attachment_type
-          create_tgw_routes                   = try(attachment_value.create_tgw_routes, false)
-          route_dest                          = cidr_block
-          route_key                           = route_key
-          route_table                         = try(route_value.route_table, var.tgw_route_tables[0])
+          attachment_key  = attachment_key
+          attachment_type = attachment_value.attachment_type
+          create_routes   = try(attachment_value.create_routes, false)
+          route_dest      = cidr_block
+          route_key       = route_key
+          # route_table                         = try(route_value.route_table, var.tgw_route_tables[0])
           route_value                         = route_value
           tgw_default_route_table_association = try(attachment_value.transit_gateway_default_route_table_association, true)
           tgw_default_route_table_propagation = try(attachment_value.transit_gateway_default_route_table_propagation, true)
-        } if var.create_tgw && try(attachment_value.create_tgw_routes, false)
+        } if var.create && try(attachment_value.create_routes, false)
       ]
     ]
   ])
 
-  tgw_default_route_table_tags_merged = merge(
-    var.tags,
-    { Name = var.name },
-    var.tgw_default_route_table_tags,
-  )
-
   tgw_route_table_propagations = flatten([
     for attachment_key, attachment_value in var.attachments : [
       for tgw_rtb_name, tgw_rtb_value in try(attachment_value.tgw_route_table_propagations, {}) : {
-        attachment_id      = try(data.aws_ec2_transit_gateway_vpc_attachment.this[attachment_key].id, null)
+        attachment_id      = try(aws_ec2_transit_gateway_vpc_attachment.this[attachment_key].id, null)
         attachment_key     = attachment_key
         enable_propagation = try(tgw_rtb_value.enable, false)
         rtb_name           = tgw_rtb_name
-      } if var.create_tgw &&
-      try(attachment_value.create_tgw_routes, false) &&
+      } if var.create &&
+      try(attachment_value.create_routes, false) &&
       try(attachment_value.transit_gateway_default_route_table_propagation, true) == false &&
       attachment_value.attachment_type != "peering"
     ]
@@ -58,7 +51,7 @@ locals {
           create_vpc_routes = try(v.create_vpc_routes, false)
           ipv6_support      = try(v.ipv6_support, false)
           rtb_id            = rtb_id
-          tgw_id            = !var.create_tgw ? try(v.tgw_id, null) : null
+          tgw_id            = !var.create ? try(v.tgw_id, null) : null
         } if try(v.create_vpc_routes, false)
       ]
     ]
@@ -69,10 +62,18 @@ locals {
 # Transit Gateway
 ################################################################################
 
-resource "aws_ec2_transit_gateway" "this" {
-  count = var.create_tgw ? 1 : 0
+locals {
+  tgw_tags = merge(
+    var.tags,
+    { Name = var.name },
+    var.tgw_tags,
+  )
+}
 
-  description                     = coalesce(var.description, var.name)
+resource "aws_ec2_transit_gateway" "this" {
+  count = var.create ? 1 : 0
+
+  description                     = var.description
   amazon_side_asn                 = var.amazon_side_asn
   default_route_table_association = var.enable_default_route_table_association ? "enable" : "disable"
   default_route_table_propagation = var.enable_default_route_table_propagation ? "enable" : "disable"
@@ -88,15 +89,11 @@ resource "aws_ec2_transit_gateway" "this" {
     delete = try(var.timeouts.delete, null)
   }
 
-  tags = merge(
-    var.tags,
-    { Name = var.name },
-    var.tgw_tags,
-  )
+  tags = local.tgw_tags
 }
 
 resource "aws_ec2_tag" "this" {
-  for_each = { for k, v in local.tgw_default_route_table_tags_merged : k => v if var.create_tgw && var.enable_default_route_table_association }
+  for_each = { for k, v in local.tgw_tags : k => v if var.create && var.enable_default_route_table_association }
 
   resource_id = aws_ec2_transit_gateway.this[0].association_default_route_table_id
   key         = each.key
@@ -110,73 +107,37 @@ resource "aws_ec2_tag" "this" {
 resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
   for_each = { for k, v in var.attachments : k => v if v.attachment_type == "vpc" && try(v.create_vpc_attachment, false) }
 
-  transit_gateway_id = var.create_tgw ? aws_ec2_transit_gateway.this[0].id : each.value.tgw_id
+  transit_gateway_id = var.create ? aws_ec2_transit_gateway.this[0].id : each.value.tgw_id
   vpc_id             = each.value.vpc_id
   subnet_ids         = each.value.subnet_ids
 
   dns_support                                     = try(each.value.dns_support, true) ? "enable" : "disable"
   ipv6_support                                    = try(each.value.ipv6_support, false) ? "enable" : "disable"
   appliance_mode_support                          = try(each.value.appliance_mode_support, false) ? "enable" : "disable"
-  transit_gateway_default_route_table_association = try(each.value.transit_gateway_default_route_table_association, true)
-  transit_gateway_default_route_table_propagation = try(each.value.transit_gateway_default_route_table_propagation, true)
+  transit_gateway_default_route_table_association = try(each.value.transit_gateway_default_route_table_association, null)
+  transit_gateway_default_route_table_propagation = try(each.value.transit_gateway_default_route_table_propagation, null)
 
   tags = merge(
     var.tags,
     { Name = each.key },
-    var.tgw_attachment_tags,
+    var.attachment_tags,
+    try(each.value.tags, {}),
   )
-
-  lifecycle {
-    ignore_changes = [
-      transit_gateway_default_route_table_association,
-      transit_gateway_default_route_table_propagation,
-    ]
-  }
-}
-
-data "aws_ec2_transit_gateway_vpc_attachment" "this" {
-  for_each = { for k, v in var.attachments : k => v if v.attachment_type == "vpc" && try(v.enable_vpc_attachment, false) }
-
-  filter {
-    name   = "vpc-id"
-    values = [each.value.vpc_id]
-  }
-
-  filter {
-    name   = "transit-gateway-id"
-    values = [var.create_tgw ? aws_ec2_transit_gateway.this[0].id : each.value.tgw_id]
-  }
-
-  filter {
-    name   = "state"
-    values = ["pendingAcceptance", "available"]
-  }
-
-  depends_on = [
-    aws_ec2_transit_gateway_vpc_attachment.this
-  ]
 }
 
 resource "aws_ec2_transit_gateway_vpc_attachment_accepter" "this" {
   for_each = { for k, v in var.attachments : k => v if v.attachment_type == "vpc" && try(v.accept_vpc_attachment, false) }
 
-  transit_gateway_attachment_id                   = data.aws_ec2_transit_gateway_vpc_attachment.this[each.key].id
-  transit_gateway_default_route_table_association = try(each.value.transit_gateway_default_route_table_association, true)
-  transit_gateway_default_route_table_propagation = try(each.value.transit_gateway_default_route_table_propagation, true)
+  transit_gateway_attachment_id                   = aws_ec2_transit_gateway_vpc_attachment.this[0]
+  transit_gateway_default_route_table_association = try(each.value.transit_gateway_default_route_table_association, null)
+  transit_gateway_default_route_table_propagation = try(each.value.transit_gateway_default_route_table_propagation, null)
 
   tags = merge(
     var.tags,
     { Name = each.key },
-    var.tgw_attachment_tags,
+    var.attachment_tags,
     try(each.value.tags, {}),
   )
-
-  lifecycle {
-    ignore_changes = [
-      transit_gateway_default_route_table_association,
-      transit_gateway_default_route_table_propagation,
-    ]
-  }
 }
 
 ################################################################################
@@ -184,26 +145,27 @@ resource "aws_ec2_transit_gateway_vpc_attachment_accepter" "this" {
 ################################################################################
 
 resource "aws_ec2_transit_gateway_route_table" "this" {
-  for_each = var.create_tgw ? var.tgw_route_tables : toset([])
+  count = var.create && var.create_route_table ? 1 : 0
 
   transit_gateway_id = aws_ec2_transit_gateway.this[0].id
 
   tags = merge(
     var.tags,
-    { Name = "${var.name}-${each.key}" },
-    var.tgw_route_table_tags,
+    { Name = var.name },
+    var.route_table_tags,
   )
 }
 
 resource "aws_ec2_transit_gateway_route" "this" {
-  for_each = { for attachment_route in local.attachments_with_route_keys : "${attachment_route.attachment_key}-${attachment_route.route_table}-${attachment_route.route_dest}" => attachment_route if var.create_tgw && attachment_route.route_dest != "no-cidrs-defined" }
+  for_each = { for attachment_route in local.attachments_with_route_keys : "${attachment_route.attachment_key}-${attachment_route.route_table}-${attachment_route.route_dest}" => attachment_route if var.create && attachment_route.route_dest != "no-cidrs-defined" }
 
   destination_cidr_block = each.value.route_dest
   blackhole              = try(each.value.route_value.blackhole, null)
 
-  transit_gateway_route_table_id = var.create_tgw ? aws_ec2_transit_gateway_route_table.this[each.value.route_table].id : var.transit_gateway_route_table_id
+  transit_gateway_route_table_id = var.create ? aws_ec2_transit_gateway_route_table.this[0].id : var.transit_gateway_route_table_id
   transit_gateway_attachment_id  = try(each.value.route_value.blackhole, false) == false ? each.value.attachment_id : null
 }
+
 
 resource "aws_route" "this" {
   for_each = { for route in local.vpc_route_table_destinations : "${route.rtb_id}-${route.cidr}" => route if route.create_vpc_routes }
@@ -211,25 +173,18 @@ resource "aws_route" "this" {
   route_table_id              = each.value.rtb_id
   destination_cidr_block      = try(each.value.ipv6_support, false) ? null : each.value.cidr
   destination_ipv6_cidr_block = try(each.value.ipv6_support, false) ? each.value.cidr : null
-  transit_gateway_id          = var.create_tgw ? aws_ec2_transit_gateway.this[0].id : each.value.tgw_id
-
-  depends_on = [
-    aws_ec2_transit_gateway.this
-  ]
+  transit_gateway_id          = aws_ec2_transit_gateway.this[0].id
 }
 
 resource "aws_ec2_transit_gateway_route_table_association" "this" {
-  for_each = { for attachment_route in local.attachments_with_route_keys : "${attachment_route.attachment_key}-${attachment_route.route_table}" => attachment_route... if var.create_tgw && attachment_route.create_tgw_routes && attachment_route.accept_tgw_peering == null && attachment_route.tgw_default_route_table_association == false && contains(keys(aws_ec2_transit_gateway_route_table.this), attachment_route.route_table)
+  for_each = { for attachment_route in local.attachments_with_route_keys : "${attachment_route.attachment_key}-${attachment_route.route_table}" => attachment_route... if var.create && attachment_route.create_routes && attachment_route.accept_tgw_peering == null && attachment_route.tgw_default_route_table_association == false && contains(keys(aws_ec2_transit_gateway_route_table.this), attachment_route.route_table)
   }
 
   transit_gateway_attachment_id  = each.value[0].attachment_id
-  transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.this[each.value[0].route_table].id
+  transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.this[0].id
 
   depends_on = [
     aws_ec2_transit_gateway_peering_attachment.this,
-    data.aws_ec2_transit_gateway_peering_attachment.this,
-    data.aws_ec2_transit_gateway_vpc_attachment.this,
-    aws_ec2_transit_gateway_route_table.this
   ]
 }
 
@@ -238,11 +193,6 @@ resource "aws_ec2_transit_gateway_route_table_propagation" "this" {
 
   transit_gateway_attachment_id  = each.value.attachment_id
   transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.this[each.value.rtb_name].id
-
-  depends_on = [
-    data.aws_ec2_transit_gateway_vpc_attachment.this,
-    aws_ec2_transit_gateway_route_table.this
-  ]
 }
 
 ################################################################################
@@ -250,7 +200,7 @@ resource "aws_ec2_transit_gateway_route_table_propagation" "this" {
 ################################################################################
 
 resource "aws_ram_resource_share" "this" {
-  count = var.create_tgw && var.share_tgw ? 1 : 0
+  count = var.create && var.share_tgw ? 1 : 0
 
   name                      = coalesce(var.ram_name, var.name)
   allow_external_principals = var.ram_allow_external_principals
@@ -263,23 +213,17 @@ resource "aws_ram_resource_share" "this" {
 }
 
 resource "aws_ram_resource_association" "this" {
-  count = var.create_tgw && var.share_tgw ? 1 : 0
+  count = var.create && var.share_tgw ? 1 : 0
 
   resource_arn       = aws_ec2_transit_gateway.this[0].arn
   resource_share_arn = aws_ram_resource_share.this[0].id
 }
 
 resource "aws_ram_principal_association" "this" {
-  for_each = var.create_tgw && var.share_tgw ? var.ram_principals : []
+  for_each = { for k, v in var.ram_principals : k => v if var.create && var.share_tgw }
 
   principal          = each.value
   resource_share_arn = aws_ram_resource_share.this[0].arn
-}
-
-resource "aws_ram_resource_share_accepter" "this" {
-  count = !var.create_tgw && var.share_tgw ? 1 : 0
-
-  share_arn = var.ram_resource_share_arn
 }
 
 ################################################################################
@@ -287,42 +231,59 @@ resource "aws_ram_resource_share_accepter" "this" {
 ################################################################################
 
 resource "aws_ec2_transit_gateway_peering_attachment" "this" {
-  for_each = { for k, v in var.attachments : k => v if v.attachment_type == "peering" && try(v.create_tgw_peering, false) }
+  for_each = { for k, v in var.attachments : k => v if v.attachment_type == "peering" && try(v.create_peering, false) }
 
   peer_account_id         = each.value.peer_account_id
   peer_region             = each.value.peer_region
   peer_transit_gateway_id = each.value.peer_tgw_id
   transit_gateway_id      = aws_ec2_transit_gateway.this[0].id
 
-  tags = merge(
-    var.tags,
-    { Name = var.name },
-    var.tgw_tags,
-  )
-}
-
-data "aws_ec2_transit_gateway_peering_attachment" "this" {
-  for_each = { for k, v in var.attachments : k => v if v.attachment_type == "peering" && try(v.enable_peering_attachment, false) && try(v.create_tgw_peering, false) == false }
-
-  filter {
-    name   = "remote-owner-id"
-    values = [each.value.peer_account_id]
-  }
-
-  filter {
-    name   = "state"
-    values = ["pendingAcceptance", "available"]
-  }
+  tags = var.tags
 }
 
 resource "aws_ec2_transit_gateway_peering_attachment_accepter" "this" {
   for_each = { for k, v in var.attachments : k => v if try(v.accept_tgw_peering, false) }
 
-  transit_gateway_attachment_id = data.aws_ec2_transit_gateway_peering_attachment.this[each.key].id
+  transit_gateway_attachment_id = aws_ec2_transit_gateway_peering_attachment.this[each.key].id
+
+  tags = var.tags
+}
+
+################################################################################
+# Flow Log(s)
+################################################################################
+
+resource "aws_flow_log" "this" {
+  for_each = { for k, v in var.flow_logs : "${v.key}-${v.dest_type}" => v if v.dest_enabled }
+
+  log_destination_type = each.value.dest_type
+  log_destination = {
+    s3               = each.value.s3_dest_arn,
+    cloud-watch-logs = each.value.cloudwatch_dest_arn
+  }[each.value.dest_type]
+  log_format         = try(each.value.log_format, null)
+  iam_role_arn       = each.value.dest_type == "cloud-watch-logs" ? each.value.cloudwatch_iam_role_arn : null
+  traffic_type       = try(each.value.traffic_type, "ALL")
+  transit_gateway_id = each.value.key == "tgw" && var.create ? aws_ec2_transit_gateway.this[0].id : null
+  transit_gateway_attachment_id = each.value.key != "tgw" ? lookup({
+    vpc     = each.value.create_vpc_attachment ? aws_ec2_transit_gateway_vpc_attachment.this[each.value.key].id : null
+    peering = each.value.create_peering ? aws_ec2_transit_gateway_peering_attachment.this[each.value.key].id : null
+  }, each.value.attachment_type, null) : null
+  # When transit_gateway_id or transit_gateway_attachment_id is specified, max_aggregation_interval must be 60 seconds (1 minute).
+  max_aggregation_interval = 60
+
+  dynamic "destination_options" {
+    for_each = each.value.dest_type == "s3" ? [true] : []
+
+    content {
+      file_format                = try(each.value.file_format, "parquet")
+      hive_compatible_partitions = try(each.value.hive_compatible_partitions, false)
+      per_hour_partition         = try(each.value.per_hour_partition, true)
+    }
+  }
 
   tags = merge(
     var.tags,
-    { Name = var.name },
-    var.tgw_tags,
+    var.flow_log_tags,
   )
 }

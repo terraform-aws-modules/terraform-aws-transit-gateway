@@ -64,7 +64,6 @@ module "primary_hub" {
   description     = "Primary Hub TGW shared with several other AWS accounts in ${local.primary_region}"
   amazon_side_asn = 64532
 
-  create_tgw = true
   # Creates RAM resources for hub (create_tgw = true) accounts
   share_tgw = true
 
@@ -141,11 +140,6 @@ module "primary_hub" {
       key          = "peer_hub"
       s3_dest_arn  = local.primary_hub_flow_logs_s3_dest_arn
     },
-  ]
-
-  tgw_route_tables = [
-    "prod",
-    "staging",
   ]
 
   attachments = {
@@ -299,7 +293,6 @@ module "peer_hub" {
   description     = "Peer Hub TGW shared with several other AWS accounts in ${local.secondary_region}"
   amazon_side_asn = 64532
 
-  create_tgw = true
   # Creates RAM resources for hub (create_tgw = true) accounts
   share_tgw = true
 
@@ -348,11 +341,6 @@ module "peer_hub" {
       key                     = "peer_hub_local"
       s3_dest_arn             = local.peer_hub_flow_logs_s3_dest_arn
     },
-  ]
-
-  tgw_route_tables = [
-    "prod",
-    "staging",
   ]
 
   attachments = {
@@ -491,12 +479,10 @@ module "primary_spoke" {
     aws = aws.primary_spoke
   }
 
-  create_tgw = false
   # Creates RAM Resource Share Accepter for spoke (create_tgw = false) accounts
   share_tgw = true
 
-  ram_resource_share_arn = module.primary_hub.ram_resource_share_id
-  description            = "Primary Spoke sharing the TGW from the Primary Hub in ${local.primary_region}"
+  description = "Primary Spoke sharing the TGW from the Primary Hub in ${local.primary_region}"
 
   flow_logs = [
     {
@@ -573,12 +559,10 @@ module "peer_spoke" {
     aws = aws.peer_spoke
   }
 
-  create_tgw = false
   # Creates RAM Resource Share Accepter for spoke (create_tgw = false) accounts
   share_tgw = true
 
-  ram_resource_share_arn = module.peer_hub.ram_resource_share_id
-  description            = "Peer Spoke sharing the TGW from the Peer Hub in ${local.secondary_region}"
+  description = "Peer Spoke sharing the TGW from the Peer Hub in ${local.secondary_region}"
 
   flow_logs = [
     {

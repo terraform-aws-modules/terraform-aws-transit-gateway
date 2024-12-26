@@ -29,7 +29,6 @@ module "tgw" {
   description     = "My TGW connecting multiple VPCs"
   amazon_side_asn = 64532
 
-  create_tgw = true
   # Creates RAM resources for hub (create_tgw = true) accounts
   share_tgw = false
 
@@ -107,11 +106,6 @@ module "tgw" {
       key                     = "vpc2"
       s3_dest_arn             = local.flow_logs_s3_dest_arn
     },
-  ]
-
-  tgw_route_tables = [
-    "prod",
-    "staging",
   ]
 
   attachments = {
