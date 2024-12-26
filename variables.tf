@@ -112,6 +112,12 @@ variable "tgw_attachment_tags" {
 # Route Table / Routes
 ################################################################################
 
+variable "create_tgw_routes" {
+  description = "Controls if TGW Route Table / Routes should be created"
+  type        = bool
+  default     = true
+}
+
 variable "transit_gateway_route_table_id" {
   description = "Identifier of EC2 Transit Gateway Route Table to use with the Target Gateway when reusing it between multiple TGWs"
   type        = string

@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.12.2](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.12.1...v2.12.2) (2024-03-06)
+
+
+### Bug Fixes
+
+* Update CI workflow versions to remove deprecated runtime warnings ([#130](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/130)) ([d3391d6](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/commit/d3391d692ef1de6e8b3ccedfa1bf4aac54b91ca0))
+
+### [2.12.1](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.12.0...v2.12.1) (2023-12-11)
+
+
+### Bug Fixes
+
+* Use IPv6 CIDR block destination on route when IPv6 support is enabled ([#102](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/102)) ([f70ec98](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/commit/f70ec98e82ebab67b03450ccb4b2717ae8a42578))
+
+## [2.12.0](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.11.0...v2.12.0) (2023-12-11)
+
+
+### Features
+
+* Allow creating VPC routes for already existing or shared TGW ([#114](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/114)) ([20c4dc4](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/commit/20c4dc4f698bc9edc7b7936ee7befb50043ded8a))
+
+## [2.11.0](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.10.0...v2.11.0) (2023-12-11)
+
+
+### Features
+
+* Make TGW routing creation optional ([#119](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/119)) ([1661dfa](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/commit/1661dfa3f538c8d5b4f612a7c0982e4afd20daca))
+
 ## [2.10.0](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.9.0...v2.10.0) (2023-04-26)
 
 

@@ -8,25 +8,22 @@ Terraform module which creates Transit Gateway resources on AWS.
 module "tgw" {
   source  = "terraform-aws-modules/transit-gateway/aws"
 
-  name        = "my-tgw"
-  description = "My TGW shared with several other AWS accounts"
+  name        = "example"
+  description = "Example TGW shared with several other AWS accounts"
 
-  # When "true" there is no need for RAM resources if using multiple AWS accounts
+  # When `true` there is no need for RAM resources if using multiple AWS accounts
   enable_auto_accept_shared_attachments = true
 
   vpc_attachments = {
     vpc = {
       attachment_type       = "vpc"
       create_vpc_attachment = true
-      # Keep enable_vpc_attachment = false until the corresponding VPC attachment is created
-      enable_vpc_attachment = false
-      vpc_id       = "vpc-1234556abcdef"
-      subnet_ids   = ["subnet-abcde012", "subnet-bcde012a", "subnet-fghi345a"]
+      vpc_id                = "vpc-1234556abcdef"
+      subnet_ids            = ["subnet-abcde012", "subnet-bcde012a", "subnet-fghi345a"]
+      
       dns_support  = true
       ipv6_support = true
 
-      # Keep create_tgw_routes = false until the VPC/peering attachments exist/are accepted
-      create_tgw_routes = true
       tgw_routes = {
         vpc = {
           destination_cidr_block = "30.0.0.0/16"
@@ -45,130 +42,12 @@ module "tgw" {
 }
 ```
 
-## Order of operations
-
-Order of operations is especially important with this module given its intended use case of connecting multiple VPCs/accounts.
-
-1. For all "hubs" (accounts/modules where the Transit Gateways will be created):
-
-- Set:
-
-  ```hcl
-  create_tgw = true
-  ```
-
-- Set:
-
-  ```hcl
-  share_tgw = true
-  ```
-
-  if using Resource Access Manager (RAM).
-
-- Set:
-
-  ```hcl
-  create_tgw_peering = true
-  ```
-
-  for any TGW Peering attachments that this hub will be the requester for.
-
-- Set:
-
-  ```hcl
-  create_vpc_attachment = true
-  ```
-
-  for all attachments that **are** local to this TGW's VPC.
-
-- Apply those changes.
-
-2. For all "hubs" (accounts/modules where the Transit Gateways will be created) that will be accepting TGW Peering attachments:
-
-- Set:
-
-  ```hcl
-  accept_tgw_peering        = true
-  enable_peering_attachment = true
-  ```
-
-  for all TGW Peering attachments that need to be accepted.
-
-- Set:
-
-  ```hcl
-  enable_peering_attachment = true
-  ```
-
-  for all remaining `attachment_type = "peering"` attachments.
-
-- Apply those changes.
-
-3. For all "spokes" (accounts/modules where the Transit Gateways will **not** be created):
-
-- Set:
-
-  ```hcl
-  create_vpc_attachment = true
-  ```
-
-  for all attachments that **are** local to this spoke's VPCs (the module's AWS provider must have access).
-
-- Apply those changes.
-
-4. For all "hubs" (accounts/modules where the Transit Gateways will be created) that will be using Resource Access Manager (RAM) to accept VPC attachments from spokes:
-
-- Set:
-
-  ```hcl
-  accept_vpc_attachment = true
-  enable_vpc_attachment = true
-  ```
-
-  for all VPC attachments that need to be accepted.
-
-- Apply those changes.
-
-5. For all "hubs" and "spokes":
-
-- Set:
-
-  ```hcl
-  create_vpc_routes = true
-  ```
-
-  for all attachments that **are not** local to this TGW's VPC (local VPC routes are inherently created in each route table).
-
-- Set:
-
-  ```hcl
-  enable_vpc_attachment = true
-  ```
-
-  for all VPC attachments.
-
-- Apply those changes.
-
-6. For all "hubs":
-
-- Set:
-
-  ```hcl
-  create_tgw_routes = true
-  ```
-
-  for all attachments of any type.
-
-- Apply those changes.
-
-That's it!  You should now be able to test connectivity between VPCs/accounts and enable Flow Logs as desired.
-
 ## Examples
 
 - [Complete example](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/tree/master/examples/complete) shows TGW in combination with the [VPC module](https://github.com/terraform-aws-modules/terraform-aws-vpc).
 - [Multi-account example](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/tree/master/examples/multi-account) shows TGW resources shared with different AWS accounts (via [Resource Access Manager (RAM)](https://aws.amazon.com/ram/)).
 
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -216,6 +95,7 @@ No modules.
 | <a name="input_amazon_side_asn"></a> [amazon\_side\_asn](#input\_amazon\_side\_asn) | The Autonomous System Number (ASN) for the Amazon side of the gateway. By default the TGW is created with the current default Amazon ASN. | `string` | `null` | no |
 | <a name="input_attachments"></a> [attachments](#input\_attachments) | Maps of maps of VPC details to attach to TGW. Type 'any' to disable type validation by Terraform. | `any` | `{}` | no |
 | <a name="input_create_tgw"></a> [create\_tgw](#input\_create\_tgw) | Controls if TGW should be created (it affects almost all resources) | `bool` | `true` | no |
+| <a name="input_create_tgw_routes"></a> [create\_tgw\_routes](#input\_create\_tgw\_routes) | Controls if TGW Route Table / Routes should be created | `bool` | `true` | no |
 | <a name="input_description"></a> [description](#input\_description) | Description of the EC2 Transit Gateway | `string` | `null` | no |
 | <a name="input_enable_auto_accept_shared_attachments"></a> [enable\_auto\_accept\_shared\_attachments](#input\_enable\_auto\_accept\_shared\_attachments) | Whether resource attachment requests are automatically accepted | `bool` | `false` | no |
 | <a name="input_enable_default_route_table_association"></a> [enable\_default\_route\_table\_association](#input\_enable\_default\_route\_table\_association) | Whether resource attachments are automatically associated with the default association route table | `bool` | `true` | no |
@@ -236,7 +116,7 @@ No modules.
 | <a name="input_tgw_default_route_table_tags"></a> [tgw\_default\_route\_table\_tags](#input\_tgw\_default\_route\_table\_tags) | Additional tags for the Default TGW route table | `map(string)` | `{}` | no |
 | <a name="input_tgw_flow_log_tags"></a> [tgw\_flow\_log\_tags](#input\_tgw\_flow\_log\_tags) | Additional tags for TGW or attachment flow logs | `map(string)` | `{}` | no |
 | <a name="input_tgw_route_table_tags"></a> [tgw\_route\_table\_tags](#input\_tgw\_route\_table\_tags) | Additional tags for the TGW route table | `map(string)` | `{}` | no |
-| <a name="input_tgw_route_tables"></a> [tgw\_route\_tables](#input\_tgw\_route\_tables) | Custom TGW route tables to create | `set(string)` | <pre>[<br>  "custom"<br>]</pre> | no |
+| <a name="input_tgw_route_tables"></a> [tgw\_route\_tables](#input\_tgw\_route\_tables) | Custom TGW route tables to create | `set(string)` | <pre>[<br/>  "custom"<br/>]</pre> | no |
 | <a name="input_tgw_tags"></a> [tgw\_tags](#input\_tgw\_tags) | Additional tags for the TGW | `map(string)` | `{}` | no |
 | <a name="input_timeouts"></a> [timeouts](#input\_timeouts) | Create, update, and delete timeout configurations for the transit gateway | `map(string)` | `{}` | no |
 | <a name="input_transit_gateway_cidr_blocks"></a> [transit\_gateway\_cidr\_blocks](#input\_transit\_gateway\_cidr\_blocks) | One or more IPv4 or IPv6 CIDR blocks for the transit gateway. Must be a size /24 CIDR block or larger for IPv4, or a size /64 CIDR block or larger for IPv6 | `list(string)` | `[]` | no |
@@ -263,7 +143,7 @@ No modules.
 | <a name="output_ec2_transit_gateway_vpc_attachment_ids"></a> [ec2\_transit\_gateway\_vpc\_attachment\_ids](#output\_ec2\_transit\_gateway\_vpc\_attachment\_ids) | List of EC2 Transit Gateway VPC Attachment identifiers |
 | <a name="output_ram_principal_association_id"></a> [ram\_principal\_association\_id](#output\_ram\_principal\_association\_id) | The Amazon Resource Name (ARN) of the Resource Share and the principal, separated by a comma |
 | <a name="output_ram_resource_share_id"></a> [ram\_resource\_share\_id](#output\_ram\_resource\_share\_id) | The Amazon Resource Name (ARN) of the resource share |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->
 
 ## Authors
 

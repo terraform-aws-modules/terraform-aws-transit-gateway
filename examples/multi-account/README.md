@@ -14,7 +14,7 @@ $ terraform apply
 
 Note that this example may create resources which cost money. Run `terraform destroy` when you don't need these resources.
 
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -89,4 +89,4 @@ No inputs.
 | <a name="output_primary_hub_ram_resource_share_id"></a> [primary\_hub\_ram\_resource\_share\_id](#output\_primary\_hub\_ram\_resource\_share\_id) | The Amazon Resource Name (ARN) of the resource share |
 | <a name="output_primary_spoke_ec2_transit_gateway_vpc_attachment"></a> [primary\_spoke\_ec2\_transit\_gateway\_vpc\_attachment](#output\_primary\_spoke\_ec2\_transit\_gateway\_vpc\_attachment) | Map of EC2 Transit Gateway VPC Attachment attributes |
 | <a name="output_primary_spoke_ec2_transit_gateway_vpc_attachment_ids"></a> [primary\_spoke\_ec2\_transit\_gateway\_vpc\_attachment\_ids](#output\_primary\_spoke\_ec2\_transit\_gateway\_vpc\_attachment\_ids) | List of EC2 Transit Gateway VPC Attachment identifiers |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->
