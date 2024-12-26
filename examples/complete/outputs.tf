@@ -35,3 +35,21 @@ output "ram_resource_share_id" {
   description = "The Amazon Resource Name (ARN) of the resource share"
   value       = module.tgw.ram_resource_share_id
 }
+
+################################################################################
+# VPC Attachment
+################################################################################
+
+output "vpc_attachments" {
+  description = "Map of VPC attachments created"
+  value       = module.tgw.vpc_attachments
+}
+
+################################################################################
+# TGW Peering Attachment
+################################################################################
+
+output "peering_attachments" {
+  description = "Map of TGW peering attachments created"
+  value       = module.tgw.peering_attachments
+}

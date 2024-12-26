@@ -35,3 +35,21 @@ output "ram_resource_share_id" {
   description = "The Amazon Resource Name (ARN) of the resource share"
   value       = try(aws_ram_resource_share.this[0].id, null)
 }
+
+################################################################################
+# VPC Attachment
+################################################################################
+
+output "vpc_attachments" {
+  description = "Map of VPC attachments created"
+  value       = aws_ec2_transit_gateway_vpc_attachment.this
+}
+
+################################################################################
+# TGW Peering Attachment
+################################################################################
+
+output "peering_attachments" {
+  description = "Map of TGW peering attachments created"
+  value       = aws_ec2_transit_gateway_peering_attachment.this
+}

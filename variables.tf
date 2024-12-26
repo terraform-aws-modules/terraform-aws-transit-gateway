@@ -35,13 +35,13 @@ variable "amazon_side_asn" {
 variable "enable_default_route_table_association" {
   description = "Whether resource attachments are automatically associated with the default association route table"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "enable_default_route_table_propagation" {
   description = "Whether resource attachments automatically propagate routes to the default propagation route table"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "enable_auto_accept_shared_attachments" {

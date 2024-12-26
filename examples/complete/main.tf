@@ -2,15 +2,13 @@ provider "aws" {
   region = local.region
 }
 
+data "aws_caller_identity" "current" {}
+
 locals {
-  name   = "ex-tgw-${replace(basename(path.cwd), "_", "-")}"
+  name   = "ex-tgw-${basename(path.cwd)}"
   region = "eu-west-1"
 
-  account_id = "012345678901"
-
-  flow_logs_cloudwatch_dest_arn     = "arn:aws:logs:${local.region}:${local.account_id}:log-group:/aws/tgw/"
-  flow_logs_cloudwatch_iam_role_arn = "arn:aws:iam::${local.account_id}:role/tgw-flow-logs-to-cloudwatch"
-  flow_logs_s3_dest_arn             = "arn:aws:s3:::tgw-flow-logs-${local.account_id}-${local.region}"
+  account_id = data.aws_caller_identity.current.account_id
 
   tags = {
     Example    = local.name
@@ -25,167 +23,80 @@ locals {
 module "tgw" {
   source = "../../"
 
-  name            = local.name
-  description     = "My TGW connecting multiple VPCs"
-  amazon_side_asn = 64532
-
-  # Creates RAM resources for hub (create_tgw = true) accounts
-  share_tgw = false
-
+  name                        = local.name
+  description                 = "Example TGW connecting multiple VPCs"
+  amazon_side_asn             = 64532
   transit_gateway_cidr_blocks = ["10.99.0.0/24"]
 
-  # When "true" there is no need for RAM resources if using multiple AWS accounts
-  enable_auto_accept_shared_attachments = false
-
-  enable_default_route_table_association = false
-  enable_default_route_table_propagation = false
-
-  # When "true", allows service discovery through IGMP
-  enable_multicast_support = false
-
-  flow_logs = [
-    # Flow logs for the entire TGW
-    {
-      cloudwatch_dest_arn     = local.flow_logs_cloudwatch_dest_arn
-      cloudwatch_iam_role_arn = local.flow_logs_cloudwatch_iam_role_arn
-      dest_enabled            = true
-      dest_type               = "cloud-watch-logs"
-      key                     = "tgw"
-      s3_dest_arn             = null
-    },
-    {
-      cloudwatch_dest_arn     = null
-      cloudwatch_iam_role_arn = null
-      dest_enabled            = true
-      dest_type               = "s3"
-      key                     = "tgw"
-      s3_dest_arn             = local.flow_logs_s3_dest_arn
-    },
-    # Flow logs for individual attachments
-    {
-      attachment_type         = "vpc"
-      cloudwatch_dest_arn     = local.flow_logs_cloudwatch_dest_arn
-      cloudwatch_iam_role_arn = local.flow_logs_cloudwatch_iam_role_arn
-      create_tgw_peering      = false
-      create_vpc_attachment   = true
-      dest_enabled            = true
-      dest_type               = "cloud-watch-logs"
-      key                     = "vpc1"
-      s3_dest_arn             = null
-    },
-    {
-      attachment_type         = "vpc"
-      cloudwatch_dest_arn     = null
-      cloudwatch_iam_role_arn = null
-      create_tgw_peering      = false
-      create_vpc_attachment   = true
-      dest_enabled            = true
-      dest_type               = "s3"
-      key                     = "vpc1"
-      s3_dest_arn             = local.flow_logs_s3_dest_arn
-    },
-    {
-      attachment_type         = "vpc"
-      cloudwatch_dest_arn     = local.flow_logs_cloudwatch_dest_arn
-      cloudwatch_iam_role_arn = local.flow_logs_cloudwatch_iam_role_arn
-      create_tgw_peering      = false
-      create_vpc_attachment   = true
-      dest_enabled            = true
-      dest_type               = "cloud-watch-logs"
-      key                     = "vpc2"
-      s3_dest_arn             = null
-    },
-    {
-      attachment_type         = "vpc"
-      cloudwatch_dest_arn     = null
-      cloudwatch_iam_role_arn = null
-      create_tgw_peering      = false
-      create_vpc_attachment   = true
-      dest_enabled            = true
-      dest_type               = "s3"
-      key                     = "vpc2"
-      s3_dest_arn             = local.flow_logs_s3_dest_arn
-    },
-  ]
+  # flow_logs = {
+  #   tgw = {
+  #     log_destination      = module.s3_bucket.s3_bucket_arn
+  #     log_destination_type = "s3"
+  #     traffic_type         = "ALL"
+  #     destination_options = {
+  #       file_format        = "parquet"
+  #       per_hour_partition = true
+  #     }
+  #   }
+  #   vpc1-attach = {
+  #     log_destination      = module.s3_bucket.s3_bucket_arn
+  #     log_destination_type = "s3"
+  #     traffic_type         = "ALL"
+  #     destination_options = {
+  #       file_format        = "parquet"
+  #       per_hour_partition = true
+  #     }
+  #   }
+  #   vpc2-attach = {
+  #     log_destination      = module.s3_bucket.s3_bucket_arn
+  #     log_destination_type = "s3"
+  #     traffic_type         = "ALL"
+  #     destination_options = {
+  #       file_format        = "parquet"
+  #       per_hour_partition = true
+  #     }
+  #   }
+  # }
 
   vpc_attachments = {
     vpc1 = {
-      attachment_type       = "vpc"
-      create_vpc_attachment = true
-      # Keep enable_vpc_attachment = false until the corresponding VPC attachment is created/accepted
-      enable_vpc_attachment                           = false
-      vpc_id                                          = module.vpc1.vpc_id
-      subnet_ids                                      = module.vpc1.private_subnets
-      transit_gateway_default_route_table_association = false
-      transit_gateway_default_route_table_propagation = false
-      dns_support                                     = true
-      ipv6_support                                    = true
-      # Keep create_tgw_routes = false until the VPC/peering attachments exist/are accepted
-      create_tgw_routes = true
-      tgw_route_table_propagations = {
-        prod = {
-          enable = true
-        },
-        staging = {
-          enable = true
-        }
-      }
-      tgw_routes = {
-        vpc1 = {
-          destination_cidr_blocks = module.vpc1.private_subnets_cidr_blocks
-          route_table             = "prod"
-        }
-        blackhole = {
-          blackhole               = true
-          destination_cidr_blocks = ["0.0.0.0/0"]
-          route_table             = "prod"
-        }
-      }
+      vpc_id       = module.vpc1.vpc_id
+      subnet_ids   = module.vpc1.private_subnets
+      ipv6_support = true
     }
+
     vpc2 = {
-      attachment_type       = "vpc"
-      create_vpc_attachment = true
-      # Keep enable_vpc_attachment = false until the corresponding VPC attachment is created/accepted
-      enable_vpc_attachment                           = false
-      vpc_id                                          = module.vpc2.vpc_id
-      subnet_ids                                      = module.vpc2.private_subnets
-      transit_gateway_default_route_table_association = false
-      transit_gateway_default_route_table_propagation = false
-      dns_support                                     = true
-      ipv6_support                                    = false
-      # Keep create_tgw_routes = false until the VPC/peering attachments exist/are accepted
-      create_tgw_routes = true
-      tgw_route_table_propagations = {
-        prod = {
-          enable = true
-        },
-        staging = {
-          enable = true
-        }
-      }
-      tgw_routes = {
-        vpc2 = {
-          destination_cidr_blocks = module.vpc2.private_subnets_cidr_blocks
-          route_table             = "prod"
-        }
-        blackhole = {
-          blackhole               = true
-          destination_cidr_blocks = ["0.0.0.0/0"]
-          route_table             = "prod"
-        }
-      }
-
-      tags = {
-        Name = "${local.name}-vpc2"
-      }
-
+      vpc_id     = module.vpc2.vpc_id
+      subnet_ids = module.vpc2.private_subnets
     }
   }
 
-  ram_allow_external_principals = false
-  ram_principals = [
-    local.account_id
-  ]
+  tags = local.tags
+}
+
+module "transit_gateway_route_table" {
+  source = "../../modules/route-table"
+
+  name               = local.name
+  transit_gateway_id = module.tgw.id
+
+  associations = {
+    vpc1 = {
+      transit_gateway_attachment_id = module.tgw.vpc_attachments["vpc1"].id
+      propagate_route_table         = true
+    }
+    vpc2 = {
+      transit_gateway_attachment_id = module.tgw.vpc_attachments["vpc2"].id
+      propagate_route_table         = true
+    }
+  }
+
+  routes = {
+    blackhole = {
+      blackhole              = true
+      destination_cidr_block = "0.0.0.0/0"
+    }
+  }
 
   tags = local.tags
 }
@@ -194,15 +105,29 @@ module "tgw" {
 # Supporting resources
 ################################################################################
 
+locals {
+  vpc1_cidr = "10.0.0.0/16"
+  vpc2_cidr = "10.20.0.0/16"
+  azs       = slice(data.aws_availability_zones.available.names, 0, 3)
+}
+
+data "aws_availability_zones" "available" {
+  # Exclude local zones
+  filter {
+    name   = "opt-in-status"
+    values = ["opt-in-not-required"]
+  }
+}
+
 module "vpc1" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "~> 5.0"
 
   name = "${local.name}-vpc1"
-  cidr = "10.10.0.0/16"
+  cidr = local.vpc1_cidr
 
-  azs             = ["${local.region}a", "${local.region}b", "${local.region}c"]
-  private_subnets = ["10.10.1.0/24", "10.10.2.0/24", "10.10.3.0/24"]
+  azs             = local.azs
+  private_subnets = [for k, v in local.azs : cidrsubnet(local.vpc1_cidr, 4, k)]
 
   enable_ipv6                                    = true
   private_subnet_assign_ipv6_address_on_creation = true
@@ -216,10 +141,84 @@ module "vpc2" {
   version = "~> 5.0"
 
   name = "${local.name}-vpc2"
-  cidr = "10.20.0.0/16"
+  cidr = local.vpc2_cidr
 
-  azs             = ["${local.region}a", "${local.region}b", "${local.region}c"]
-  private_subnets = ["10.20.1.0/24", "10.20.2.0/24", "10.20.3.0/24"]
+  azs             = local.azs
+  private_subnets = [for k, v in local.azs : cidrsubnet(local.vpc2_cidr, 4, k)]
 
   tags = local.tags
+}
+
+resource "random_pet" "this" {
+  length = 2
+}
+
+module "s3_bucket" {
+  source  = "terraform-aws-modules/s3-bucket/aws"
+  version = "~> 3.0"
+
+  bucket        = "${local.name}-${random_pet.this.id}"
+  policy        = data.aws_iam_policy_document.flow_log_s3.json
+  force_destroy = true
+
+  tags = local.tags
+}
+
+data "aws_iam_policy_document" "flow_log_s3" {
+  statement {
+    sid = "AWSLogDeliveryWrite"
+
+    principals {
+      type        = "Service"
+      identifiers = ["delivery.logs.amazonaws.com"]
+    }
+
+    actions   = ["s3:PutObject"]
+    resources = ["arn:aws:s3:::${local.name}-${random_pet.this.id}/*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "s3:x-amz-acl"
+      values   = ["bucket-owner-full-control"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceAccount"
+      values   = [local.account_id]
+    }
+
+    condition {
+      test     = "ArnLike"
+      variable = "aws:SourceArn"
+      values   = ["arn:aws:logs:${local.region}:${local.account_id}:*"]
+    }
+  }
+
+  statement {
+    sid = "AWSLogDeliveryAclCheck"
+
+    principals {
+      type        = "Service"
+      identifiers = ["delivery.logs.amazonaws.com"]
+    }
+
+    actions = [
+      "s3:Get*",
+      "s3:List*",
+    ]
+    resources = ["arn:aws:s3:::${local.name}-${random_pet.this.id}"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceAccount"
+      values   = [local.account_id]
+    }
+
+    condition {
+      test     = "ArnLike"
+      variable = "aws:SourceArn"
+      values   = ["arn:aws:logs:${local.region}:${local.account_id}:*"]
+    }
+  }
 }

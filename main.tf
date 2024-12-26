@@ -54,8 +54,8 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
   dns_support                                     = try(each.value.dns_support, true) ? "enable" : "disable"
   ipv6_support                                    = try(each.value.ipv6_support, false) ? "enable" : "disable"
   appliance_mode_support                          = try(each.value.appliance_mode_support, false) ? "enable" : "disable"
-  transit_gateway_default_route_table_association = try(each.value.transit_gateway_default_route_table_association, null)
-  transit_gateway_default_route_table_propagation = try(each.value.transit_gateway_default_route_table_propagation, null)
+  transit_gateway_default_route_table_association = try(each.value.transit_gateway_default_route_table_association, false)
+  transit_gateway_default_route_table_propagation = try(each.value.transit_gateway_default_route_table_propagation, false)
 
   tags = merge(
     var.tags,
@@ -69,8 +69,8 @@ resource "aws_ec2_transit_gateway_vpc_attachment_accepter" "this" {
   for_each = { for k, v in var.vpc_attachments : k => v if var.create && try(v.accept_peering_attachment, false) }
 
   transit_gateway_attachment_id                   = aws_ec2_transit_gateway_vpc_attachment.this[0]
-  transit_gateway_default_route_table_association = try(each.value.transit_gateway_default_route_table_association, null)
-  transit_gateway_default_route_table_propagation = try(each.value.transit_gateway_default_route_table_propagation, null)
+  transit_gateway_default_route_table_association = try(each.value.transit_gateway_default_route_table_association, false)
+  transit_gateway_default_route_table_propagation = try(each.value.transit_gateway_default_route_table_propagation, false)
 
   tags = merge(
     var.tags,
@@ -107,15 +107,19 @@ resource "aws_ec2_transit_gateway_peering_attachment_accepter" "this" {
 # Resource Access Manager
 ################################################################################
 
+locals {
+  ram_name = try(coalesce(var.ram_name, var.name), "")
+}
+
 resource "aws_ram_resource_share" "this" {
   count = var.create && var.share_tgw ? 1 : 0
 
-  name                      = coalesce(var.ram_name, var.name)
+  name                      = local.ram_name
   allow_external_principals = var.ram_allow_external_principals
 
   tags = merge(
     var.tags,
-    { Name = coalesce(var.ram_name, var.name) },
+    { Name = local.ram_name },
     var.ram_tags,
   )
 }
@@ -141,22 +145,10 @@ resource "aws_ram_principal_association" "this" {
 resource "aws_flow_log" "this" {
   for_each = { for k, v in var.flow_logs : k => v if var.create && var.create_flow_log }
 
-  log_destination_type = each.value.log_destination_type
-  log_destination      = each.value.log_destination
-  log_format           = try(each.value.log_format, null)
-  iam_role_arn         = try(each.value.iam_role_arn, null)
-  traffic_type         = try(each.value.traffic_type, null)
-  transit_gateway_id   = aws_ec2_transit_gateway.this[0].id
-  transit_gateway_attachment_id = try(
-    aws_ec2_transit_gateway_vpc_attachment.this[each.value.vpc_attachment_key].id,
-    aws_ec2_transit_gateway_peering_attachment.this[each.value.peering_attachment_key].id,
-    null
-  )
-  # When transit_gateway_id or transit_gateway_attachment_id is specified, max_aggregation_interval must be 60 seconds (1 minute).
-  max_aggregation_interval = max(try(each.value.max_aggregation_interval, null), 60)
+  deliver_cross_account_role = try(each.value.deliver_cross_account_role, null)
 
   dynamic "destination_options" {
-    for_each = each.value.dest_type == "s3" ? [true] : []
+    for_each = try([each.value.destination_options], [])
 
     content {
       file_format                = try(each.value.file_format, "parquet")
@@ -164,6 +156,21 @@ resource "aws_flow_log" "this" {
       per_hour_partition         = try(each.value.per_hour_partition, true)
     }
   }
+
+  iam_role_arn         = try(each.value.iam_role_arn, null)
+  log_destination      = try(each.value.log_destination, null)
+  log_destination_type = try(each.value.log_destination_type, null)
+  log_format           = try(each.value.log_format, null)
+  # When transit_gateway_id or transit_gateway_attachment_id is specified, max_aggregation_interval must be 60 seconds (1 minute).
+  max_aggregation_interval = max(try(each.value.max_aggregation_interval, 30), 60)
+
+  traffic_type       = try(each.value.traffic_type, "ALL")
+  transit_gateway_id = try(each.value.enable_transit_gateway, true) ? aws_ec2_transit_gateway.this[0].id : null
+  transit_gateway_attachment_id = try(each.value.enable_transit_gateway, true) ? null : try(
+    aws_ec2_transit_gateway_vpc_attachment.this[each.value.vpc_attachment_key].id,
+    aws_ec2_transit_gateway_peering_attachment.this[each.value.peering_attachment_key].id,
+    null
+  )
 
   tags = merge(
     var.tags,
