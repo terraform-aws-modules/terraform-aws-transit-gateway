@@ -90,36 +90,20 @@ variable "tgw_tags" {
 # VPC Attachment
 ################################################################################
 
-variable "attachments" {
-  description = "Maps of maps of VPC details to attach to TGW. Type 'any' to disable type validation by Terraform."
+variable "vpc_attachments" {
+  description = "Map of VPC route table attachments to create"
+  type        = any
+  default     = {}
+}
+
+variable "peering_attachments" {
+  description = "Map of Transit Gateway peering attachments to create"
   type        = any
   default     = {}
 }
 
 variable "attachment_tags" {
   description = "Additional tags for VPC attachments"
-  type        = map(string)
-  default     = {}
-}
-
-################################################################################
-# Route Table / Routes
-################################################################################
-
-variable "create_route_table" {
-  description = "Controls if TGW Route Table should be created"
-  type        = bool
-  default     = true
-}
-
-variable "transit_gateway_route_table_id" {
-  description = "Identifier of EC2 Transit Gateway Route Table to use with the Target Gateway when reusing it between multiple TGWs"
-  type        = string
-  default     = null
-}
-
-variable "route_table_tags" {
-  description = "Additional tags for the TGW route table"
   type        = map(string)
   default     = {}
 }
@@ -161,6 +145,12 @@ variable "ram_tags" {
 ################################################################################
 # Flow Logs
 ################################################################################
+
+variable "create_flow_log" {
+  description = "Whether to create flow log resource(s)"
+  type        = bool
+  default     = true
+}
 
 variable "flow_logs" {
   description = "Flow Logs to create for Transit Gateway or attachments"

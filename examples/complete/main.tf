@@ -108,7 +108,7 @@ module "tgw" {
     },
   ]
 
-  attachments = {
+  vpc_attachments = {
     vpc1 = {
       attachment_type       = "vpc"
       create_vpc_attachment = true
