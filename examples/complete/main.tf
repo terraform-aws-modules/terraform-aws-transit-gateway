@@ -98,6 +98,17 @@ module "transit_gateway_route_table" {
     }
   }
 
+  vpc_routes = {
+    vpc1 = {
+      destination_cidr_block = module.vpc2.vpc_cidr_block
+      route_table_id         = element(module.vpc1.private_route_table_ids, 0)
+    }
+    vpc2 = {
+      destination_cidr_block = module.vpc1.vpc_cidr_block
+      route_table_id         = element(module.vpc2.private_route_table_ids, 0)
+    }
+  }
+
   tags = local.tags
 }
 

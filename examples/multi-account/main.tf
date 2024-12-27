@@ -8,6 +8,8 @@ provider "aws" {
   alias  = "peer"
 }
 
+data "aws_caller_identity" "current" {}
+
 locals {
   name   = "ex-tgw-${replace(basename(path.cwd), "_", "-")}"
   region = "eu-west-1"
