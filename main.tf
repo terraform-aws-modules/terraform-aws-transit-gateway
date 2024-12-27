@@ -60,7 +60,7 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
 
   tags = merge(
     var.tags,
-    { Name = each.key },
+    { Name = "${var.name}-${each.key}" },
     each.value.tags,
   )
 }
@@ -74,7 +74,6 @@ resource "aws_ec2_transit_gateway_vpc_attachment_accepter" "this" {
 
   tags = merge(
     var.tags,
-    { Name = each.key },
     each.value.tags,
   )
 }
@@ -91,7 +90,11 @@ resource "aws_ec2_transit_gateway_peering_attachment" "this" {
   peer_transit_gateway_id = each.value.peer_transit_gateway_id
   transit_gateway_id      = aws_ec2_transit_gateway.this[0].id
 
-  tags = var.tags
+  tags = merge(
+    var.tags,
+    { Name = "${var.name}-${each.key}" },
+    each.value.tags,
+  )
 }
 
 resource "aws_ec2_transit_gateway_peering_attachment_accepter" "this" {
@@ -99,7 +102,10 @@ resource "aws_ec2_transit_gateway_peering_attachment_accepter" "this" {
 
   transit_gateway_attachment_id = aws_ec2_transit_gateway_peering_attachment.this[each.key].id
 
-  tags = var.tags
+  tags = merge(
+    var.tags,
+    each.value.tags,
+  )
 }
 
 ################################################################################
@@ -150,9 +156,9 @@ resource "aws_flow_log" "this" {
     for_each = each.value.destination_options != null ? [each.value.destination_options] : []
 
     content {
-      file_format                = each.value.file_format
-      hive_compatible_partitions = each.value.hive_compatible_partitions
-      per_hour_partition         = each.value.per_hour_partition
+      file_format                = destination_options.value.file_format
+      hive_compatible_partitions = destination_options.value.hive_compatible_partitions
+      per_hour_partition         = destination_options.value.per_hour_partition
     }
   }
 

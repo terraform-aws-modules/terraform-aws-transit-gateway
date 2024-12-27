@@ -1,25 +1,76 @@
 # AWS Transit Gateway Terraform module
 
-Terraform module which creates Transit Gateway resources on AWS.
+Terraform module which creates AWS Transit Gateway resources.
 
-## Usage with VPC module
+## Usage
 
 ```hcl
 module "transit_gateway" {
   source  = "terraform-aws-modules/transit-gateway/aws"
 
   name        = "example"
-  description = "Example TGW shared with several other AWS accounts"
+  description = "Example TGW connecting multiple VPCs"
 
   # When `true` there is no need for RAM resources if using multiple AWS accounts
-  enable_auto_accept_shared_attachments = true
+  auto_accept_shared_attachments = true
+
+  flow_logs = {
+    tgw = {
+      log_destination      = "arn:aws:s3:::flow-log-bucket"
+      log_destination_type = "s3"
+      traffic_type         = "ALL"
+      destination_options = {
+        file_format        = "parquet"
+        per_hour_partition = true
+      }
+    },
+    vpc1-attach = {
+      enable_transit_gateway = false
+      vpc_attachment_key = "vpc1"
+
+      log_destination      = "arn:aws:s3:::flow-log-bucket"
+      log_destination_type = "s3"
+      traffic_type         = "ALL"
+      destination_options = {
+        file_format        = "parquet"
+        per_hour_partition = true
+      }
+    },
+    vpc2-attach = {
+      enable_transit_gateway = false
+      vpc_attachment_key = "vpc2"
+
+      log_destination      = "arn:aws:s3:::flow-log-bucket"
+      log_destination_type = "s3"
+      traffic_type         = "ALL"
+      destination_options = {
+        file_format        = "parquet"
+        per_hour_partition = true
+      }
+    }
+  }
+
+  vpc_attachments = {
+    vpc1 = {
+      vpc_id                             = "vpc-1234556abcdef"
+      security_group_referencing_support = true
+      subnet_ids                         = ["subnet-abcde012", "subnet-bcde012a", "subnet-fghi345a"]
+      ipv6_support                       = true
+    }
+
+    vpc2 = {
+      vpc_id                             = "vpc-98765432d1aad"
+      security_group_referencing_support = true
+      subnet_ids                         = ["subnet-334de012", "subnet-6vfe012a", "subnet-agfi435a"]
+    }
+  }
 
   vpc_attachments = {
     vpc = {
       attachment_type       = "vpc"
       create_vpc_attachment = true
-      vpc_id                = "vpc-1234556abcdef"
-      subnet_ids            = ["subnet-abcde012", "subnet-bcde012a", "subnet-fghi345a"]
+      vpc_id                =
+      subnet_ids            =
 
       dns_support  = true
       ipv6_support = true
@@ -37,7 +88,49 @@ module "transit_gateway" {
   }
 
   tags = {
-    Purpose = "tgw-complete-example"
+    Environment = "Development"
+    Project     = "Example"
+  }
+}
+
+module "transit_gateway_route_table" {
+  source  = "terraform-aws-modules/transit-gateway/aws//modules/route-table"
+
+  name               = "example"
+  transit_gateway_id = module.transit_gateway.id
+
+  associations = {
+    vpc1 = {
+      transit_gateway_attachment_id = module.transit_gateway.vpc_attachments["vpc1"].id
+      propagate_route_table         = true
+    }
+    vpc2 = {
+      transit_gateway_attachment_id = module.transit_gateway.vpc_attachments["vpc2"].id
+      propagate_route_table         = true
+    }
+  }
+
+  routes = {
+    blackhole = {
+      blackhole              = true
+      destination_cidr_block = "0.0.0.0/0"
+    }
+  }
+
+  vpc_routes = {
+    vpc1 = {
+      destination_cidr_block = "10.0.0.0/16"
+      route_table_id         = "rtb-a73c2ede"
+    }
+    vpc2 = {
+      destination_cidr_block = 10.1.0.0/16"
+      route_table_id         = "rtb-852956e2",
+    }
+  }
+
+  tags = {
+    Environment = "Development"
+    Project     = "Example"
   }
 }
 ```

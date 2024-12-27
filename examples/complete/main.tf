@@ -29,35 +29,41 @@ module "transit_gateway" {
   security_group_referencing_support = true
   transit_gateway_cidr_blocks        = ["10.99.0.0/24"]
 
-  # flow_logs = {
-  #   tgw = {
-  #     log_destination      = module.s3_bucket.s3_bucket_arn
-  #     log_destination_type = "s3"
-  #     traffic_type         = "ALL"
-  #     destination_options = {
-  #       file_format        = "parquet"
-  #       per_hour_partition = true
-  #     }
-  #   }
-  #   vpc1-attach = {
-  #     log_destination      = module.s3_bucket.s3_bucket_arn
-  #     log_destination_type = "s3"
-  #     traffic_type         = "ALL"
-  #     destination_options = {
-  #       file_format        = "parquet"
-  #       per_hour_partition = true
-  #     }
-  #   }
-  #   vpc2-attach = {
-  #     log_destination      = module.s3_bucket.s3_bucket_arn
-  #     log_destination_type = "s3"
-  #     traffic_type         = "ALL"
-  #     destination_options = {
-  #       file_format        = "parquet"
-  #       per_hour_partition = true
-  #     }
-  #   }
-  # }
+  flow_logs = {
+    tgw = {
+      log_destination      = module.s3_bucket.s3_bucket_arn
+      log_destination_type = "s3"
+      traffic_type         = "ALL"
+      destination_options = {
+        file_format        = "parquet"
+        per_hour_partition = true
+      }
+    },
+    vpc1-attach = {
+      enable_transit_gateway = false
+      vpc_attachment_key     = "vpc1"
+
+      log_destination      = module.s3_bucket.s3_bucket_arn
+      log_destination_type = "s3"
+      traffic_type         = "ALL"
+      destination_options = {
+        file_format        = "parquet"
+        per_hour_partition = true
+      }
+    },
+    vpc2-attach = {
+      enable_transit_gateway = false
+      vpc_attachment_key     = "vpc2"
+
+      log_destination      = module.s3_bucket.s3_bucket_arn
+      log_destination_type = "s3"
+      traffic_type         = "ALL"
+      destination_options = {
+        file_format        = "parquet"
+        per_hour_partition = true
+      }
+    }
+  }
 
   vpc_attachments = {
     vpc1 = {
