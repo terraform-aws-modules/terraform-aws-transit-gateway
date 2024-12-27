@@ -23,10 +23,11 @@ locals {
 module "transit_gateway" {
   source = "../../"
 
-  name                        = local.name
-  description                 = "Example Transit Gateway connecting multiple VPCs"
-  amazon_side_asn             = 64532
-  transit_gateway_cidr_blocks = ["10.99.0.0/24"]
+  name                               = local.name
+  description                        = "Example Transit Gateway connecting multiple VPCs"
+  amazon_side_asn                    = 64532
+  security_group_referencing_support = true
+  transit_gateway_cidr_blocks        = ["10.99.0.0/24"]
 
   # flow_logs = {
   #   tgw = {
@@ -60,14 +61,16 @@ module "transit_gateway" {
 
   vpc_attachments = {
     vpc1 = {
-      vpc_id       = module.vpc1.vpc_id
-      subnet_ids   = module.vpc1.private_subnets
-      ipv6_support = true
+      vpc_id                             = module.vpc1.vpc_id
+      security_group_referencing_support = true
+      subnet_ids                         = module.vpc1.private_subnets
+      ipv6_support                       = true
     }
 
     vpc2 = {
-      vpc_id     = module.vpc2.vpc_id
-      subnet_ids = module.vpc2.private_subnets
+      vpc_id                             = module.vpc2.vpc_id
+      security_group_referencing_support = true
+      subnet_ids                         = module.vpc2.private_subnets
     }
   }
 

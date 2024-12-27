@@ -1,5 +1,11 @@
+variable "create" {
+  description = "Controls if resources should be created (it affects almost all resources)"
+  type        = bool
+  default     = true
+}
+
 variable "name" {
-  description = "Name to be used on all the resources as identifier"
+  description = "Name to be used on all the resources as the identifier"
   type        = string
   default     = ""
 }
@@ -14,10 +20,28 @@ variable "tags" {
 # Transit Gateway
 ################################################################################
 
-variable "create" {
-  description = "Controls if TGW should be created (it affects almost all resources)"
+variable "amazon_side_asn" {
+  description = "The Autonomous System Number (ASN) for the Amazon side of the gateway. By default the TGW is created with the current default Amazon ASN"
+  type        = string
+  default     = null
+}
+
+variable "auto_accept_shared_attachments" {
+  description = "Whether resource attachment requests are automatically accepted"
   type        = bool
-  default     = true
+  default     = false
+}
+
+variable "default_route_table_association" {
+  description = "Whether resource attachments are automatically associated with the default association route table"
+  type        = bool
+  default     = false
+}
+
+variable "default_route_table_propagation" {
+  description = "Whether resource attachments automatically propagate routes to the default propagation route table"
+  type        = bool
+  default     = false
 }
 
 variable "description" {
@@ -26,52 +50,34 @@ variable "description" {
   default     = null
 }
 
-variable "amazon_side_asn" {
-  description = "The Autonomous System Number (ASN) for the Amazon side of the gateway. By default the TGW is created with the current default Amazon ASN"
-  type        = string
-  default     = null
-}
-
-variable "enable_default_route_table_association" {
-  description = "Whether resource attachments are automatically associated with the default association route table"
-  type        = bool
-  default     = false
-}
-
-variable "enable_default_route_table_propagation" {
-  description = "Whether resource attachments automatically propagate routes to the default propagation route table"
-  type        = bool
-  default     = false
-}
-
-variable "enable_auto_accept_shared_attachments" {
-  description = "Whether resource attachment requests are automatically accepted"
-  type        = bool
-  default     = false
-}
-
-variable "enable_vpn_ecmp_support" {
-  description = "Whether VPN Equal Cost Multipath Protocol support is enabled"
+variable "dns_support" {
+  description = "Should be true to enable DNS support in the TGW"
   type        = bool
   default     = true
 }
 
-variable "enable_multicast_support" {
+variable "multicast_support" {
   description = "Whether multicast support is enabled"
   type        = bool
   default     = false
 }
 
-variable "enable_dns_support" {
-  description = "Should be true to enable DNS support in the TGW"
+variable "security_group_referencing_support" {
+  description = "Whether security group referencing is enabled"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "transit_gateway_cidr_blocks" {
   description = "One or more IPv4 or IPv6 CIDR blocks for the transit gateway. Must be a size /24 CIDR block or larger for IPv4, or a size /64 CIDR block or larger for IPv6"
   type        = list(string)
   default     = []
+}
+
+variable "vpn_ecmp_support" {
+  description = "Whether VPN Equal Cost Multipath Protocol support is enabled"
+  type        = bool
+  default     = true
 }
 
 variable "timeouts" {
@@ -93,14 +99,15 @@ variable "tgw_tags" {
 variable "vpc_attachments" {
   description = "Map of VPC route table attachments to create"
   type = map(object({
-    vpc_id                                          = string
-    subnet_ids                                      = list(string)
+    appliance_mode_support                          = optional(bool, false)
     dns_support                                     = optional(bool, true)
     ipv6_support                                    = optional(bool, false)
-    appliance_mode_support                          = optional(bool, false)
+    security_group_referencing_support              = optional(bool, false)
+    subnet_ids                                      = list(string)
+    tags                                            = optional(map(string), {})
     transit_gateway_default_route_table_association = optional(bool, false)
     transit_gateway_default_route_table_propagation = optional(bool, false)
-    tags                                            = optional(map(string), {})
+    vpc_id                                          = string
 
     accept_peering_attachment = optional(bool, false)
   }))

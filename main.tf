@@ -13,15 +13,16 @@ locals {
 resource "aws_ec2_transit_gateway" "this" {
   count = var.create ? 1 : 0
 
-  description                     = var.description
-  amazon_side_asn                 = var.amazon_side_asn
-  default_route_table_association = var.enable_default_route_table_association ? "enable" : "disable"
-  default_route_table_propagation = var.enable_default_route_table_propagation ? "enable" : "disable"
-  auto_accept_shared_attachments  = var.enable_auto_accept_shared_attachments ? "enable" : "disable"
-  multicast_support               = var.enable_multicast_support ? "enable" : "disable"
-  vpn_ecmp_support                = var.enable_vpn_ecmp_support ? "enable" : "disable"
-  dns_support                     = var.enable_dns_support ? "enable" : "disable"
-  transit_gateway_cidr_blocks     = var.transit_gateway_cidr_blocks
+  amazon_side_asn                    = var.amazon_side_asn
+  auto_accept_shared_attachments     = var.auto_accept_shared_attachments ? "enable" : "disable"
+  default_route_table_association    = var.default_route_table_association ? "enable" : "disable"
+  default_route_table_propagation    = var.default_route_table_propagation ? "enable" : "disable"
+  description                        = var.description
+  dns_support                        = var.dns_support ? "enable" : "disable"
+  multicast_support                  = var.multicast_support ? "enable" : "disable"
+  security_group_referencing_support = var.security_group_referencing_support ? "enable" : "disable"
+  transit_gateway_cidr_blocks        = var.transit_gateway_cidr_blocks
+  vpn_ecmp_support                   = var.vpn_ecmp_support ? "enable" : "disable"
 
   timeouts {
     create = try(var.timeouts.create, null)
@@ -33,7 +34,7 @@ resource "aws_ec2_transit_gateway" "this" {
 }
 
 resource "aws_ec2_tag" "this" {
-  for_each = { for k, v in local.tgw_tags : k => v if var.create && var.enable_default_route_table_association }
+  for_each = { for k, v in local.tgw_tags : k => v if var.create && var.default_route_table_association }
 
   resource_id = aws_ec2_transit_gateway.this[0].association_default_route_table_id
   key         = each.key
@@ -47,15 +48,15 @@ resource "aws_ec2_tag" "this" {
 resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
   for_each = { for k, v in var.vpc_attachments : k => v if var.create }
 
-  transit_gateway_id = aws_ec2_transit_gateway.this[0].id
-  vpc_id             = each.value.vpc_id
-  subnet_ids         = each.value.subnet_ids
-
+  appliance_mode_support                          = each.value.appliance_mode_support ? "enable" : "disable"
   dns_support                                     = each.value.dns_support ? "enable" : "disable"
   ipv6_support                                    = each.value.ipv6_support ? "enable" : "disable"
-  appliance_mode_support                          = each.value.appliance_mode_support ? "enable" : "disable"
+  security_group_referencing_support              = each.value.security_group_referencing_support ? "enable" : "disable"
+  subnet_ids                                      = each.value.subnet_ids
   transit_gateway_default_route_table_association = each.value.transit_gateway_default_route_table_association
   transit_gateway_default_route_table_propagation = each.value.transit_gateway_default_route_table_propagation
+  transit_gateway_id                              = aws_ec2_transit_gateway.this[0].id
+  vpc_id                                          = each.value.vpc_id
 
   tags = merge(
     var.tags,
