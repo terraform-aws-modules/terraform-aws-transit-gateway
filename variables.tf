@@ -29,7 +29,7 @@ variable "amazon_side_asn" {
 variable "auto_accept_shared_attachments" {
   description = "Whether resource attachment requests are automatically accepted"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "default_route_table_association" {

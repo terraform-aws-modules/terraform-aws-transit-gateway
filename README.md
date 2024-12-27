@@ -2,6 +2,8 @@
 
 Terraform module which creates AWS Transit Gateway resources.
 
+[![SWUbanner](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://github.com/vshymanskyy/StandWithUkraine/blob/main/docs/README.md)
+
 ## Usage
 
 ```hcl
@@ -54,36 +56,14 @@ module "transit_gateway" {
     vpc1 = {
       vpc_id                             = "vpc-1234556abcdef"
       security_group_referencing_support = true
-      subnet_ids                         = ["subnet-abcde012", "subnet-bcde012a", "subnet-fghi345a"]
+      subnet_ids                         = ["sub-abcde012", "sub-bcde012a", "sub-fghi345a"]
       ipv6_support                       = true
     }
 
     vpc2 = {
       vpc_id                             = "vpc-98765432d1aad"
       security_group_referencing_support = true
-      subnet_ids                         = ["subnet-334de012", "subnet-6vfe012a", "subnet-agfi435a"]
-    }
-  }
-
-  vpc_attachments = {
-    vpc = {
-      attachment_type       = "vpc"
-      create_vpc_attachment = true
-      vpc_id                =
-      subnet_ids            =
-
-      dns_support  = true
-      ipv6_support = true
-
-      tgw_routes = {
-        vpc = {
-          destination_cidr_block = "30.0.0.0/16"
-        },
-        blackhole = {
-          blackhole              = true
-          destination_cidr_block = "40.0.0.0/20"
-        }
-      }
+      subnet_ids                         = ["sub-334de012", "sub-6vfe012a", "sub-agfi435a"]
     }
   }
 
@@ -178,7 +158,7 @@ No modules.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_amazon_side_asn"></a> [amazon\_side\_asn](#input\_amazon\_side\_asn) | The Autonomous System Number (ASN) for the Amazon side of the gateway. By default the TGW is created with the current default Amazon ASN | `string` | `null` | no |
-| <a name="input_auto_accept_shared_attachments"></a> [auto\_accept\_shared\_attachments](#input\_auto\_accept\_shared\_attachments) | Whether resource attachment requests are automatically accepted | `bool` | `false` | no |
+| <a name="input_auto_accept_shared_attachments"></a> [auto\_accept\_shared\_attachments](#input\_auto\_accept\_shared\_attachments) | Whether resource attachment requests are automatically accepted | `bool` | `true` | no |
 | <a name="input_create"></a> [create](#input\_create) | Controls if resources should be created (it affects almost all resources) | `bool` | `true` | no |
 | <a name="input_create_flow_log"></a> [create\_flow\_log](#input\_create\_flow\_log) | Whether to create flow log resource(s) | `bool` | `true` | no |
 | <a name="input_default_route_table_association"></a> [default\_route\_table\_association](#input\_default\_route\_table\_association) | Whether resource attachments are automatically associated with the default association route table | `bool` | `false` | no |
