@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.13.0](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.12.2...v2.13.0) (2025-01-15)
+
+
+### Features
+
+* Add support for security group referencing to transit-gateway module ([#133](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/133)) ([26c10f3](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/commit/26c10f34d144554eb965598127f86f87d6bb279a))
+
+
+### Bug Fixes
+
+* Update CI workflow versions to latest ([#134](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/134)) ([77279c9](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/commit/77279c9d76d7b9978a502cd175173a1a4d7cdecf))
+
 ## [2.12.2](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.12.1...v2.12.2) (2024-03-06)
 
 
