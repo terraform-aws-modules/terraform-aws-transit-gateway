@@ -28,15 +28,16 @@ locals {
 resource "aws_ec2_transit_gateway" "this" {
   count = var.create_tgw ? 1 : 0
 
-  description                     = coalesce(var.description, var.name)
-  amazon_side_asn                 = var.amazon_side_asn
-  default_route_table_association = var.enable_default_route_table_association ? "enable" : "disable"
-  default_route_table_propagation = var.enable_default_route_table_propagation ? "enable" : "disable"
-  auto_accept_shared_attachments  = var.enable_auto_accept_shared_attachments ? "enable" : "disable"
-  multicast_support               = var.enable_multicast_support ? "enable" : "disable"
-  vpn_ecmp_support                = var.enable_vpn_ecmp_support ? "enable" : "disable"
-  dns_support                     = var.enable_dns_support ? "enable" : "disable"
-  transit_gateway_cidr_blocks     = var.transit_gateway_cidr_blocks
+  description                        = coalesce(var.description, var.name)
+  amazon_side_asn                    = var.amazon_side_asn
+  default_route_table_association    = var.enable_default_route_table_association ? "enable" : "disable"
+  default_route_table_propagation    = var.enable_default_route_table_propagation ? "enable" : "disable"
+  auto_accept_shared_attachments     = var.enable_auto_accept_shared_attachments ? "enable" : "disable"
+  multicast_support                  = var.enable_multicast_support ? "enable" : "disable"
+  vpn_ecmp_support                   = var.enable_vpn_ecmp_support ? "enable" : "disable"
+  dns_support                        = var.enable_dns_support ? "enable" : "disable"
+  transit_gateway_cidr_blocks        = var.transit_gateway_cidr_blocks
+  security_group_referencing_support = var.enable_sg_referencing_support ? "enable" : "disable"
 
   timeouts {
     create = try(var.timeouts.create, null)
@@ -73,6 +74,7 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
   dns_support                                     = try(each.value.dns_support, true) ? "enable" : "disable"
   ipv6_support                                    = try(each.value.ipv6_support, false) ? "enable" : "disable"
   appliance_mode_support                          = try(each.value.appliance_mode_support, false) ? "enable" : "disable"
+  security_group_referencing_support              = try(each.value.security_group_referencing_support, false) ? "enable" : "disable"
   transit_gateway_default_route_table_association = try(each.value.transit_gateway_default_route_table_association, true)
   transit_gateway_default_route_table_propagation = try(each.value.transit_gateway_default_route_table_propagation, true)
 
