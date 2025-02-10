@@ -43,12 +43,6 @@ variable "enable_ipv6_support" {
   default     = false
 }
 
-variable "enable_appliance_mode_support" {
-  description = "Should be true to enable appliance support in the TGW attachment"
-  type        = bool
-  default     = false
-}
-
 variable "enable_sg_referencing_support" {
   description = "Indicates whether to enable security group referencing support"
   type        = bool
