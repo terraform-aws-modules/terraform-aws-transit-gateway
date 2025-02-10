@@ -1,13 +1,4 @@
 ################################################################################
-# Transit Gateway
-################################################################################
-
-output "ec2_transit_gateway_propagation_default_route_table_id" {
-  description = "Identifier of the default propagation route table"
-  value       = try(aws_ec2_transit_gateway.this[0].propagation_default_route_table_id, "")
-}
-
-################################################################################
 # VPC Attachment
 ################################################################################
 
@@ -27,17 +18,17 @@ output "ec2_transit_gateway_vpc_attachment" {
 
 output "ec2_transit_gateway_route_table_id" {
   description = "EC2 Transit Gateway Route Table identifier"
-  value       = try(aws_ec2_transit_gateway_route_table.this[0].id, "")
+  value       = aws_ec2_transit_gateway_route_table.this.id
 }
 
 output "ec2_transit_gateway_route_table_default_association_route_table" {
   description = "Boolean whether this is the default association route table for the EC2 Transit Gateway"
-  value       = try(aws_ec2_transit_gateway_route_table.this[0].default_association_route_table, "")
+  value       = try(aws_ec2_transit_gateway_route_table.this.default_association_route_table, "")
 }
 
 output "ec2_transit_gateway_route_table_default_propagation_route_table" {
   description = "Boolean whether this is the default propagation route table for the EC2 Transit Gateway"
-  value       = try(aws_ec2_transit_gateway_route_table.this[0].default_propagation_route_table, "")
+  value       = try(aws_ec2_transit_gateway_route_table.this.default_propagation_route_table, "")
 }
 
 output "ec2_transit_gateway_route_ids" {
