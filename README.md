@@ -62,6 +62,7 @@ module "vpc" {
 
 - [Complete example](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/tree/master/examples/complete) shows TGW in combination with the [VPC module](https://github.com/terraform-aws-modules/terraform-aws-vpc) and [Resource Access Manager (RAM)](https://aws.amazon.com/ram/).
 - [Multi-account example](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/tree/master/examples/multi-account) shows TGW resources shared with different AWS accounts (via [Resource Access Manager (RAM)](https://aws.amazon.com/ram/)).
+- [Multiple route tables](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/tree/master/examples/multiple-route-tables) shows a TGW with multiple route tables
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
