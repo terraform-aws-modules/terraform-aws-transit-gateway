@@ -1,6 +1,8 @@
 # AWS Transit Gateway Terraform module
 
-A Terraform module which creates Transit Gateway resources for an existing Transit Gateway
+A Terraform module which creates Transit Gateway resources for an existing
+Transit Gateway. All of the `vpc_attachments` will be assigned to the same tgw
+route table.
 
 ## Usage with VPC module
 
@@ -22,7 +24,7 @@ module "tgw" {
   }
 }
 
-# create a tgw route table called rtb1, associate the attachment, for tgw
+# create a tgw route table called rtb1, associate the attachments
 module "tgw-rtb1" {
   source  = "terraform-aws-modules/transit-gateway/aws//modules/route-table"
   version = "~> 2.0"

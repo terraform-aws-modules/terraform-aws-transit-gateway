@@ -56,7 +56,6 @@ variable "enable_sg_referencing_support" {
 variable "vpc_attachments" {
   description = "Maps of maps of VPC details to attach to TGW. Type 'any' to disable type validation by Terraform."
   type        = any
-  default     = {}
 }
 
 variable "tgw_vpc_attachment_tags" {
