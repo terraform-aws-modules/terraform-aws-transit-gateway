@@ -103,9 +103,23 @@ variable "enable_sg_referencing_support" {
 ################################################################################
 
 variable "vpc_attachments" {
-  description = "Maps of maps of VPC details to attach to TGW. Type 'any' to disable type validation by Terraform."
-  type        = any
-  default     = {}
+  description = "Maps of VPC names to VPC attachment configurations"
+  type = map(object({
+    vpc_id                                          = string
+    subnet_ids                                      = list(string)
+    dns_support                                     = optional(bool, true)
+    ipv6_support                                    = optional(bool, false)
+    appliance_mode_support                          = optional(bool, false)
+    security_group_referencing_support              = optional(bool, false)
+    transit_gateway_default_route_table_association = optional(bool, true)
+    transit_gateway_default_route_table_propagation = optional(bool, true)
+    vpc_route_table_ids                             = optional(list(string), [])
+    tgw_destination_cidrs                           = optional(list(string), [])
+    tgw_id                                          = optional(string)
+    tags                                            = optional(map(string), {})
+    tgw_routes                                      = optional(list(map(string)), [])
+  }))
+  default = {}
 }
 
 variable "tgw_vpc_attachment_tags" {
