@@ -58,9 +58,154 @@ module "vpc" {
 }
 ```
 
+## Usage with Flow Logs
+
+Transit Gateway Flow Logs can be enabled to capture information about the IP traffic going to and from network interfaces in your Transit Gateway. Flow logs can help with monitoring network traffic, troubleshooting connectivity issues, and detecting anomalous traffic patterns.
+
+### Basic Flow Logs to CloudWatch
+
+```hcl
+module "tgw" {
+  source  = "terraform-aws-modules/transit-gateway/aws"
+  version = "~> 2.0"
+
+  name        = "my-tgw"
+  description = "My TGW with flow logs enabled"
+
+  # Enable flow logs
+  enable_flow_log                      = true
+  create_flow_log_cloudwatch_log_group = true
+  create_flow_log_cloudwatch_iam_role  = true
+
+  vpc_attachments = {
+    vpc = {
+      vpc_id     = module.vpc.vpc_id
+      subnet_ids = module.vpc.private_subnets
+    }
+  }
+
+  tags = {
+    Purpose = "tgw-with-flow-logs"
+  }
+}
+```
+
+### Flow Logs with Custom CloudWatch Configuration
+
+```hcl
+module "tgw" {
+  source  = "terraform-aws-modules/transit-gateway/aws"
+  version = "~> 2.0"
+
+  name        = "my-tgw"
+  description = "My TGW with custom flow logs"
+
+  # Flow log configuration
+  enable_flow_log                      = true
+  create_flow_log_cloudwatch_log_group = true
+  create_flow_log_cloudwatch_iam_role  = true
+
+  # CloudWatch log group settings
+  flow_log_cloudwatch_log_group_name_prefix       = "/aws/transit-gateway/flowlogs/"
+  flow_log_cloudwatch_log_group_retention_in_days = 14
+  flow_log_cloudwatch_log_group_kms_key_id        = aws_kms_key.log_key.arn
+
+  # Flow log settings
+  flow_log_traffic_type             = "ALL"
+  flow_log_max_aggregation_interval = 60
+  flow_log_log_format               = "$${version} $${account-id} $${transit-gateway-id} $${transit-gateway-attachment-id} $${srcaddr} $${dstaddr} $${srcport} $${dstport} $${protocol} $${packets} $${bytes} $${windowstart} $${windowend} $${action}"
+
+  vpc_attachments = {
+    vpc = {
+      vpc_id     = module.vpc.vpc_id
+      subnet_ids = module.vpc.private_subnets
+    }
+  }
+
+  tgw_flow_log_tags = {
+    LogType = "TransitGatewayFlow"
+  }
+
+  tags = {
+    Purpose = "tgw-with-custom-flow-logs"
+  }
+}
+```
+
+### Flow Logs to S3
+
+```hcl
+module "tgw" {
+  source  = "terraform-aws-modules/transit-gateway/aws"
+  version = "~> 2.0"
+
+  name        = "my-tgw"
+  description = "My TGW with S3 flow logs"
+
+  # Flow log configuration for S3
+  enable_flow_log           = true
+  flow_log_destination_type = "s3"
+  flow_log_destination_arn  = aws_s3_bucket.flow_logs.arn
+
+  # S3 destination options
+  flow_log_file_format                = "parquet"
+  flow_log_hive_compatible_partitions = true
+  flow_log_per_hour_partition         = true
+
+  vpc_attachments = {
+    vpc = {
+      vpc_id     = module.vpc.vpc_id
+      subnet_ids = module.vpc.private_subnets
+    }
+  }
+
+  tags = {
+    Purpose = "tgw-with-s3-flow-logs"
+  }
+}
+
+resource "aws_s3_bucket" "flow_logs" {
+  bucket        = "my-tgw-flow-logs-bucket"
+  force_destroy = true
+}
+
+resource "aws_s3_bucket_policy" "flow_logs" {
+  bucket = aws_s3_bucket.flow_logs.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AWSLogDeliveryWrite"
+        Effect = "Allow"
+        Principal = {
+          Service = "delivery.logs.amazonaws.com"
+        }
+        Action   = "s3:PutObject"
+        Resource = "${aws_s3_bucket.flow_logs.arn}/*"
+        Condition = {
+          StringEquals = {
+            "s3:x-amz-acl" = "bucket-owner-full-control"
+          }
+        }
+      },
+      {
+        Sid    = "AWSLogDeliveryAclCheck"
+        Effect = "Allow"
+        Principal = {
+          Service = "delivery.logs.amazonaws.com"
+        }
+        Action   = "s3:GetBucketAcl"
+        Resource = aws_s3_bucket.flow_logs.arn
+      }
+    ]
+  })
+}
+```
+
 ## Examples
 
-- [Complete example](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/tree/master/examples/complete) shows TGW in combination with the [VPC module](https://github.com/terraform-aws-modules/terraform-aws-vpc) and [Resource Access Manager (RAM)](https://aws.amazon.com/ram/).
+- [Complete example](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/tree/master/examples/complete) shows TGW in combination with the [VPC module](https://github.com/terraform-aws-modules/terraform-aws-vpc), [Resource Access Manager (RAM)](https://aws.amazon.com/ram/), and basic flow logging configuration.
+- [Flow Logs example](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/tree/master/examples/flow-logs) demonstrates comprehensive flow logging configurations including CloudWatch Logs, S3 destinations, and external resource usage.
 - [Multi-account example](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/tree/master/examples/multi-account) shows TGW resources shared with different AWS accounts (via [Resource Access Manager (RAM)](https://aws.amazon.com/ram/)).
 
 <!-- BEGIN_TF_DOCS -->
@@ -85,6 +230,7 @@ No modules.
 
 | Name | Type |
 |------|------|
+| [aws_cloudwatch_log_group.flow_log](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_ec2_tag.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ec2_tag) | resource |
 | [aws_ec2_transit_gateway.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ec2_transit_gateway) | resource |
 | [aws_ec2_transit_gateway_route.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ec2_transit_gateway_route) | resource |
@@ -92,17 +238,28 @@ No modules.
 | [aws_ec2_transit_gateway_route_table_association.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ec2_transit_gateway_route_table_association) | resource |
 | [aws_ec2_transit_gateway_route_table_propagation.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ec2_transit_gateway_route_table_propagation) | resource |
 | [aws_ec2_transit_gateway_vpc_attachment.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ec2_transit_gateway_vpc_attachment) | resource |
+| [aws_flow_log.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/flow_log) | resource |
+| [aws_iam_policy.tgw_flow_log_cloudwatch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
+| [aws_iam_role.tgw_flow_log_cloudwatch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role_policy_attachment.tgw_flow_log_cloudwatch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy_attachment) | resource |
 | [aws_ram_principal_association.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ram_principal_association) | resource |
 | [aws_ram_resource_association.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ram_resource_association) | resource |
 | [aws_ram_resource_share.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ram_resource_share) | resource |
 | [aws_ram_resource_share_accepter.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ram_resource_share_accepter) | resource |
 | [aws_route.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route) | resource |
+| [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
+| [aws_iam_policy_document.flow_log_cloudwatch_assume_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.tgw_flow_log_cloudwatch](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_partition.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/partition) | data source |
+| [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_amazon_side_asn"></a> [amazon\_side\_asn](#input\_amazon\_side\_asn) | The Autonomous System Number (ASN) for the Amazon side of the gateway. By default the TGW is created with the current default Amazon ASN. | `string` | `null` | no |
+| <a name="input_create_flow_log_cloudwatch_iam_role"></a> [create\_flow\_log\_cloudwatch\_iam\_role](#input\_create\_flow\_log\_cloudwatch\_iam\_role) | Whether to create IAM role for TGW Flow Logs | `bool` | `false` | no |
+| <a name="input_create_flow_log_cloudwatch_log_group"></a> [create\_flow\_log\_cloudwatch\_log\_group](#input\_create\_flow\_log\_cloudwatch\_log\_group) | Whether to create CloudWatch log group for TGW Flow Logs | `bool` | `false` | no |
 | <a name="input_create_tgw"></a> [create\_tgw](#input\_create\_tgw) | Controls if TGW should be created (it affects almost all resources) | `bool` | `true` | no |
 | <a name="input_create_tgw_routes"></a> [create\_tgw\_routes](#input\_create\_tgw\_routes) | Controls if TGW Route Table / Routes should be created | `bool` | `true` | no |
 | <a name="input_description"></a> [description](#input\_description) | Description of the EC2 Transit Gateway | `string` | `null` | no |
@@ -110,9 +267,27 @@ No modules.
 | <a name="input_enable_default_route_table_association"></a> [enable\_default\_route\_table\_association](#input\_enable\_default\_route\_table\_association) | Whether resource attachments are automatically associated with the default association route table | `bool` | `true` | no |
 | <a name="input_enable_default_route_table_propagation"></a> [enable\_default\_route\_table\_propagation](#input\_enable\_default\_route\_table\_propagation) | Whether resource attachments automatically propagate routes to the default propagation route table | `bool` | `true` | no |
 | <a name="input_enable_dns_support"></a> [enable\_dns\_support](#input\_enable\_dns\_support) | Should be true to enable DNS support in the TGW | `bool` | `true` | no |
+| <a name="input_enable_flow_log"></a> [enable\_flow\_log](#input\_enable\_flow\_log) | Whether or not to enable TGW Flow Logs | `bool` | `false` | no |
 | <a name="input_enable_multicast_support"></a> [enable\_multicast\_support](#input\_enable\_multicast\_support) | Whether multicast support is enabled | `bool` | `false` | no |
 | <a name="input_enable_sg_referencing_support"></a> [enable\_sg\_referencing\_support](#input\_enable\_sg\_referencing\_support) | Indicates whether to enable security group referencing support | `bool` | `true` | no |
 | <a name="input_enable_vpn_ecmp_support"></a> [enable\_vpn\_ecmp\_support](#input\_enable\_vpn\_ecmp\_support) | Whether VPN Equal Cost Multipath Protocol support is enabled | `bool` | `true` | no |
+| <a name="input_flow_log_cloudwatch_iam_role_arn"></a> [flow\_log\_cloudwatch\_iam\_role\_arn](#input\_flow\_log\_cloudwatch\_iam\_role\_arn) | The ARN for the IAM role that's used to post flow logs to a CloudWatch Logs log group. When flow\_log\_destination\_arn is set to ARN of Cloudwatch Logs, this argument needs to be provided | `string` | `""` | no |
+| <a name="input_flow_log_cloudwatch_iam_role_conditions"></a> [flow\_log\_cloudwatch\_iam\_role\_conditions](#input\_flow\_log\_cloudwatch\_iam\_role\_conditions) | Additional conditions of the CloudWatch role assumption policy | <pre>list(object({<br/>    test     = string<br/>    variable = string<br/>    values   = list(string)<br/>  }))</pre> | `[]` | no |
+| <a name="input_flow_log_cloudwatch_log_group_class"></a> [flow\_log\_cloudwatch\_log\_group\_class](#input\_flow\_log\_cloudwatch\_log\_group\_class) | Specified the log class of the log group. Possible values are: STANDARD or INFREQUENT\_ACCESS | `string` | `null` | no |
+| <a name="input_flow_log_cloudwatch_log_group_kms_key_id"></a> [flow\_log\_cloudwatch\_log\_group\_kms\_key\_id](#input\_flow\_log\_cloudwatch\_log\_group\_kms\_key\_id) | The ARN of the KMS Key to use when encrypting log data for TGW flow logs | `string` | `null` | no |
+| <a name="input_flow_log_cloudwatch_log_group_name_prefix"></a> [flow\_log\_cloudwatch\_log\_group\_name\_prefix](#input\_flow\_log\_cloudwatch\_log\_group\_name\_prefix) | Specifies the name prefix of CloudWatch Log Group for TGW flow logs | `string` | `"/aws/tgw-flow-log/"` | no |
+| <a name="input_flow_log_cloudwatch_log_group_name_suffix"></a> [flow\_log\_cloudwatch\_log\_group\_name\_suffix](#input\_flow\_log\_cloudwatch\_log\_group\_name\_suffix) | Specifies the name suffix of CloudWatch Log Group for TGW flow logs | `string` | `""` | no |
+| <a name="input_flow_log_cloudwatch_log_group_retention_in_days"></a> [flow\_log\_cloudwatch\_log\_group\_retention\_in\_days](#input\_flow\_log\_cloudwatch\_log\_group\_retention\_in\_days) | Specifies the number of days you want to retain log events in the specified log group for TGW flow logs | `number` | `null` | no |
+| <a name="input_flow_log_cloudwatch_log_group_skip_destroy"></a> [flow\_log\_cloudwatch\_log\_group\_skip\_destroy](#input\_flow\_log\_cloudwatch\_log\_group\_skip\_destroy) | Set to true if you do not wish the log group (and any logs it may contain) to be deleted at destroy time, and instead just remove the log group from the Terraform state | `bool` | `false` | no |
+| <a name="input_flow_log_deliver_cross_account_role"></a> [flow\_log\_deliver\_cross\_account\_role](#input\_flow\_log\_deliver\_cross\_account\_role) | (Optional) ARN of the IAM role that allows Amazon EC2 to publish flow logs across accounts. | `string` | `null` | no |
+| <a name="input_flow_log_destination_arn"></a> [flow\_log\_destination\_arn](#input\_flow\_log\_destination\_arn) | The ARN of the CloudWatch log group or S3 bucket where TGW Flow Logs will be pushed. If this ARN is a S3 bucket the appropriate permissions need to be set on that bucket's policy. When create\_flow\_log\_cloudwatch\_log\_group is set to false this argument must be provided | `string` | `""` | no |
+| <a name="input_flow_log_destination_type"></a> [flow\_log\_destination\_type](#input\_flow\_log\_destination\_type) | Type of flow log destination. Can be s3, kinesis-data-firehose or cloud-watch-logs | `string` | `"cloud-watch-logs"` | no |
+| <a name="input_flow_log_file_format"></a> [flow\_log\_file\_format](#input\_flow\_log\_file\_format) | (Optional) The format for the flow log. Valid values: `plain-text`, `parquet` | `string` | `null` | no |
+| <a name="input_flow_log_hive_compatible_partitions"></a> [flow\_log\_hive\_compatible\_partitions](#input\_flow\_log\_hive\_compatible\_partitions) | (Optional) Indicates whether to use Hive-compatible prefixes for flow logs stored in Amazon S3 | `bool` | `false` | no |
+| <a name="input_flow_log_log_format"></a> [flow\_log\_log\_format](#input\_flow\_log\_log\_format) | The fields to include in the flow log record, in the order in which they should appear | `string` | `null` | no |
+| <a name="input_flow_log_max_aggregation_interval"></a> [flow\_log\_max\_aggregation\_interval](#input\_flow\_log\_max\_aggregation\_interval) | The maximum interval of time during which a flow of packets is captured and aggregated into a flow log record. Valid Values: `60` seconds | `number` | `60` | no |
+| <a name="input_flow_log_per_hour_partition"></a> [flow\_log\_per\_hour\_partition](#input\_flow\_log\_per\_hour\_partition) | (Optional) Indicates whether to partition the flow log per hour. This reduces the cost and response time for queries | `bool` | `false` | no |
+| <a name="input_flow_log_traffic_type"></a> [flow\_log\_traffic\_type](#input\_flow\_log\_traffic\_type) | The type of traffic to capture. Valid values: ACCEPT, REJECT, ALL | `string` | `"ALL"` | no |
 | <a name="input_name"></a> [name](#input\_name) | Name to be used on all the resources as identifier | `string` | `""` | no |
 | <a name="input_ram_allow_external_principals"></a> [ram\_allow\_external\_principals](#input\_ram\_allow\_external\_principals) | Indicates whether principals outside your organization can be associated with a resource share. | `bool` | `false` | no |
 | <a name="input_ram_name"></a> [ram\_name](#input\_ram\_name) | The name of the resource share of TGW | `string` | `""` | no |
@@ -122,6 +297,12 @@ No modules.
 | <a name="input_share_tgw"></a> [share\_tgw](#input\_share\_tgw) | Whether to share your transit gateway with other accounts | `bool` | `true` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to add to all resources | `map(string)` | `{}` | no |
 | <a name="input_tgw_default_route_table_tags"></a> [tgw\_default\_route\_table\_tags](#input\_tgw\_default\_route\_table\_tags) | Additional tags for the Default TGW route table | `map(string)` | `{}` | no |
+| <a name="input_tgw_flow_log_iam_policy_name"></a> [tgw\_flow\_log\_iam\_policy\_name](#input\_tgw\_flow\_log\_iam\_policy\_name) | Name of the IAM policy | `string` | `"tgw-flow-log-to-cloudwatch"` | no |
+| <a name="input_tgw_flow_log_iam_policy_use_name_prefix"></a> [tgw\_flow\_log\_iam\_policy\_use\_name\_prefix](#input\_tgw\_flow\_log\_iam\_policy\_use\_name\_prefix) | Determines whether the name of the IAM policy (`tgw_flow_log_iam_policy_name`) is used as a prefix | `bool` | `true` | no |
+| <a name="input_tgw_flow_log_iam_role_name"></a> [tgw\_flow\_log\_iam\_role\_name](#input\_tgw\_flow\_log\_iam\_role\_name) | Name to use on the TGW Flow Log IAM role created | `string` | `"tgw-flow-log-role"` | no |
+| <a name="input_tgw_flow_log_iam_role_use_name_prefix"></a> [tgw\_flow\_log\_iam\_role\_use\_name\_prefix](#input\_tgw\_flow\_log\_iam\_role\_use\_name\_prefix) | Determines whether the IAM role name (`tgw_flow_log_iam_role_name`) is used as a prefix | `bool` | `true` | no |
+| <a name="input_tgw_flow_log_permissions_boundary"></a> [tgw\_flow\_log\_permissions\_boundary](#input\_tgw\_flow\_log\_permissions\_boundary) | The ARN of the Permissions Boundary for the TGW Flow Log IAM Role | `string` | `null` | no |
+| <a name="input_tgw_flow_log_tags"></a> [tgw\_flow\_log\_tags](#input\_tgw\_flow\_log\_tags) | Additional tags for the TGW Flow Logs | `map(string)` | `{}` | no |
 | <a name="input_tgw_route_table_tags"></a> [tgw\_route\_table\_tags](#input\_tgw\_route\_table\_tags) | Additional tags for the TGW route table | `map(string)` | `{}` | no |
 | <a name="input_tgw_tags"></a> [tgw\_tags](#input\_tgw\_tags) | Additional tags for the TGW | `map(string)` | `{}` | no |
 | <a name="input_tgw_vpc_attachment_tags"></a> [tgw\_vpc\_attachment\_tags](#input\_tgw\_vpc\_attachment\_tags) | Additional tags for VPC attachments | `map(string)` | `{}` | no |
@@ -151,6 +332,11 @@ No modules.
 | <a name="output_ec2_transit_gateway_vpc_attachment_ids"></a> [ec2\_transit\_gateway\_vpc\_attachment\_ids](#output\_ec2\_transit\_gateway\_vpc\_attachment\_ids) | List of EC2 Transit Gateway VPC Attachment identifiers |
 | <a name="output_ram_principal_association_id"></a> [ram\_principal\_association\_id](#output\_ram\_principal\_association\_id) | The Amazon Resource Name (ARN) of the Resource Share and the principal, separated by a comma |
 | <a name="output_ram_resource_share_id"></a> [ram\_resource\_share\_id](#output\_ram\_resource\_share\_id) | The Amazon Resource Name (ARN) of the resource share |
+| <a name="output_tgw_flow_log_cloudwatch_iam_role_arn"></a> [tgw\_flow\_log\_cloudwatch\_iam\_role\_arn](#output\_tgw\_flow\_log\_cloudwatch\_iam\_role\_arn) | The ARN of the IAM role used when pushing logs to Cloudwatch log group |
+| <a name="output_tgw_flow_log_deliver_cross_account_role"></a> [tgw\_flow\_log\_deliver\_cross\_account\_role](#output\_tgw\_flow\_log\_deliver\_cross\_account\_role) | The ARN of the IAM role used when pushing logs cross account |
+| <a name="output_tgw_flow_log_destination_arn"></a> [tgw\_flow\_log\_destination\_arn](#output\_tgw\_flow\_log\_destination\_arn) | The ARN of the destination for TGW Flow Logs |
+| <a name="output_tgw_flow_log_destination_type"></a> [tgw\_flow\_log\_destination\_type](#output\_tgw\_flow\_log\_destination\_type) | The type of the destination for TGW Flow Logs |
+| <a name="output_tgw_flow_log_id"></a> [tgw\_flow\_log\_id](#output\_tgw\_flow\_log\_id) | The ID of the Flow Log resource |
 <!-- END_TF_DOCS -->
 
 ## Authors

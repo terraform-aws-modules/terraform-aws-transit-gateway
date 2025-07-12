@@ -175,3 +175,167 @@ variable "ram_tags" {
   type        = map(string)
   default     = {}
 }
+
+################################################################################
+# Flow Log
+################################################################################
+
+variable "enable_flow_log" {
+  description = "Whether or not to enable TGW Flow Logs"
+  type        = bool
+  default     = false
+}
+
+variable "create_flow_log_cloudwatch_iam_role" {
+  description = "Whether to create IAM role for TGW Flow Logs"
+  type        = bool
+  default     = false
+}
+
+variable "create_flow_log_cloudwatch_log_group" {
+  description = "Whether to create CloudWatch log group for TGW Flow Logs"
+  type        = bool
+  default     = false
+}
+
+variable "flow_log_destination_type" {
+  description = "Type of flow log destination. Can be s3, kinesis-data-firehose or cloud-watch-logs"
+  type        = string
+  default     = "cloud-watch-logs"
+}
+
+variable "flow_log_destination_arn" {
+  description = "The ARN of the CloudWatch log group or S3 bucket where TGW Flow Logs will be pushed. If this ARN is a S3 bucket the appropriate permissions need to be set on that bucket's policy. When create_flow_log_cloudwatch_log_group is set to false this argument must be provided"
+  type        = string
+  default     = ""
+}
+
+variable "flow_log_log_format" {
+  description = "The fields to include in the flow log record, in the order in which they should appear"
+  type        = string
+  default     = null
+}
+
+variable "flow_log_traffic_type" {
+  description = "The type of traffic to capture. Valid values: ACCEPT, REJECT, ALL"
+  type        = string
+  default     = "ALL"
+}
+
+variable "flow_log_max_aggregation_interval" {
+  description = "The maximum interval of time during which a flow of packets is captured and aggregated into a flow log record. Valid Values: `60` seconds"
+  type        = number
+  default     = 60
+}
+
+variable "flow_log_deliver_cross_account_role" {
+  description = "(Optional) ARN of the IAM role that allows Amazon EC2 to publish flow logs across accounts."
+  type        = string
+  default     = null
+}
+
+variable "flow_log_file_format" {
+  description = "(Optional) The format for the flow log. Valid values: `plain-text`, `parquet`"
+  type        = string
+  default     = null
+}
+
+variable "flow_log_hive_compatible_partitions" {
+  description = "(Optional) Indicates whether to use Hive-compatible prefixes for flow logs stored in Amazon S3"
+  type        = bool
+  default     = false
+}
+
+variable "flow_log_per_hour_partition" {
+  description = "(Optional) Indicates whether to partition the flow log per hour. This reduces the cost and response time for queries"
+  type        = bool
+  default     = false
+}
+
+variable "flow_log_cloudwatch_iam_role_arn" {
+  description = "The ARN for the IAM role that's used to post flow logs to a CloudWatch Logs log group. When flow_log_destination_arn is set to ARN of Cloudwatch Logs, this argument needs to be provided"
+  type        = string
+  default     = ""
+}
+
+variable "flow_log_cloudwatch_iam_role_conditions" {
+  description = "Additional conditions of the CloudWatch role assumption policy"
+  type = list(object({
+    test     = string
+    variable = string
+    values   = list(string)
+  }))
+  default = []
+}
+
+variable "flow_log_cloudwatch_log_group_name_prefix" {
+  description = "Specifies the name prefix of CloudWatch Log Group for TGW flow logs"
+  type        = string
+  default     = "/aws/tgw-flow-log/"
+}
+
+variable "flow_log_cloudwatch_log_group_name_suffix" {
+  description = "Specifies the name suffix of CloudWatch Log Group for TGW flow logs"
+  type        = string
+  default     = ""
+}
+
+variable "flow_log_cloudwatch_log_group_retention_in_days" {
+  description = "Specifies the number of days you want to retain log events in the specified log group for TGW flow logs"
+  type        = number
+  default     = null
+}
+
+variable "flow_log_cloudwatch_log_group_kms_key_id" {
+  description = "The ARN of the KMS Key to use when encrypting log data for TGW flow logs"
+  type        = string
+  default     = null
+}
+
+variable "flow_log_cloudwatch_log_group_skip_destroy" {
+  description = "Set to true if you do not wish the log group (and any logs it may contain) to be deleted at destroy time, and instead just remove the log group from the Terraform state"
+  type        = bool
+  default     = false
+}
+
+variable "flow_log_cloudwatch_log_group_class" {
+  description = "Specified the log class of the log group. Possible values are: STANDARD or INFREQUENT_ACCESS"
+  type        = string
+  default     = null
+}
+
+variable "tgw_flow_log_iam_role_name" {
+  description = "Name to use on the TGW Flow Log IAM role created"
+  type        = string
+  default     = "tgw-flow-log-role"
+}
+
+variable "tgw_flow_log_iam_role_use_name_prefix" {
+  description = "Determines whether the IAM role name (`tgw_flow_log_iam_role_name`) is used as a prefix"
+  type        = bool
+  default     = true
+}
+
+variable "tgw_flow_log_permissions_boundary" {
+  description = "The ARN of the Permissions Boundary for the TGW Flow Log IAM Role"
+  type        = string
+  default     = null
+}
+
+variable "tgw_flow_log_iam_policy_name" {
+  description = "Name of the IAM policy"
+  type        = string
+  default     = "tgw-flow-log-to-cloudwatch"
+}
+
+variable "tgw_flow_log_iam_policy_use_name_prefix" {
+  description = "Determines whether the name of the IAM policy (`tgw_flow_log_iam_policy_name`) is used as a prefix"
+  type        = bool
+  default     = true
+}
+
+variable "tgw_flow_log_tags" {
+  description = "Additional tags for the TGW Flow Logs"
+  type        = map(string)
+  default     = {}
+}

@@ -35,6 +35,15 @@ module "tgw" {
   # When "true", allows service discovery through IGMP
   enable_multicast_support = false
 
+  # Flow log configuration (optional)
+  enable_flow_log                      = true
+  create_flow_log_cloudwatch_log_group = true
+  create_flow_log_cloudwatch_iam_role  = true
+
+  flow_log_cloudwatch_log_group_retention_in_days = 14
+  flow_log_traffic_type                           = "ALL"
+  flow_log_max_aggregation_interval               = 600
+
   vpc_attachments = {
     vpc1 = {
       vpc_id                             = module.vpc1.vpc_id
