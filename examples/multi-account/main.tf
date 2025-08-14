@@ -125,7 +125,7 @@ data "aws_availability_zones" "available" {
 
 module "vpc1" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "~> 5.0"
+  version = "~> 6.0"
 
   name = "${local.name}-vpc1"
   cidr = local.vpc1_cidr
@@ -142,7 +142,7 @@ module "vpc1" {
 
 module "vpc2" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "~> 5.0"
+  version = "~> 6.0"
 
   name = "${local.name}-vpc2"
   cidr = local.vpc2_cidr
@@ -159,7 +159,7 @@ resource "random_pet" "this" {
 
 module "s3_bucket" {
   source  = "terraform-aws-modules/s3-bucket/aws"
-  version = "~> 3.0"
+  version = "~> 5.0"
 
   bucket        = "${local.name}-${random_pet.this.id}"
   policy        = data.aws_iam_policy_document.flow_log_s3.json
