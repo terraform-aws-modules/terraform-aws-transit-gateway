@@ -84,6 +84,8 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
     var.tgw_vpc_attachment_tags,
     try(each.value.tags, {}),
   )
+
+  depends_on = [aws_ram_resource_share_accepter.this]
 }
 
 ################################################################################
@@ -122,6 +124,8 @@ resource "aws_route" "this" {
   destination_cidr_block      = try(each.value.ipv6_support, false) ? null : each.value["cidr"]
   destination_ipv6_cidr_block = try(each.value.ipv6_support, false) ? each.value["cidr"] : null
   transit_gateway_id          = each.value["tgw_id"]
+
+  depends_on = [aws_ec2_transit_gateway_vpc_attachment.this]
 }
 
 resource "aws_ec2_transit_gateway_route_table_association" "this" {
