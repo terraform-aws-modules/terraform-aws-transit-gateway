@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.13.1](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.13.0...v2.13.1) (2025-09-23)
+
+
+### Bug Fixes
+
+* Defined dependencies for aws_ram_resource_share_accepter and aws_route ([#144](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/144)) ([6a09286](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/commit/6a0928641fb88285583c381a129824a0f2bbc534))
+
 ## [2.13.0](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.12.2...v2.13.0) (2025-01-15)
 
 
