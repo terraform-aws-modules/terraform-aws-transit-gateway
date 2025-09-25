@@ -41,10 +41,13 @@ resource "aws_ec2_transit_gateway" "this" {
   transit_gateway_cidr_blocks        = var.transit_gateway_cidr_blocks
   security_group_referencing_support = var.enable_sg_referencing_support ? "enable" : "disable"
 
-  timeouts {
-    create = try(var.timeouts.create, null)
-    update = try(var.timeouts.update, null)
-    delete = try(var.timeouts.delete, null)
+  dynamic "timeouts" {
+    for_each = var.timeouts == null ? [] : [var.timeouts]
+    content {
+      create = timeouts.value.create
+      update = timeouts.value.update
+      delete = timeouts.value.delete
+    }
   }
 
   tags = merge(
@@ -168,17 +171,21 @@ resource "aws_ec2_transit_gateway_route_table_propagation" "this" {
 # Resource Access Manager
 ################################################################################
 
+locals {
+  ram_name = coalesce(var.ram_name, var.name)
+}
+
 resource "aws_ram_resource_share" "this" {
   count = var.create_tgw && var.share_tgw ? 1 : 0
 
   region = var.region
 
-  name                      = coalesce(var.ram_name, var.name)
+  name                      = local.ram_name
   allow_external_principals = var.ram_allow_external_principals
 
   tags = merge(
     var.tags,
-    { Name = coalesce(var.ram_name, var.name) },
+    { Name = local.ram_name },
     var.ram_tags,
   )
 }

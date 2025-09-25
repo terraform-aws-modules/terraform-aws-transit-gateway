@@ -82,8 +82,12 @@ variable "transit_gateway_cidr_blocks" {
 
 variable "timeouts" {
   description = "Create, update, and delete timeout configurations for the transit gateway"
-  type        = map(string)
-  default     = {}
+  type = object({
+    create = optional(bool)
+    update = optional(bool)
+    delete = optional(bool)
+  })
+  default = null
 }
 
 variable "tgw_tags" {
