@@ -10,6 +10,12 @@ variable "tags" {
   default     = {}
 }
 
+variable "region" {
+  description = "Region where the resource(s) will be managed. Defaults to the region set in the provider configuration"
+  type        = string
+  default     = null
+}
+
 ################################################################################
 # Transit Gateway
 ################################################################################
@@ -76,8 +82,12 @@ variable "transit_gateway_cidr_blocks" {
 
 variable "timeouts" {
   description = "Create, update, and delete timeout configurations for the transit gateway"
-  type        = map(string)
-  default     = {}
+  type = object({
+    create = optional(bool)
+    update = optional(bool)
+    delete = optional(bool)
+  })
+  default = null
 }
 
 variable "tgw_tags" {

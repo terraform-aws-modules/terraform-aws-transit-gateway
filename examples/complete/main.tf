@@ -2,14 +2,20 @@ provider "aws" {
   region = local.region
 }
 
+data "aws_availability_zones" "available" {}
+
 locals {
-  name   = "ex-tgw-${replace(basename(path.cwd), "_", "-")}"
   region = "eu-west-1"
+  name   = "ex-${basename(path.cwd)}"
+
+  vpc1_cidr = "10.10.0.0/16"
+  vpc2_cidr = "10.20.0.0/16"
+  azs       = slice(data.aws_availability_zones.available.names, 0, 3)
 
   tags = {
+    Name       = local.name
     Example    = local.name
-    GithubRepo = "terraform-aws-eks"
-    GithubOrg  = "terraform-aws-transit-gateway"
+    Repository = "https://github.com/terraform-aws-modules/terraform-aws-transit-gateway"
   }
 }
 
@@ -87,13 +93,13 @@ module "tgw" {
 
 module "vpc1" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "~> 5.0"
+  version = "~> 6.0"
 
-  name = "${local.name}-vpc1"
-  cidr = "10.10.0.0/16"
+  name = "${local.name}-1"
+  cidr = local.vpc1_cidr
 
-  azs             = ["${local.region}a", "${local.region}b", "${local.region}c"]
-  private_subnets = ["10.10.1.0/24", "10.10.2.0/24", "10.10.3.0/24"]
+  azs             = local.azs
+  private_subnets = [for k, v in local.azs : cidrsubnet(local.vpc1_cidr, 8, k)]
 
   enable_ipv6                                    = true
   private_subnet_assign_ipv6_address_on_creation = true
@@ -104,13 +110,13 @@ module "vpc1" {
 
 module "vpc2" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "~> 5.0"
+  version = "~> 6.0"
 
-  name = "${local.name}-vpc2"
-  cidr = "10.20.0.0/16"
+  name = "${local.name}-2"
+  cidr = local.vpc2_cidr
 
-  azs             = ["${local.region}a", "${local.region}b", "${local.region}c"]
-  private_subnets = ["10.20.1.0/24", "10.20.2.0/24", "10.20.3.0/24"]
+  azs             = local.azs
+  private_subnets = [for k, v in local.azs : cidrsubnet(local.vpc2_cidr, 8, k)]
 
   enable_ipv6 = false
 

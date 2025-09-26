@@ -28,6 +28,8 @@ locals {
 resource "aws_ec2_transit_gateway" "this" {
   count = var.create_tgw ? 1 : 0
 
+  region = var.region
+
   description                        = coalesce(var.description, var.name)
   amazon_side_asn                    = var.amazon_side_asn
   default_route_table_association    = var.enable_default_route_table_association ? "enable" : "disable"
@@ -39,10 +41,13 @@ resource "aws_ec2_transit_gateway" "this" {
   transit_gateway_cidr_blocks        = var.transit_gateway_cidr_blocks
   security_group_referencing_support = var.enable_sg_referencing_support ? "enable" : "disable"
 
-  timeouts {
-    create = try(var.timeouts.create, null)
-    update = try(var.timeouts.update, null)
-    delete = try(var.timeouts.delete, null)
+  dynamic "timeouts" {
+    for_each = var.timeouts == null ? [] : [var.timeouts]
+    content {
+      create = timeouts.value.create
+      update = timeouts.value.update
+      delete = timeouts.value.delete
+    }
   }
 
   tags = merge(
@@ -55,6 +60,8 @@ resource "aws_ec2_transit_gateway" "this" {
 resource "aws_ec2_tag" "this" {
   for_each = { for k, v in local.tgw_default_route_table_tags_merged : k => v if var.create_tgw && var.enable_default_route_table_association }
 
+  region = var.region
+
   resource_id = aws_ec2_transit_gateway.this[0].association_default_route_table_id
   key         = each.key
   value       = each.value
@@ -66,6 +73,8 @@ resource "aws_ec2_tag" "this" {
 
 resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
   for_each = var.vpc_attachments
+
+  region = var.region
 
   transit_gateway_id = var.create_tgw ? aws_ec2_transit_gateway.this[0].id : each.value.tgw_id
   vpc_id             = each.value.vpc_id
@@ -95,6 +104,8 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
 resource "aws_ec2_transit_gateway_route_table" "this" {
   count = var.create_tgw && var.create_tgw_routes ? 1 : 0
 
+  region = var.region
+
   transit_gateway_id = aws_ec2_transit_gateway.this[0].id
 
   tags = merge(
@@ -106,6 +117,8 @@ resource "aws_ec2_transit_gateway_route_table" "this" {
 
 resource "aws_ec2_transit_gateway_route" "this" {
   count = var.create_tgw_routes ? length(local.vpc_attachments_with_routes) : 0
+
+  region = var.region
 
   destination_cidr_block = local.vpc_attachments_with_routes[count.index][1].destination_cidr_block
   blackhole              = try(local.vpc_attachments_with_routes[count.index][1].blackhole, null)
@@ -120,6 +133,8 @@ resource "aws_route" "this" {
     tgw_id = x.tgw_id
   } }
 
+  region = var.region
+
   route_table_id              = each.key
   destination_cidr_block      = try(each.value.ipv6_support, false) ? null : each.value["cidr"]
   destination_ipv6_cidr_block = try(each.value.ipv6_support, false) ? each.value["cidr"] : null
@@ -133,6 +148,8 @@ resource "aws_ec2_transit_gateway_route_table_association" "this" {
     for k, v in var.vpc_attachments : k => v if var.create_tgw && var.create_tgw_routes && try(v.transit_gateway_default_route_table_association, true) != true
   }
 
+  region = var.region
+
   # Create association if it was not set already by aws_ec2_transit_gateway_vpc_attachment resource
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.this[each.key].id
   transit_gateway_route_table_id = var.create_tgw ? aws_ec2_transit_gateway_route_table.this[0].id : try(each.value.transit_gateway_route_table_id, var.transit_gateway_route_table_id)
@@ -143,6 +160,8 @@ resource "aws_ec2_transit_gateway_route_table_propagation" "this" {
     for k, v in var.vpc_attachments : k => v if var.create_tgw && var.create_tgw_routes && try(v.transit_gateway_default_route_table_propagation, true) != true
   }
 
+  region = var.region
+
   # Create association if it was not set already by aws_ec2_transit_gateway_vpc_attachment resource
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.this[each.key].id
   transit_gateway_route_table_id = var.create_tgw ? aws_ec2_transit_gateway_route_table.this[0].id : try(each.value.transit_gateway_route_table_id, var.transit_gateway_route_table_id)
@@ -152,21 +171,29 @@ resource "aws_ec2_transit_gateway_route_table_propagation" "this" {
 # Resource Access Manager
 ################################################################################
 
+locals {
+  ram_name = coalesce(var.ram_name, var.name)
+}
+
 resource "aws_ram_resource_share" "this" {
   count = var.create_tgw && var.share_tgw ? 1 : 0
 
-  name                      = coalesce(var.ram_name, var.name)
+  region = var.region
+
+  name                      = local.ram_name
   allow_external_principals = var.ram_allow_external_principals
 
   tags = merge(
     var.tags,
-    { Name = coalesce(var.ram_name, var.name) },
+    { Name = local.ram_name },
     var.ram_tags,
   )
 }
 
 resource "aws_ram_resource_association" "this" {
   count = var.create_tgw && var.share_tgw ? 1 : 0
+
+  region = var.region
 
   resource_arn       = aws_ec2_transit_gateway.this[0].arn
   resource_share_arn = aws_ram_resource_share.this[0].id
@@ -175,12 +202,16 @@ resource "aws_ram_resource_association" "this" {
 resource "aws_ram_principal_association" "this" {
   count = var.create_tgw && var.share_tgw ? length(var.ram_principals) : 0
 
+  region = var.region
+
   principal          = var.ram_principals[count.index]
   resource_share_arn = aws_ram_resource_share.this[0].arn
 }
 
 resource "aws_ram_resource_share_accepter" "this" {
   count = !var.create_tgw && var.share_tgw ? 1 : 0
+
+  region = var.region
 
   share_arn = var.ram_resource_share_arn
 }
