@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.0](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.13.1...v3.0.0) (2025-09-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* Raise MSV of Terraform and AWS provider to `v1.5.7` and `v6.0.0` respectively, add support for `region` argument (#146)
+
+### Features
+
+* Raise MSV of Terraform and AWS provider to `v1.5.7` and `v6.0.0` respectively, add support for `region` argument ([#146](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/146)) ([9ded85b](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/commit/9ded85b8f16ee1e3372907b2f8ec6c0d5c0c496a))
+
 ## [2.13.1](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.13.0...v2.13.1) (2025-09-23)
 
 
