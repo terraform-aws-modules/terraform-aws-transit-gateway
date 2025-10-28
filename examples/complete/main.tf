@@ -84,6 +84,12 @@ module "tgw" {
   ram_allow_external_principals = true
   ram_principals                = [307990089504]
 
+  timeouts = {
+    create = "10m"
+    update = "15m"
+    delete = "15m"
+  }
+
   tags = local.tags
 }
 
