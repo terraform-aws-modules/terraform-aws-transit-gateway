@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.2](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v3.0.1...v3.0.2) (2025-10-28)
+
+### Bug Fixes
+
+* Correct `timeouts` variable type definition from `optional(bool)` to `optional(string)` ([#150](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/150)) ([cb116df](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/commit/cb116df0a263de5a2176dd583a8e0bbef8522633))
+
 ## [3.0.1](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v3.0.0...v3.0.1) (2025-10-21)
 
 ### Bug Fixes
