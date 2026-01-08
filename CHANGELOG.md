@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.0](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v3.0.2...v3.1.0) (2026-01-08)
+
+### Features
+
+* Add provider meta user-agent ([#151](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/151)) ([09fb3b8](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/commit/09fb3b8a3fff330972775f75b963efa88d7c5247))
+
 ## [3.0.2](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v3.0.1...v3.0.2) (2025-10-28)
 
 ### Bug Fixes
