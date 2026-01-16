@@ -139,7 +139,7 @@ resource "aws_ec2_transit_gateway_route" "this" {
   transit_gateway_attachment_id  = tobool(try(local.vpc_attachments_with_routes[count.index][1].blackhole, false)) == false ? aws_ec2_transit_gateway_vpc_attachment.this[local.vpc_attachments_with_routes[count.index][0].key].id : null
 }
 
-resource "aws_route" "destination_cidr" {
+resource "aws_route" "this" {
   for_each = { for x in local.vpc_route_table_destination_cidr : x.rtb_id => {
     cidr   = x.cidr,
     tgw_id = x.tgw_id
@@ -153,11 +153,6 @@ resource "aws_route" "destination_cidr" {
   transit_gateway_id          = each.value["tgw_id"]
 
   depends_on = [aws_ec2_transit_gateway_vpc_attachment.this]
-}
-
-moved {
-  from = aws_route.this
-  to   = aws_route.destination_cidr
 }
 
 resource "aws_route" "additional_cidrs" {
