@@ -19,6 +19,18 @@ locals {
       }
     ]
   ])
+
+  vpc_route_table_additional_cidrs = flatten([
+    for k, v in var.vpc_attachments : [
+      for rtb_id in try(v.vpc_route_table_ids, []) : [
+        for cidr in try(v.tgw_additional_cidrs, []) : {
+          rtb_id = rtb_id
+          cidr   = cidr
+          tgw_id = var.create_tgw ? aws_ec2_transit_gateway.this[0].id : v.tgw_id
+        }
+      ]
+    ]
+  ])
 }
 
 ################################################################################
@@ -141,6 +153,19 @@ resource "aws_route" "this" {
   transit_gateway_id          = each.value["tgw_id"]
 
   depends_on = [aws_ec2_transit_gateway_vpc_attachment.this]
+}
+
+resource "aws_route" "additional_cidrs" {
+  for_each = { for x in local.vpc_route_table_additional_cidrs : "${x.rtb_id}_${x.cidr}" => {
+    cidr   = x.cidr
+    rtb_id = x.rtb_id
+    tgw_id = x.tgw_id
+  } }
+
+  route_table_id              = each.value["rtb_id"]
+  destination_cidr_block      = try(each.value.ipv6_support, false) ? null : each.value["cidr"]
+  destination_ipv6_cidr_block = try(each.value.ipv6_support, false) ? each.value["cidr"] : null
+  transit_gateway_id          = each.value["tgw_id"]
 }
 
 resource "aws_ec2_transit_gateway_route_table_association" "this" {
