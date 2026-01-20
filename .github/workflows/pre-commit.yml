@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - master
+      - develop/v4
 
 env:
   TERRAFORM_DOCS_VERSION: v0.20.0
