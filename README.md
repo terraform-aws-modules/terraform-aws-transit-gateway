@@ -10,6 +10,9 @@ Terraform module which creates AWS Transit Gateway resources.
 module "transit_gateway" {
   source  = "terraform-aws-modules/transit-gateway/aws"
 
+  name        = "my-tgw"
+  description = "My TGW shared with several other AWS accounts"
+
   name        = "example"
   description = "Example TGW connecting multiple VPCs"
 
@@ -126,13 +129,13 @@ module "transit_gateway_route_table" {
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.5.7 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.4 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.28 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 6.4 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 6.28 |
 
 ## Modules
 

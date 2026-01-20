@@ -16,6 +16,12 @@ variable "tags" {
   default     = {}
 }
 
+variable "region" {
+  description = "Region where the resource(s) will be managed. Defaults to the region set in the provider configuration"
+  type        = string
+  default     = null
+}
+
 ################################################################################
 # Transit Gateway
 ################################################################################
@@ -82,8 +88,12 @@ variable "vpn_ecmp_support" {
 
 variable "timeouts" {
   description = "Create, update, and delete timeout configurations for the transit gateway"
-  type        = map(string)
-  default     = {}
+  type = object({
+    create = optional(string)
+    update = optional(string)
+    delete = optional(string)
+  })
+  default = null
 }
 
 variable "tgw_tags" {

@@ -11,15 +11,15 @@ provider "aws" {
 data "aws_caller_identity" "current" {}
 
 locals {
-  name   = "ex-tgw-${replace(basename(path.cwd), "_", "-")}"
   region = "eu-west-1"
+  name   = "ex-${basename(path.cwd)}"
 
   account_id = data.aws_caller_identity.current.account_id
 
   tags = {
+    Name       = local.name
     Example    = local.name
-    GithubRepo = "terraform-aws-eks"
-    GithubOrg  = "terraform-aws-transit-gateway"
+    Repository = "https://github.com/terraform-aws-modules/terraform-aws-transit-gateway"
   }
 }
 

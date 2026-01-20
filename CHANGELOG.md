@@ -2,6 +2,42 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.0](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v3.0.2...v3.1.0) (2026-01-08)
+
+### Features
+
+* Add provider meta user-agent ([#151](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/151)) ([09fb3b8](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/commit/09fb3b8a3fff330972775f75b963efa88d7c5247))
+
+## [3.0.2](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v3.0.1...v3.0.2) (2025-10-28)
+
+### Bug Fixes
+
+* Correct `timeouts` variable type definition from `optional(bool)` to `optional(string)` ([#150](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/150)) ([cb116df](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/commit/cb116df0a263de5a2176dd583a8e0bbef8522633))
+
+## [3.0.1](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v3.0.0...v3.0.1) (2025-10-21)
+
+### Bug Fixes
+
+* Update CI workflow versions to latest ([#148](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/148)) ([c479b0b](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/commit/c479b0bd531d545f527ebcb1b2a6aee5c0311209))
+
+## [3.0.0](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.13.1...v3.0.0) (2025-09-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* Raise MSV of Terraform and AWS provider to `v1.5.7` and `v6.0.0` respectively, add support for `region` argument (#146)
+
+### Features
+
+* Raise MSV of Terraform and AWS provider to `v1.5.7` and `v6.0.0` respectively, add support for `region` argument ([#146](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/146)) ([9ded85b](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/commit/9ded85b8f16ee1e3372907b2f8ec6c0d5c0c496a))
+
+## [2.13.1](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.13.0...v2.13.1) (2025-09-23)
+
+
+### Bug Fixes
+
+* Defined dependencies for aws_ram_resource_share_accepter and aws_route ([#144](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/144)) ([6a09286](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/commit/6a0928641fb88285583c381a129824a0f2bbc534))
+
 ## [2.13.0](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v2.12.2...v2.13.0) (2025-01-15)
 
 

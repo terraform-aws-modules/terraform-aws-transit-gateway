@@ -7,10 +7,12 @@ data "aws_caller_identity" "current" {}
 locals {
   name   = "ex-tgw-${basename(path.cwd)}"
   region = "eu-west-1"
+  name   = "ex-${basename(path.cwd)}"
 
   account_id = data.aws_caller_identity.current.account_id
 
   tags = {
+    Name       = local.name
     Example    = local.name
     GithubRepo = "terraform-aws-transit-gateway"
   }
@@ -116,6 +118,12 @@ module "transit_gateway_route_table" {
       destination_cidr_block = module.vpc1.vpc_cidr_block
       route_table_id         = element(module.vpc2.private_route_table_ids, 0)
     }
+  }
+
+  timeouts = {
+    create = "10m"
+    update = "15m"
+    delete = "15m"
   }
 
   tags = local.tags
