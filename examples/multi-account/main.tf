@@ -8,13 +8,9 @@ provider "aws" {
   alias  = "peer"
 }
 
-data "aws_caller_identity" "current" {}
-
 locals {
   region = "eu-west-1"
-  name   = "ex-${basename(path.cwd)}"
-
-  account_id = data.aws_caller_identity.current.account_id
+  name   = "ex-tgw-${basename(path.cwd)}"
 
   tags = {
     Name       = local.name
@@ -151,78 +147,4 @@ module "vpc2" {
   private_subnets = [for k, v in local.azs : cidrsubnet(local.vpc2_cidr, 4, k)]
 
   tags = local.tags
-}
-
-resource "random_pet" "this" {
-  length = 2
-}
-
-module "s3_bucket" {
-  source  = "terraform-aws-modules/s3-bucket/aws"
-  version = "~> 5.0"
-
-  bucket        = "${local.name}-${random_pet.this.id}"
-  policy        = data.aws_iam_policy_document.flow_log_s3.json
-  force_destroy = true
-
-  tags = local.tags
-}
-
-data "aws_iam_policy_document" "flow_log_s3" {
-  statement {
-    sid = "AWSLogDeliveryWrite"
-
-    principals {
-      type        = "Service"
-      identifiers = ["delivery.logs.amazonaws.com"]
-    }
-
-    actions   = ["s3:PutObject"]
-    resources = ["arn:aws:s3:::${local.name}-${random_pet.this.id}/*"]
-
-    condition {
-      test     = "StringEquals"
-      variable = "s3:x-amz-acl"
-      values   = ["bucket-owner-full-control"]
-    }
-
-    condition {
-      test     = "StringEquals"
-      variable = "aws:SourceAccount"
-      values   = [local.account_id]
-    }
-
-    condition {
-      test     = "ArnLike"
-      variable = "aws:SourceArn"
-      values   = ["arn:aws:logs:${local.region}:${local.account_id}:*"]
-    }
-  }
-
-  statement {
-    sid = "AWSLogDeliveryAclCheck"
-
-    principals {
-      type        = "Service"
-      identifiers = ["delivery.logs.amazonaws.com"]
-    }
-
-    actions = [
-      "s3:Get*",
-      "s3:List*",
-    ]
-    resources = ["arn:aws:s3:::${local.name}-${random_pet.this.id}"]
-
-    condition {
-      test     = "StringEquals"
-      variable = "aws:SourceAccount"
-      values   = [local.account_id]
-    }
-
-    condition {
-      test     = "ArnLike"
-      variable = "aws:SourceArn"
-      values   = ["arn:aws:logs:${local.region}:${local.account_id}:*"]
-    }
-  }
 }

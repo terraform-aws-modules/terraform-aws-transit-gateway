@@ -170,38 +170,3 @@ variable "ram_tags" {
   type        = map(string)
   default     = {}
 }
-
-################################################################################
-# Flow Logs
-################################################################################
-
-variable "create_flow_log" {
-  description = "Whether to create flow log resource(s)"
-  type        = bool
-  default     = true
-}
-
-variable "flow_logs" {
-  description = "Flow Logs to create for Transit Gateway or attachments"
-  type = map(object({
-    deliver_cross_account_role = optional(string)
-    destination_options = optional(object({
-      file_format                = optional(string, "parquet")
-      hive_compatible_partitions = optional(bool, false)
-      per_hour_partition         = optional(bool, true)
-    }))
-    iam_role_arn             = optional(string)
-    log_destination          = optional(string)
-    log_destination_type     = optional(string)
-    log_format               = optional(string)
-    max_aggregation_interval = optional(number, 30)
-    traffic_type             = optional(string, "ALL")
-    tags                     = optional(map(string), {})
-
-    enable_transit_gateway = optional(bool, true)
-    # The following can be provided when `enable_transit_gateway` is `false`
-    vpc_attachment_key     = optional(string)
-    peering_attachment_key = optional(string)
-  }))
-  default = {}
-}

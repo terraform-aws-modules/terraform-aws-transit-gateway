@@ -12,9 +12,9 @@ locals {
 
 resource "aws_ec2_transit_gateway" "this" {
   count = var.create ? 1 : 0
-  
+
   region = var.region
-  
+
   amazon_side_asn                    = var.amazon_side_asn
   auto_accept_shared_attachments     = var.auto_accept_shared_attachments ? "enable" : "disable"
   default_route_table_association    = var.default_route_table_association ? "enable" : "disable"
@@ -54,7 +54,7 @@ resource "aws_ec2_tag" "this" {
 
 resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
   for_each = { for k, v in var.vpc_attachments : k => v if var.create }
-    
+
   region = var.region
 
   appliance_mode_support                          = each.value.appliance_mode_support ? "enable" : "disable"
@@ -72,15 +72,13 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
     { Name = "${var.name}-${each.key}" },
     each.value.tags,
   )
-
-  depends_on = [aws_ram_resource_share_accepter.this]
 }
 
 resource "aws_ec2_transit_gateway_vpc_attachment_accepter" "this" {
   for_each = { for k, v in var.vpc_attachments : k => v if var.create && v.accept_peering_attachment }
 
   region = var.region
-    
+
   transit_gateway_attachment_id                   = aws_ec2_transit_gateway_vpc_attachment.this[0]
   transit_gateway_default_route_table_association = each.value.transit_gateway_default_route_table_association
   transit_gateway_default_route_table_propagation = each.value.transit_gateway_default_route_table_propagation
@@ -99,7 +97,7 @@ resource "aws_ec2_transit_gateway_peering_attachment" "this" {
   for_each = { for k, v in var.peering_attachments : k => v if var.create }
 
   region = var.region
-  
+
   peer_account_id         = each.value.peer_account_id
   peer_region             = each.value.peer_region
   peer_transit_gateway_id = each.value.peer_transit_gateway_id
@@ -116,7 +114,7 @@ resource "aws_ec2_transit_gateway_peering_attachment_accepter" "this" {
   for_each = { for k, v in var.peering_attachments : k => v if var.create && v.accept_peering_attachment }
 
   region = var.region
-    
+
   transit_gateway_attachment_id = aws_ec2_transit_gateway_peering_attachment.this[each.key].id
 
   tags = merge(
@@ -137,7 +135,7 @@ resource "aws_ram_resource_share" "this" {
   count = var.create && var.enable_ram_share ? 1 : 0
 
   region = var.region
-  
+
   name                      = local.ram_name
   allow_external_principals = var.ram_allow_external_principals
 
@@ -161,48 +159,7 @@ resource "aws_ram_principal_association" "this" {
   for_each = { for k, v in var.ram_principals : k => v if var.create && var.enable_ram_share }
 
   region = var.region
-    
+
   principal          = each.value
   resource_share_arn = aws_ram_resource_share.this[0].arn
-}
-
-################################################################################
-# Flow Log(s)
-################################################################################
-
-resource "aws_flow_log" "this" {
-  for_each = { for k, v in var.flow_logs : k => v if var.create && var.create_flow_log }
-
-  region = var.region
-    
-  deliver_cross_account_role = each.value.deliver_cross_account_role
-
-  dynamic "destination_options" {
-    for_each = each.value.destination_options != null ? [each.value.destination_options] : []
-
-    content {
-      file_format                = destination_options.value.file_format
-      hive_compatible_partitions = destination_options.value.hive_compatible_partitions
-      per_hour_partition         = destination_options.value.per_hour_partition
-    }
-  }
-
-  iam_role_arn             = each.value.iam_role_arn
-  log_destination          = each.value.log_destination
-  log_destination_type     = each.value.log_destination_type
-  log_format               = each.value.log_format
-  max_aggregation_interval = max(each.value.max_aggregation_interval, 60)
-
-  traffic_type       = each.value.traffic_type
-  transit_gateway_id = each.value.enable_transit_gateway ? aws_ec2_transit_gateway.this[0].id : null
-  transit_gateway_attachment_id = each.value.enable_transit_gateway ? null : try(
-    aws_ec2_transit_gateway_vpc_attachment.this[each.value.vpc_attachment_key].id,
-    aws_ec2_transit_gateway_peering_attachment.this[each.value.peering_attachment_key].id,
-    null
-  )
-
-  tags = merge(
-    var.tags,
-    each.value.tags,
-  )
 }
