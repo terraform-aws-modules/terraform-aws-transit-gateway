@@ -2,20 +2,14 @@ provider "aws" {
   region = local.region
 }
 
-data "aws_availability_zones" "available" {}
-
 locals {
   region = "eu-west-1"
-  name   = "ex-${basename(path.cwd)}"
-
-  vpc1_cidr = "10.10.0.0/16"
-  vpc2_cidr = "10.20.0.0/16"
-  azs       = slice(data.aws_availability_zones.available.names, 0, 3)
+  name   = "ex-tgw-${basename(path.cwd)}"
 
   tags = {
     Name       = local.name
     Example    = local.name
-    Repository = "https://github.com/terraform-aws-modules/terraform-aws-transit-gateway"
+    GithubRepo = "terraform-aws-transit-gateway"
   }
 }
 
@@ -23,71 +17,66 @@ locals {
 # Transit Gateway Module
 ################################################################################
 
-module "tgw" {
+module "transit_gateway" {
   source = "../../"
 
-  name            = local.name
-  description     = "My TGW shared with several other AWS accounts"
-  amazon_side_asn = 64532
-
-  transit_gateway_cidr_blocks = ["10.99.0.0/24"]
-
-  # When "true" there is no need for RAM resources if using multiple AWS accounts
-  enable_auto_accept_shared_attachments = true
-
-  # When "true", SG referencing support is enabled at the Transit Gateway level
-  enable_sg_referencing_support = true
-
-  # When "true", allows service discovery through IGMP
-  enable_multicast_support = false
+  name                               = local.name
+  description                        = "Example Transit Gateway connecting multiple VPCs"
+  amazon_side_asn                    = 64532
+  security_group_referencing_support = true
+  transit_gateway_cidr_blocks        = ["10.99.0.0/24"]
 
   vpc_attachments = {
     vpc1 = {
       vpc_id                             = module.vpc1.vpc_id
-      subnet_ids                         = module.vpc1.private_subnets
       security_group_referencing_support = true
-      dns_support                        = true
+      subnet_ids                         = module.vpc1.private_subnets
       ipv6_support                       = true
+    }
 
-      transit_gateway_default_route_table_association = false
-      transit_gateway_default_route_table_propagation = false
-
-      tgw_routes = [
-        {
-          destination_cidr_block = "30.0.0.0/16"
-        },
-        {
-          blackhole              = true
-          destination_cidr_block = "0.0.0.0/0"
-        }
-      ]
-    },
     vpc2 = {
-      vpc_id     = module.vpc2.vpc_id
-      subnet_ids = module.vpc2.private_subnets
-
-      tgw_routes = [
-        {
-          destination_cidr_block = "50.0.0.0/16"
-        },
-        {
-          blackhole              = true
-          destination_cidr_block = "10.10.10.10/32"
-        }
-      ]
-      tags = {
-        Name = "${local.name}-vpc2"
-      }
-    },
+      vpc_id                             = module.vpc2.vpc_id
+      security_group_referencing_support = true
+      subnet_ids                         = module.vpc2.private_subnets
+    }
   }
 
-  ram_allow_external_principals = true
-  ram_principals                = [307990089504]
+  tags = local.tags
+}
 
-  timeouts = {
-    create = "10m"
-    update = "15m"
-    delete = "15m"
+module "transit_gateway_route_table" {
+  source = "../../modules/route-table"
+
+  name               = local.name
+  transit_gateway_id = module.transit_gateway.id
+
+  associations = {
+    vpc1 = {
+      transit_gateway_attachment_id = module.transit_gateway.vpc_attachments["vpc1"].id
+      propagate_route_table         = true
+    }
+    vpc2 = {
+      transit_gateway_attachment_id = module.transit_gateway.vpc_attachments["vpc2"].id
+      propagate_route_table         = true
+    }
+  }
+
+  routes = {
+    blackhole = {
+      blackhole              = true
+      destination_cidr_block = "0.0.0.0/0"
+    }
+  }
+
+  vpc_routes = {
+    vpc1 = {
+      destination_cidr_block = module.vpc2.vpc_cidr_block
+      route_table_id         = element(module.vpc1.private_route_table_ids, 0)
+    }
+    vpc2 = {
+      destination_cidr_block = module.vpc1.vpc_cidr_block
+      route_table_id         = element(module.vpc2.private_route_table_ids, 0)
+    }
   }
 
   tags = local.tags
@@ -97,15 +86,29 @@ module "tgw" {
 # Supporting resources
 ################################################################################
 
+locals {
+  vpc1_cidr = "10.0.0.0/16"
+  vpc2_cidr = "10.20.0.0/16"
+  azs       = slice(data.aws_availability_zones.available.names, 0, 3)
+}
+
+data "aws_availability_zones" "available" {
+  # Exclude local zones
+  filter {
+    name   = "opt-in-status"
+    values = ["opt-in-not-required"]
+  }
+}
+
 module "vpc1" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "~> 6.0"
 
-  name = "${local.name}-1"
+  name = "${local.name}-vpc1"
   cidr = local.vpc1_cidr
 
   azs             = local.azs
-  private_subnets = [for k, v in local.azs : cidrsubnet(local.vpc1_cidr, 8, k)]
+  private_subnets = [for k, v in local.azs : cidrsubnet(local.vpc1_cidr, 4, k)]
 
   enable_ipv6                                    = true
   private_subnet_assign_ipv6_address_on_creation = true
@@ -118,13 +121,11 @@ module "vpc2" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "~> 6.0"
 
-  name = "${local.name}-2"
+  name = "${local.name}-vpc2"
   cidr = local.vpc2_cidr
 
   azs             = local.azs
-  private_subnets = [for k, v in local.azs : cidrsubnet(local.vpc2_cidr, 8, k)]
-
-  enable_ipv6 = false
+  private_subnets = [for k, v in local.azs : cidrsubnet(local.vpc2_cidr, 4, k)]
 
   tags = local.tags
 }
