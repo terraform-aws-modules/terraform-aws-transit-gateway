@@ -110,7 +110,7 @@ resource "aws_ec2_transit_gateway_route_table" "this" {
 
   tags = merge(
     var.tags,
-    { Name = "${var.name}-${each.key}" },
+    { Name = var.name },
     var.tgw_route_table_tags,
   )
 }
