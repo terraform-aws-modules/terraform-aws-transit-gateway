@@ -169,7 +169,7 @@ variable "ram_allow_external_principals" {
 }
 
 variable "ram_principals" {
-  description = "A list of principals to share TGW with. Possible values are an AWS account ID, an AWS Organizations Organization ARN, or an AWS Organizations Organization Unit ARN"
+  description = "A list of principals to share TGW with (must be unique; duplicates are ignored). Possible values are an AWS account ID, an AWS Organizations Organization ARN, or an AWS Organizations Organization Unit ARN"
   type        = list(string)
   default     = []
 }

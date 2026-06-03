@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+### ⚠ BREAKING CHANGES
+
+* `aws_ram_principal_association.this` now uses `for_each` keyed by principal string. Terraform state addresses change from `this[N]` to `this["<principal>"]`. Use `terraform state mv` for each existing instance before apply to avoid replace, or accept a one-time destroy/create.
+* Output `ram_principal_association_id` is now a `map(string)` keyed by principal instead of a single `string` for the first list entry.
+
+### Features
+
+* Key RAM principal associations by principal value so reordering or removing entries from `ram_principals` does not destroy unrelated associations.
+
 ## [3.2.0](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v3.1.0...v3.2.0) (2026-02-26)
 
 ### Features

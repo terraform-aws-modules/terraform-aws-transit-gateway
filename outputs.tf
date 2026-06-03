@@ -95,6 +95,6 @@ output "ram_resource_share_id" {
 }
 
 output "ram_principal_association_id" {
-  description = "The Amazon Resource Name (ARN) of the Resource Share and the principal, separated by a comma"
-  value       = try(aws_ram_principal_association.this[0].id, "")
+  description = "Map of RAM principal association IDs keyed by principal (Amazon Resource Name of the resource share and the principal, separated by a comma)"
+  value       = { for k, v in aws_ram_principal_association.this : k => v.id }
 }
