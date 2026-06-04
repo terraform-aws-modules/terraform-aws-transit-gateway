@@ -40,6 +40,7 @@ resource "aws_ec2_transit_gateway" "this" {
   dns_support                        = var.enable_dns_support ? "enable" : "disable"
   transit_gateway_cidr_blocks        = var.transit_gateway_cidr_blocks
   security_group_referencing_support = var.enable_sg_referencing_support ? "enable" : "disable"
+  encryption_support                 = var.enable_encryption_support ? "enable" : "disable"
 
   dynamic "timeouts" {
     for_each = var.timeouts == null ? [] : [var.timeouts]

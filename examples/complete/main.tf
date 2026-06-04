@@ -41,6 +41,9 @@ module "tgw" {
   # When "true", allows service discovery through IGMP
   enable_multicast_support = false
 
+  # When "true", enforces encryption-in-transit for traffic between VPCs attached to a Transit Gateway
+  enable_encryption_support = false
+
   vpc_attachments = {
     vpc1 = {
       vpc_id                             = module.vpc1.vpc_id

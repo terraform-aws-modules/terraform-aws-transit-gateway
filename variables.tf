@@ -74,6 +74,12 @@ variable "enable_dns_support" {
   default     = true
 }
 
+variable "enable_encryption_support" {
+  description = "Should be true to enable encryption support in the TGW"
+  type        = bool
+  default     = false
+}
+
 variable "transit_gateway_cidr_blocks" {
   description = "One or more IPv4 or IPv6 CIDR blocks for the transit gateway. Must be a size /24 CIDR block or larger for IPv4, or a size /64 CIDR block or larger for IPv6"
   type        = list(string)
