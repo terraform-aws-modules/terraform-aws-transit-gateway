@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.3.0](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v3.2.0...v3.3.0) (2026-06-04)
+
+### Features
+
+* Add variable to enable encryption support ([#156](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/issues/156)) ([1bb982a](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/commit/1bb982a95841fdecfa4bac383aa9cfbee3c12a67))
+
 ## [3.2.0](https://github.com/terraform-aws-modules/terraform-aws-transit-gateway/compare/v3.1.0...v3.2.0) (2026-02-26)
 
 ### Features
