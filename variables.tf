@@ -174,6 +174,14 @@ variable "ram_allow_external_principals" {
   default     = false
 }
 
+variable "ram_resource_share_configuration" {
+  description = "Resource share configuration for the RAM resource share. Set to control behavior when a principal account leaves the organization. Requires AWS provider >= 6.35."
+  type = object({
+    retain_sharing_on_account_leave_organization = optional(bool)
+  })
+  default = null
+}
+
 variable "ram_principals" {
   description = "A list of principals to share TGW with. Possible values are an AWS account ID, an AWS Organizations Organization ARN, or an AWS Organizations Organization Unit ARN"
   type        = list(string)

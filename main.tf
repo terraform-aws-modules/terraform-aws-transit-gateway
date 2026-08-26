@@ -184,6 +184,13 @@ resource "aws_ram_resource_share" "this" {
   name                      = local.ram_name
   allow_external_principals = var.ram_allow_external_principals
 
+  dynamic "resource_share_configuration" {
+    for_each = var.ram_resource_share_configuration != null ? [var.ram_resource_share_configuration] : []
+    content {
+      retain_sharing_on_account_leave_organization = resource_share_configuration.value.retain_sharing_on_account_leave_organization
+    }
+  }
+
   tags = merge(
     var.tags,
     { Name = local.ram_name },

@@ -86,6 +86,9 @@ module "tgw" {
 
   ram_allow_external_principals = true
   ram_principals                = [307990089504]
+  ram_resource_share_configuration = {
+    retain_sharing_on_account_leave_organization = true
+  }
 
   timeouts = {
     create = "10m"
