@@ -216,3 +216,81 @@ resource "aws_ram_resource_share_accepter" "this" {
 
   share_arn = var.ram_resource_share_arn
 }
+
+################################################################################
+# VPC Attachment Accepter
+#
+# A transit gateway exists to connect accounts, and an attachment created in another
+# account has to be accepted in this one. Without this, cross account topologies stop
+# halfway
+################################################################################
+
+resource "aws_ec2_transit_gateway_vpc_attachment_accepter" "this" {
+  for_each = var.vpc_attachment_accepters
+
+  region = var.region
+
+  transit_gateway_attachment_id = each.value.transit_gateway_attachment_id
+
+  transit_gateway_default_route_table_association = each.value.transit_gateway_default_route_table_association
+  transit_gateway_default_route_table_propagation = each.value.transit_gateway_default_route_table_propagation
+
+  tags = merge(var.tags, var.tgw_vpc_attachment_tags, each.value.tags)
+}
+
+################################################################################
+# Peering Attachment
+#
+# Connects this transit gateway to one in another Region or account. The requester
+# creates the attachment, the accepter side accepts it
+################################################################################
+
+resource "aws_ec2_transit_gateway_peering_attachment" "this" {
+  for_each = var.peering_attachments
+
+  region = var.region
+
+  transit_gateway_id      = var.create_tgw ? aws_ec2_transit_gateway.this[0].id : each.value.transit_gateway_id
+  peer_transit_gateway_id = each.value.peer_transit_gateway_id
+  peer_region             = each.value.peer_region
+  peer_account_id         = each.value.peer_account_id
+
+  dynamic "options" {
+    for_each = each.value.options != null ? [each.value.options] : []
+
+    content {
+      dynamic_routing = options.value.dynamic_routing
+    }
+  }
+
+  tags = merge(var.tags, var.tgw_peering_attachment_tags, each.value.tags)
+}
+
+resource "aws_ec2_transit_gateway_peering_attachment_accepter" "this" {
+  for_each = var.peering_attachment_accepters
+
+  region = var.region
+
+  transit_gateway_attachment_id = each.value.transit_gateway_attachment_id
+
+  tags = merge(var.tags, var.tgw_peering_attachment_tags, each.value.tags)
+}
+
+################################################################################
+# Prefix List Reference
+#
+# A route table entry that points at a managed prefix list rather than a single CIDR.
+# One reference replaces many routes, which matters against the routes per route table
+# quota in a large network
+################################################################################
+
+resource "aws_ec2_transit_gateway_prefix_list_reference" "this" {
+  for_each = var.prefix_list_references
+
+  region = var.region
+
+  prefix_list_id                 = each.value.prefix_list_id
+  transit_gateway_route_table_id = coalesce(each.value.transit_gateway_route_table_id, try(aws_ec2_transit_gateway_route_table.this[0].id, null))
+  transit_gateway_attachment_id  = each.value.transit_gateway_attachment_id
+  blackhole                      = each.value.blackhole
+}
