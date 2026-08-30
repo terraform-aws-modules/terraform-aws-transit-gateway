@@ -26,7 +26,7 @@ locals {
 ################################################################################
 
 resource "aws_ec2_transit_gateway" "this" {
-  count = var.create_tgw ? 1 : 0
+  count = var.create && var.create_tgw ? 1 : 0
 
   region = var.region
 
@@ -59,7 +59,7 @@ resource "aws_ec2_transit_gateway" "this" {
 }
 
 resource "aws_ec2_tag" "this" {
-  for_each = { for k, v in local.tgw_default_route_table_tags_merged : k => v if var.create_tgw && var.enable_default_route_table_association }
+  for_each = { for k, v in local.tgw_default_route_table_tags_merged : k => v if var.create && var.create_tgw && var.enable_default_route_table_association }
 
   region = var.region
 
@@ -73,7 +73,7 @@ resource "aws_ec2_tag" "this" {
 ################################################################################
 
 resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
-  for_each = var.vpc_attachments
+  for_each = var.create ? var.vpc_attachments : {}
 
   region = var.region
 
@@ -103,7 +103,7 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "this" {
 ################################################################################
 
 resource "aws_ec2_transit_gateway_route_table" "this" {
-  count = var.create_tgw && var.create_tgw_routes ? 1 : 0
+  count = var.create && var.create_tgw && var.create_tgw_routes ? 1 : 0
 
   region = var.region
 
@@ -117,7 +117,7 @@ resource "aws_ec2_transit_gateway_route_table" "this" {
 }
 
 resource "aws_ec2_transit_gateway_route" "this" {
-  count = var.create_tgw_routes ? length(local.vpc_attachments_with_routes) : 0
+  count = var.create && var.create_tgw_routes ? length(local.vpc_attachments_with_routes) : 0
 
   region = var.region
 
@@ -129,7 +129,7 @@ resource "aws_ec2_transit_gateway_route" "this" {
 }
 
 resource "aws_route" "this" {
-  for_each = { for x in local.vpc_route_table_destination_cidr : x.rtb_id => {
+  for_each = { for x in(var.create ? local.vpc_route_table_destination_cidr : []) : x.rtb_id => {
     cidr   = x.cidr,
     tgw_id = x.tgw_id
   } }
@@ -146,7 +146,7 @@ resource "aws_route" "this" {
 
 resource "aws_ec2_transit_gateway_route_table_association" "this" {
   for_each = {
-    for k, v in var.vpc_attachments : k => v if var.create_tgw && var.create_tgw_routes && try(v.transit_gateway_default_route_table_association, true) != true
+    for k, v in var.vpc_attachments : k => v if var.create && var.create_tgw && var.create_tgw_routes && try(v.transit_gateway_default_route_table_association, true) != true
   }
 
   region = var.region
@@ -158,7 +158,7 @@ resource "aws_ec2_transit_gateway_route_table_association" "this" {
 
 resource "aws_ec2_transit_gateway_route_table_propagation" "this" {
   for_each = {
-    for k, v in var.vpc_attachments : k => v if var.create_tgw && var.create_tgw_routes && try(v.transit_gateway_default_route_table_propagation, true) != true
+    for k, v in var.vpc_attachments : k => v if var.create && var.create_tgw && var.create_tgw_routes && try(v.transit_gateway_default_route_table_propagation, true) != true
   }
 
   region = var.region
@@ -177,7 +177,7 @@ locals {
 }
 
 resource "aws_ram_resource_share" "this" {
-  count = var.create_tgw && var.share_tgw ? 1 : 0
+  count = var.create && var.create_tgw && var.share_tgw ? 1 : 0
 
   region = var.region
 
@@ -192,7 +192,7 @@ resource "aws_ram_resource_share" "this" {
 }
 
 resource "aws_ram_resource_association" "this" {
-  count = var.create_tgw && var.share_tgw ? 1 : 0
+  count = var.create && var.create_tgw && var.share_tgw ? 1 : 0
 
   region = var.region
 
@@ -201,7 +201,7 @@ resource "aws_ram_resource_association" "this" {
 }
 
 resource "aws_ram_principal_association" "this" {
-  count = var.create_tgw && var.share_tgw ? length(var.ram_principals) : 0
+  count = var.create && var.create_tgw && var.share_tgw ? length(var.ram_principals) : 0
 
   region = var.region
 
@@ -210,7 +210,7 @@ resource "aws_ram_principal_association" "this" {
 }
 
 resource "aws_ram_resource_share_accepter" "this" {
-  count = !var.create_tgw && var.share_tgw ? 1 : 0
+  count = var.create && !var.create_tgw && var.share_tgw ? 1 : 0
 
   region = var.region
 
@@ -225,7 +225,7 @@ resource "aws_ram_resource_share_accepter" "this" {
 ################################################################################
 
 resource "aws_ec2_transit_gateway_peering_attachment" "this" {
-  for_each = var.peering_attachments
+  for_each = var.create ? var.peering_attachments : {}
 
   region = var.region
 
@@ -246,7 +246,7 @@ resource "aws_ec2_transit_gateway_peering_attachment" "this" {
 }
 
 resource "aws_ec2_transit_gateway_peering_attachment_accepter" "this" {
-  for_each = var.peering_attachment_accepters
+  for_each = var.create ? var.peering_attachment_accepters : {}
 
   region = var.region
 

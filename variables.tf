@@ -20,6 +20,12 @@ variable "region" {
 # Transit Gateway
 ################################################################################
 
+variable "create" {
+  description = "Controls if resources should be created (affects nearly all resources)"
+  type        = bool
+  default     = true
+}
+
 variable "create_tgw" {
   description = "Controls if TGW should be created (it affects almost all resources)"
   type        = bool
