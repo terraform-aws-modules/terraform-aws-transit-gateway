@@ -193,24 +193,6 @@ variable "ram_tags" {
 }
 
 ################################################################################
-# VPC Attachment Accepter
-################################################################################
-
-variable "vpc_attachment_accepters" {
-  description = "Map of VPC attachments created in another account to accept in this one. A transit gateway exists to connect accounts, and an attachment made elsewhere is not usable until it is accepted here"
-  type = map(object({
-    transit_gateway_attachment_id = string
-    # Both default to `true` in the API. Set to `false` when the attachment should use a
-    # route table other than the transit gateway's defaults
-    transit_gateway_default_route_table_association = optional(bool)
-    transit_gateway_default_route_table_propagation = optional(bool)
-    tags                                            = optional(map(string), {})
-  }))
-  default  = {}
-  nullable = false
-}
-
-################################################################################
 # Peering Attachment
 ################################################################################
 
@@ -255,30 +237,4 @@ variable "tgw_peering_attachment_tags" {
   type        = map(string)
   default     = {}
   nullable    = false
-}
-
-################################################################################
-# Prefix List Reference
-################################################################################
-
-variable "prefix_list_references" {
-  description = "Map of prefix list references to create in a transit gateway route table. One reference stands in for every CIDR in the prefix list, which keeps a large network inside the routes per route table quota"
-  type = map(object({
-    prefix_list_id = string
-    # Defaults to the route table this module creates
-    transit_gateway_route_table_id = optional(string)
-    # Omit to blackhole traffic matching the prefix list
-    transit_gateway_attachment_id = optional(string)
-    blackhole                     = optional(bool)
-  }))
-  default  = {}
-  nullable = false
-
-  validation {
-    condition = alltrue([
-      for k, v in var.prefix_list_references :
-      v.transit_gateway_attachment_id != null || v.blackhole == true
-    ])
-    error_message = "A prefix list reference needs a `transit_gateway_attachment_id`, unless `blackhole` is `true`."
-  }
 }

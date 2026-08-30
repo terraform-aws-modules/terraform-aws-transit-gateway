@@ -100,33 +100,15 @@ output "ram_principal_association_id" {
 }
 
 ################################################################################
-# VPC Attachment Accepter
-################################################################################
-
-output "ec2_transit_gateway_vpc_attachment_accepter_ids" {
-  description = "Map of accepted VPC attachment identifiers"
-  value       = { for k, v in aws_ec2_transit_gateway_vpc_attachment_accepter.this : k => v.id }
-}
-
-################################################################################
 # Peering Attachment
 ################################################################################
 
-output "ec2_transit_gateway_peering_attachment_ids" {
-  description = "Map of peering attachment identifiers created by this transit gateway"
-  value       = { for k, v in aws_ec2_transit_gateway_peering_attachment.this : k => v.id }
+output "ec2_transit_gateway_peering_attachment" {
+  description = "Map of EC2 Transit Gateway Peering Attachment attributes"
+  value       = aws_ec2_transit_gateway_peering_attachment.this
 }
 
-output "ec2_transit_gateway_peering_attachment_accepter_ids" {
-  description = "Map of peering attachment identifiers accepted by this transit gateway"
-  value       = { for k, v in aws_ec2_transit_gateway_peering_attachment_accepter.this : k => v.id }
-}
-
-################################################################################
-# Prefix List Reference
-################################################################################
-
-output "ec2_transit_gateway_prefix_list_reference_ids" {
-  description = "Map of prefix list reference identifiers"
-  value       = { for k, v in aws_ec2_transit_gateway_prefix_list_reference.this : k => v.id }
+output "ec2_transit_gateway_peering_attachment_accepter" {
+  description = "Map of EC2 Transit Gateway Peering Attachment Accepter attributes"
+  value       = aws_ec2_transit_gateway_peering_attachment_accepter.this
 }
