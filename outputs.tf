@@ -86,6 +86,40 @@ output "ec2_transit_gateway_route_table_propagation" {
 }
 
 ################################################################################
+# Flow Log
+################################################################################
+
+output "ec2_transit_gateway_flow_log_id" {
+  description = "The ID of the Transit Gateway Flow Log resource"
+  value       = try(aws_flow_log.this[0].id, null)
+}
+
+output "ec2_transit_gateway_flow_log_arn" {
+  description = "The ARN of the Transit Gateway Flow Log resource"
+  value       = try(aws_flow_log.this[0].arn, null)
+}
+
+output "ec2_transit_gateway_flow_log_destination_arn" {
+  description = "The ARN of the destination for Transit Gateway Flow Logs"
+  value       = local.enable_flow_log ? local.flow_log_destination_arn : null
+}
+
+output "ec2_transit_gateway_flow_log_destination_type" {
+  description = "The type of the destination for Transit Gateway Flow Logs"
+  value       = local.enable_flow_log ? var.flow_log_destination_type : null
+}
+
+output "ec2_transit_gateway_flow_log_cloudwatch_iam_role_arn" {
+  description = "The ARN of the IAM role used when pushing logs to Cloudwatch log group"
+  value       = local.enable_flow_log ? local.flow_log_iam_role_arn : null
+}
+
+output "ec2_transit_gateway_flow_log_cloudwatch_log_group_name" {
+  description = "The name of the CloudWatch log group created for Transit Gateway Flow Logs"
+  value       = try(aws_cloudwatch_log_group.flow_log[0].name, null)
+}
+
+################################################################################
 # Resource Access Manager
 ################################################################################
 
